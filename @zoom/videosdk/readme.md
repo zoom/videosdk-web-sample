@@ -4,8 +4,8 @@
   Zoom Video Web SDK is the app development kit provided to enable apps designed to connect people and to
 share happiness. With Video Web SDK, you can build feature-rich apps with highly customized userinterfaces
 ### Video Web SDK is designed to be:
-* <strong>Easy to use<strong>: Video SDKs have simplified most function calls, allowing you to have a high-quality video session with simple calls and options.
-* <strong>Lightweight<strong>: Video SDKs are lighterthan ever, with an enormous reduction in size compared to Client
+* <strong>Easy to use</strong>: Video SDKs have simplified most function calls, allowing you to have a high-quality video session with simple calls and options.
+* <strong>Lightweight</strong>: Video SDKs are lighterthan ever, with an enormous reduction in size compared to Client
 SDKs with the same quality of the Zoomʼs video and audio solutions.
 ### The Video Web SDK provides the ability to experience the following functionality for your app:
 * Launch a video communication session instantly
