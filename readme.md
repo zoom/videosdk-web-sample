@@ -1,8 +1,14 @@
 # Zoom Video Web SDK
+Use of this SDK is subject to our [Terms of Use](https://zoom.us/docs/en-us/zoom_api_license_and_tou.html)
+
+Please note on Jul 20, Chrome 92 will release. Start from chrome92, SharedArrayBuffer only work for cross-origin isolation. it make VideoSDK broken if you don't do any thing when user use Chrome 92.
+
+Apply `SharedArrayBuffers` [origintrials](https://developer.chrome.com/origintrials/#/trials/active) for you domain, it works until Chrome 94 release.
 
 ## What is Zoom Video Web SDK?
   Zoom Video Web SDK is the app development kit provided to enable apps designed to connect people and to
 share happiness. With Video Web SDK, you can build feature-rich apps with highly customized userinterfaces
+
 ### Video Web SDK is designed to be:
 * <strong>Easy to use</strong>: Video SDKs have simplified most function calls, allowing you to have a high-quality video session with simple calls and options.
 * <strong>Lightweight</strong>: Video SDKs are lighterthan ever, with an enormous reduction in size compared to Client
@@ -23,8 +29,24 @@ SDKs with the same quality of the Zoomʼs video and audio solutions.
 npm install @zoom/videosdk
 ```
 
-# [Demo](https://github.com/zoom/sample-app-videosdk)
-Provide and quick start with react demo or purejs demo
+## React Demo
+```
+git clone https://github.com/zoom/sample-app-videosdk.git --branch master --depth 1
+cd sample-app-videosdk/react-demo
+npm install
+npm run start
+
+```
+
+## Purejs Demo
+```
+git clone https://github.com/zoom/sample-app-videosdk.git --branch master --depth 1
+cd sample-app-videosdk/purejs-demo
+npm install
+npm run start
+
+```
+open browser http://localhost:3000
 
 # Change log
 Please referto the CHANGELOG file for all changes
@@ -32,6 +54,3 @@ Please referto the CHANGELOG file for all changes
 # Support
 For any issues regarding our Video SDK, please visit our new Community Support Forum at
 https://devforum.zoom.us/.
-
-# License
-Use of the Zoom Video Web SDK is subject to our Terms of Use
