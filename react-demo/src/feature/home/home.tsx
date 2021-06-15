@@ -29,6 +29,12 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
       title: 'Session chat',
       description: 'Session Chat, Chat Priviledge',
     },
+    {
+      key: 'preview',
+      icon: 'icon-meeting',
+      title: 'Local Preview',
+      description: 'Audio and Video preview',
+    },
   ];
   let actionText;
   if (status === "connected") {
