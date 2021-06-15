@@ -23,7 +23,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
             isMuted ? (
               <AudioMutedOutlined />
             ) : (
-              <AudioOutlined />
+              <AudioOutlined id="auido-volume-feedback"/>
             )
           ) : (
             <IconFont type="icon-headset" />

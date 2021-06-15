@@ -10,7 +10,7 @@ import { message } from 'antd';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
 import MicrophoneButton from './microphone';
-import ScreenShareButton from './screen-share';
+import { ScreenShareButton, ScreenShareLockButton } from './screen-share';
 import ZoomMediaContext from '../../../context/media-context';
 import { useUnmount } from '../../../hooks';
 import './video-footer.scss';
@@ -24,6 +24,8 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isStartedAudio, setIsStartedAudio] = useState(false);
   const [isStartedVideo, setIsStartedVideo] = useState(false);
   const [isStartedScreenShare, setIsStartedScreenShare] = useState(false);
+  const [isLockedScreenShare, setIsLockedScreenShare] = useState(false);
+  
   const [isMuted, setIsMuted] = useState(true);
   const { mediaStream } = useContext(ZoomMediaContext);
   const zmClient = useContext(ZoomContext);
@@ -114,6 +116,15 @@ const VideoFooter = (props: VideoFooterProps) => {
           onScreenShareClick={onScreenShareClick}
         />
       )}
+      {/* {(zmClient.isManager() || zmClient.isHost())&& (
+        <ScreenShareLockButton
+        isLockedScreenShare={isLockedScreenShare}
+        onScreenShareLockClick={()=>{
+          mediaStream?.lockShare(!isLockedScreenShare);
+          setIsLockedScreenShare(!isLockedScreenShare);
+        }}
+      />
+      )} */}
     </div>
   );
 };

@@ -24,7 +24,7 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-share': IconShare,
   'icon-spotlight': IconSpotlight,
   'icon-start': IconStart,
-  'icon-stop': IconStop,
+  'icon-stop': IconStop
 };
 interface IconFontProps {
   type: string;

@@ -1,6 +1,7 @@
 /* Preview page styles */
 
 .preview__root {
+  margin-top: 70px;
   flex-direction: column;
   height: fit-content;
 }
@@ -38,4 +39,35 @@
 /* The "active" pseudo-class MUST come after "hover" */
 .join-button:active {
   filter: brightness(80%);
+}
+
+
+.mic-feedback__very-low svg{
+  color: green !important;
+  opacity: 0.5 !important;
+}
+
+.mic-feedback__low svg{
+  color: green !important;
+  opacity: 0.6;
+}
+
+.mic-feedback__medium svg{
+  color: green !important;
+  opacity: 0.7;
+}
+
+.mic-feedback__high svg{
+  color: green !important;
+  opacity: 0.8;
+}
+
+
+.mic-feedback__very-high svg{
+  color: green !important;
+  opacity: 0.9;
+}
+
+.mic-feedback__max svg{
+  color: green !important;
 }

@@ -8,19 +8,47 @@ import MicrophoneButton from '../video/components/microphone';
 import CameraButton from '../video/components/camera';
 import { message } from 'antd';
 
-ZoomVideo.createLocalAudioTrack();
+let prevMicFeedbackStyle = '';
+let  micFeedBackInteval: any = '';
+
 const localAudio = ZoomVideo.createLocalAudioTrack();
 const localVideo = ZoomVideo.createLocalVideoTrack();
-type DeviceList = { label: string, deviceId: string };
-const PREVIEW_VIDEO_DIMS = {
-  Width: 800,
-  Height: 450,
-};
 const AUDIO_MASK = 1,
     MIC_MASK = 2,
     VIDEO_MASK = 4;
 
 let PREVIEW_VIDEO: any;
+
+const updateMicFeedbackStyle = () => {
+  const newVolumeIntensity = localAudio.getCurrentVolume();
+  let newMicFeedbackStyle = '';
+
+  if (newVolumeIntensity === 0) {
+      newMicFeedbackStyle = '';
+  } else if (newVolumeIntensity <= 0.05) {
+      newMicFeedbackStyle = 'mic-feedback__very-low';
+  } else if (newVolumeIntensity <= 0.1) {
+      newMicFeedbackStyle = 'mic-feedback__low';
+  } else if (newVolumeIntensity <= 0.15) {
+      newMicFeedbackStyle = 'mic-feedback__medium';
+  } else if (newVolumeIntensity <= 0.2) {
+      newMicFeedbackStyle = 'mic-feedback__high';
+  } else if (newVolumeIntensity <= 0.25) {
+      newMicFeedbackStyle = 'mic-feedback__very-high';
+  } else {
+      newMicFeedbackStyle = 'mic-feedback__max';
+  }
+  const micIcon: any = document.getElementById('auido-volume-feedback');
+  if (prevMicFeedbackStyle !== '' && micIcon) {
+      micIcon.classList.toggle(prevMicFeedbackStyle);
+  }
+
+  if (newMicFeedbackStyle !== '' && micIcon) {
+      micIcon.classList.toggle(newMicFeedbackStyle);
+  }
+  console.log(newMicFeedbackStyle, newVolumeIntensity);
+  prevMicFeedbackStyle = newMicFeedbackStyle;
+};
 
 const encodePreviewOptions = (isJoinAudio: boolean, isMuteAudio: boolean, isStartVideo: boolean) => {
   let res = 0;
@@ -45,28 +73,31 @@ const PreviewContainer = () => {
   const [isJoinAudio, setIsJoinAudio] = useState<boolean>(false);
   const [isMuteAudio, setIsMuteAudio] = useState<boolean>(false);
   const [isStartVideo, setIsStartVideo] = useState<boolean>(false);
-  const toggleJoinAudio = () => {
+  const onMicrophoneClick = () => {
     if(isJoinAudio) {
-      localAudio.stop().then(()=>{
-        setIsJoinAudio(!isJoinAudio);
-      });
+      if(isMuteAudio) {
+        localAudio.unmute().then(()=>{
+          micFeedBackInteval = setInterval(updateMicFeedbackStyle, 500);
+          setIsMuteAudio(!isMuteAudio);
+        });
+      } else {
+        localAudio.mute().then(()=>{
+          if (micFeedBackInteval) {
+            clearInterval(micFeedBackInteval);
+          }
+          setIsMuteAudio(!isMuteAudio);
+        });
+      }
+      // localAudio.stop().then(()=>{
+      //   if (micFeedBackInteval) {
+      //     clearInterval(micFeedBackInteval);
+      //   }
+      //   setIsJoinAudio(!isJoinAudio);
+      // });
     } else {
-      localAudio.start().then(()=>{
+      localAudio.start().then(()=>{        
         setIsJoinAudio(!isJoinAudio);
-      });
-    }
-    
-  };
-
-
-  const toggleMute = () => {
-    if(isMuteAudio) {
-      localAudio.unmute().then(()=>{
-        setIsMuteAudio(!isMuteAudio);
-      });
-    } else {
-      localAudio.mute().then(()=>{
-        setIsMuteAudio(!isMuteAudio);
+        setIsMuteAudio(true);
       });
     }
     
@@ -86,13 +117,19 @@ const PreviewContainer = () => {
     
   }
 
-
   useEffect(() => {
-    
+    const encodeVal = encodePreviewOptions(isJoinAudio, isMuteAudio, isStartVideo);
+                  console.log("preview encode val", encodeVal)
+                  const decodeOption = decodePreviewOptions(encodeVal);
+                  console.log("preview config", decodePreviewOptions(encodeVal));
+                  message.info(JSON.stringify(decodeOption, null, 2));
   }, [isJoinAudio, isMuteAudio, isStartVideo]);
  
   useMount(() => {
     PREVIEW_VIDEO = document.getElementById('js-preview-video');
+    ZoomVideo.getDevices().then((res)=>{
+      console.log(res);
+    });
   });
 
   return (
@@ -107,24 +144,10 @@ const PreviewContainer = () => {
                   <MicrophoneButton
                     isStartedAudio={isJoinAudio}
                     isMuted={isMuteAudio}
-                    onMicrophoneClick={toggleJoinAudio}
-                  />
-                  <MicrophoneButton
-                    isStartedAudio={isMuteAudio}
-                    isMuted={isMuteAudio}
-                    onMicrophoneClick={toggleMute}
+                    onMicrophoneClick={onMicrophoneClick}
                   />
                   <CameraButton isStartedVideo={isStartVideo} onCameraClick={toggleVideo} />
                 </div>
-                <button id="js-preview-encode" type="button" onClick={()=>{
-                  const encodeVal = encodePreviewOptions(isJoinAudio, isMuteAudio, isStartVideo);
-                  console.log("preview encode val", encodeVal)
-                  const decodeOption = decodePreviewOptions(encodeVal);
-                  console.log("preview config", decodePreviewOptions(encodeVal));
-                  message.info(JSON.stringify(decodeOption, null, 2));
-                }} className="join-button">
-                Get preview option
-                </button>
             </div>
         </div>
     </div>
