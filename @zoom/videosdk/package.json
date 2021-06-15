@@ -10,6 +10,8 @@
   "license": "ISC",
   "files": [
     "/docs",
-    "/dist"
+    "/dist",
+    "oss_attribution.txt",
+    "readme.md"
   ]
 }
