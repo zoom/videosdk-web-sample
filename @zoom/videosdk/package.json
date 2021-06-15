@@ -12,6 +12,8 @@
     "/docs",
     "/dist",
     "oss_attribution.txt",
-    "readme.md"
+    "readme.md",
+    "LICENSE.pdf",
+    "CHANGELOG.pdf",
   ]
 }
