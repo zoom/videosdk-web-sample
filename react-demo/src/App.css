@@ -1,0 +1,16 @@
+.App {
+  text-align: center;
+}
+p,li,ul,ol,h1,h2{
+  padding: 0;
+  margin: 0;
+}
+li{
+  list-style: none;
+}
+.back-home {
+  position: absolute;
+  z-index: 99;
+  right: 30px;
+  bottom: 30px;
+}

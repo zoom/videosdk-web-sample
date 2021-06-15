@@ -1,0 +1,13 @@
+.camere-button {
+  font-size: 30px;
+  color: #fff;
+  margin-left: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px !important;
+  height: 60px !important;
+  > *{
+    font-size: 28px !important;
+  }
+}

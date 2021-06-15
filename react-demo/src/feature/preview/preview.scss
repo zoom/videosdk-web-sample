@@ -1,0 +1,41 @@
+/* Preview page styles */
+
+.preview__root {
+  flex-direction: column;
+  height: fit-content;
+}
+
+.preview-video {
+  width: 800px;
+  height: 450px;
+  background: rgba(0, 0, 0, 1);
+  margin: 1px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 1);
+}
+
+.video-operations-preview button{
+  background-color: black !important
+}
+.join-button {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(0, 141, 250, 1);
+  border-radius: 14px;
+  font-size: 16px;
+  height: 3em;
+  width: 24em;
+  margin: 2em auto;
+  cursor: pointer;
+  border: none;
+  font-stretch: expanded;
+  transition: filter 0.15s ease-out;
+}
+
+.join-button:hover {
+  filter: brightness(110%);
+}
+
+/* The "active" pseudo-class MUST come after "hover" */
+.join-button:active {
+  filter: brightness(80%);
+}
