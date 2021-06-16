@@ -1,0 +1,204 @@
+/* Globally set text font to a sans-serif font */
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 250;
+  letter-spacing: 1px;
+}
+/* Centers all app content in middle of page */
+html, body {
+  height: 100vh;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+/* Generic container class to conveniently center all contents */
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Styles for the video canvas to slightly improve aesthetics */
+.video-canvas {
+  background: rgba(0, 0, 0, 1);
+  margin: 1px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 1);
+}
+
+/* Helper class to conveniently toggle hide/unhide */
+.hidden {
+  display: none;
+}
+
+
+/* Preview page styles */
+
+.preview__root {
+  flex-direction: column;
+  height: fit-content;
+}
+
+.preview-video {
+  width: 800px;
+  height: 450px;
+  background: rgba(0, 0, 0, 1);
+  margin: 1px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 1);
+}
+
+.join-button {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(0, 141, 250, 1);
+  border-radius: 14px;
+  font-size: 16px;
+  height: 3em;
+  width: 24em;
+  margin: 2em auto;
+  cursor: pointer;
+  border: none;
+  font-stretch: expanded;
+  transition: filter 0.15s ease-out;
+}
+
+.join-button:hover {
+  filter: brightness(110%);
+}
+
+/* The "active" pseudo-class MUST come after "hover" */
+.join-button:active {
+  filter: brightness(80%);
+}
+
+
+/* Loading styles */
+
+.loading-view {
+  flex-direction: column;
+  animation: blink 5s linear infinite;
+}
+
+.loading-spinner {
+  font-size: 32px;
+  color: rgba(0, 141, 250, 1);
+  animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform:rotate(0deg);
+  }
+  100% {
+    transform:rotate(360deg);
+  }
+}
+@keyframes blink {
+  0% {
+    opacity: 1.0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+
+/* Video app styles */
+
+/* Container for the video-app that helps place the meeting controls at the bottom */
+.video-app {
+  flex-direction: column;
+  height: fit-content;
+  justify-content: flex-end;
+}
+
+
+/* Additional styling for the meeting control buttons' container */
+.meeting-control-layer {
+  /* `position: absolute;` places the controls above the canvas */
+  position: absolute;
+  border-radius: 14px;
+  background-color: rgba(125, 125, 125, 0.18);
+  margin-block-end: 5px;
+}
+
+/* Styles for the buttons */
+.meeting-control-button {
+  border-radius: 50%;
+  border: none;
+  font-size: 24px;
+  color: rgba(0, 0, 0, 1);
+  background-color: rgba(255, 255, 255, 1);
+  height: 2em;
+  width: 2em;
+  margin: 0.5em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.meeting-control-button__off {
+  color: white;
+  background-color: red;
+}
+
+.meeting-control-button__leave-session {
+  color: red;
+  /* background-color: red; */
+  transform: rotate(-135deg);
+}
+
+.meeting-control-button:hover {
+  filter: brightness(90%);
+}
+
+/* The "active" pseudo-class MUST come after "hover" */
+.meeting-control-button:active {
+  filter: brightness(80%);
+}
+
+.vertical-divider {
+  border: 1px solid rgba(0, 0, 0, 1);
+  margin: 10px 5px;
+  align-self: stretch;
+}
+
+/* 
+ * Classes to help show mic volume feedback for different intensities
+ * Add more styles to create smoother transitions */
+.mic-feedback__very-low {
+  background: linear-gradient(0deg, #00FFFF 20%, #FFFFFF 20%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mic-feedback__low {
+  background: linear-gradient(0deg, #00FFFF 35%, #FFFFFF 35%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mic-feedback__medium {
+  background: linear-gradient(0deg, #00FFFF 50%, #FFFFFF 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mic-feedback__high {
+  background: linear-gradient(0deg, #00FFFF 65%, #FFFFFF 65%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mic-feedback__very-high {
+  background: linear-gradient(0deg, #00FFFF 80%, #FFFFFF 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mic-feedback__max {
+  background: #00FFFF;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

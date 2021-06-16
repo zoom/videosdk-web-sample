@@ -1,0 +1,17 @@
+{
+    "parser": "@babel/eslint-parser",
+    "extends": [
+      "prettier"
+    ],
+    "plugins": ["prettier"],
+    "rules": {
+      "prettier/prettier": ["warn", {
+        "singleQuote": true,
+        "semi": true,
+        "trailingComma": "none"
+      }],
+      "react/jsx-filename-extension": [0, { "extensions": [".js", ".jsx"] }]
+    },
+    "ignorePatterns": [
+    ]
+}
