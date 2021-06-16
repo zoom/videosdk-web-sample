@@ -1,0 +1,16 @@
+{
+    "parserOptions": {
+        // Detect and allow optional chaining
+        "ecmaVersion": 2020
+    },
+    "extends": ["airbnb", "prettier"],
+    "plugins": ["prettier"],
+    "rules": {
+        // Do not show error for @zoomus import, since we do not have npm
+        "import/no-extraneous-dependencies": "off"
+    },
+    "env": {
+        // Do not show error on window and document objects, since code is runnig in browser
+        "browser": true
+    }
+}
