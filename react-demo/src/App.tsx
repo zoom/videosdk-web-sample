@@ -87,9 +87,10 @@ function App(props: AppProps) {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [chatClient, setChatClient] = useState<ChatClient | null>(null);
   const zmClient = useContext(ZoomContext);
+  
   useEffect(() => {
     const init = async () => {
-      await zmClient.init("en-US", `${window.location.origin}/lib`);
+      await zmClient.init("en-US", `${window.location.origin}/lib`, 'zoom.us');
       try {
         setLoadingText("Joining the session...");
         await zmClient.join(topic, signature, name, password);
