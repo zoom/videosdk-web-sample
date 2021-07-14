@@ -1,5 +1,5 @@
 # Zoom Video Web SDK
-Use of this SDK is subject to our [Terms of Use](https://zoom.us/docs/en-us/zoom_api_license_and_tou.html)
+Use of this sample app is subject to our [Terms of Use](https://zoom.us/docs/en-us/zoom_api_license_and_tou.html)
 
 Please note that Chrome 92 is released on July 20, 2021, and that starting with its release, the SharedArrayBuffer object will only work on websites with proper cross-origin isolation. The Video SDK uses SharedArrayBuffer to optimize media streaming performance, and the SDK will not work properly if you do use it in an environment that is not properly cross-origin isolated.
 
