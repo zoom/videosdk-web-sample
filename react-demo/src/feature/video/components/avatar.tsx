@@ -5,15 +5,16 @@ import './avatar.scss';
 import { Participant } from '../../../index-types';
 interface AvatarProps {
   participant: Participant;
-  style: { [key: string]: string };
+  style?: { [key: string]: string };
   isActive: boolean;
+  className?: string;
 }
 const Avatar = (props: AvatarProps) => {
-  const { participant, style, isActive } = props;
+  const { participant, style, isActive, className } = props;
   const { displayName, audio, muted, bVideoOn } = participant;
   return (
     <div
-      className={classNames('avatar', { 'avatar-active': isActive })}
+      className={classNames('avatar', { 'avatar-active': isActive }, className)}
       style={{ ...style, background: bVideoOn ? 'transparent' : 'rgb(26,26,26)' }}
     >
       {(bVideoOn || (audio === 'computer' && muted)) && (
