@@ -20,7 +20,3 @@ export interface CellLayout {
   y: number;
   quality: number;
 }
-export interface MediaDevice {
-  label: string;
-  deviceId: string;
-}

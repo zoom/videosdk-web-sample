@@ -24,8 +24,6 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     meetingArgs.sdkSecret,
     meetingArgs.topic,
     meetingArgs.password,
-    'jack4',
-    'jack'
   );
 }
 console.log('meetingArgs', meetingArgs);
