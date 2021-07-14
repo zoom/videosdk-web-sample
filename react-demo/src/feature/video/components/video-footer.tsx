@@ -13,14 +13,12 @@ import MicrophoneButton from './microphone';
 import { ScreenShareButton, ScreenShareLockButton } from './screen-share';
 import ZoomMediaContext from '../../../context/media-context';
 import { useUnmount } from '../../../hooks';
-import { MediaDevice } from '../video-types';
 import './video-footer.scss';
 interface VideoFooterProps {
   className?: string;
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
   sharing?: boolean;
 }
-const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
   const { className, shareRef, sharing } = props;
   const [isStartedAudio, setIsStartedAudio] = useState(false);
@@ -29,12 +27,6 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isLockedScreenShare, setIsLockedScreenShare] = useState(false);
   
   const [isMuted, setIsMuted] = useState(true);
-  const [activeMicrophone, setActiveMicrophone] = useState('');
-  const [activeSpeaker, setActiveSpeaker] = useState('');
-  const [activeCamera, setActiveCamera] = useState('');
-  const [micList, setMicList] = useState<MediaDevice[]>([]);
-  const [speakerList, setSpeakerList] = useState<MediaDevice[]>([]);
-  const [cameraList, setCameraList] = useState<MediaDevice[]>([]);
   const { mediaStream } = useContext(ZoomMediaContext);
   const zmClient = useContext(ZoomContext);
   const onCameraClick = useCallback(async () => {
@@ -60,33 +52,6 @@ const VideoFooter = (props: VideoFooterProps) => {
       setIsStartedAudio(true);
     }
   }, [mediaStream, isStartedAudio, isMuted]);
-  const onMicrophoneMenuClick = async (key: string) => {
-    if (mediaStream) {
-      const [type, deviceId] = key.split('|');
-      if (type === 'microphone') {
-        if (deviceId !== activeMicrophone) {
-          await mediaStream.switchMicrophone(deviceId);
-          setActiveMicrophone(mediaStream.getActiveMicrophone());
-        }
-      } else if (type === 'speaker') {
-        if (deviceId !== activeSpeaker) {
-          await mediaStream.switchSpeaker(deviceId);
-          setActiveSpeaker(mediaStream.getActiveSpeaker());
-        }
-      } else if (type === 'leave audio') {
-        await mediaStream.stopAudio();
-        setIsStartedAudio(false);
-      }
-    }
-  };
-  const onSwitchCamera = async (key: string) => {
-    if (mediaStream) {
-      if (activeCamera !== key) {
-        await mediaStream.switchCamera(key);
-        setActiveCamera(mediaStream.getActiveCamera());
-      }
-    }
-  };
   const onHostAudioMuted = useCallback((payload) => {
     const { action, source, type } = payload;
     if (action === 'join' && type === 'computer') {
@@ -118,26 +83,14 @@ const VideoFooter = (props: VideoFooterProps) => {
     console.log('passively stop reason:', reason);
     setIsStartedScreenShare(false);
   }, []);
-  const onDeviceChange = useCallback(() => {
-    if (mediaStream) {
-      setMicList(mediaStream.getMicList());
-      setSpeakerList(mediaStream.getSpeakerList());
-      setCameraList(mediaStream.getCameraList());
-      setActiveMicrophone(mediaStream.getActiveMicrophone());
-      setActiveSpeaker(mediaStream.getActiveSpeaker());
-      setActiveCamera(mediaStream.getActiveCamera());
-    }
-  }, [mediaStream]);
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
     zmClient.on('passively-stop-share', onPassivelyStopShare);
-    zmClient.on('device-change', onDeviceChange);
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
-      zmClient.off('device-change', onDeviceChange);
     };
-  }, [zmClient, onHostAudioMuted, onPassivelyStopShare, onDeviceChange]);
+  }, [zmClient, onHostAudioMuted, onPassivelyStopShare]);
   useUnmount(() => {
     if (isStartedAudio) {
       mediaStream?.stopAudio();
@@ -151,25 +104,12 @@ const VideoFooter = (props: VideoFooterProps) => {
   });
   return (
     <div className={classNames('video-footer', className)}>
-      {isAudioEnable && (
       <MicrophoneButton
         isStartedAudio={isStartedAudio}
         isMuted={isMuted}
         onMicrophoneClick={onMicrophoneClick}
-          onMicrophoneMenuClick={onMicrophoneMenuClick}
-          microphoneList={micList}
-          speakerList={speakerList}
-          activeMicrophone={activeMicrophone}
-          activeSpeaker={activeSpeaker}
-        />
-      )}
-      <CameraButton
-        isStartedVideo={isStartedVideo}
-        onCameraClick={onCameraClick}
-        onSwitchCamera={onSwitchCamera}
-        cameraList={cameraList}
-        activeCamera={activeCamera}
       />
+      <CameraButton isStartedVideo={isStartedVideo} onCameraClick={onCameraClick} />
       {sharing && (
         <ScreenShareButton
           isStartedScreenShare={isStartedScreenShare}

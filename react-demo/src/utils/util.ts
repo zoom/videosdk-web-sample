@@ -5,8 +5,6 @@ export function generateVideoToken(
   sdkSecret: string,
   topic: string,
   passWord = '',
-  userIdentity = '',
-  sessionKey = ''
 ) {
   let signature = '';
   try {
@@ -22,8 +20,6 @@ export function generateVideoToken(
       exp,
       tpc: topic,
       pwd: passWord,
-      user_identity: userIdentity,
-      session_key: sessionKey
       // topic
     };
     // Sign JWT, password=616161
