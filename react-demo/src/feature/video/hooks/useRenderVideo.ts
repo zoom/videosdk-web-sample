@@ -63,7 +63,22 @@ export function useRenderVideo(
             const index = participants.findIndex((user) => user.userId === userId);
             const cellDimension = layout[index];
             if (cellDimension) {
-              const { width, height, x, y } = cellDimension;
+              const { width, height, x, y, quality } = cellDimension;
+              if (
+                previousLayout &&
+                previousLayout[index] &&
+                previousLayout[index].quality !== quality
+              ) {
+                mediaStream?.renderVideo(
+                  videoRef.current as HTMLCanvasElement,
+                  userId,
+                  width,
+                  height,
+                  x,
+                  y,
+                  quality,
+                );
+              }
               mediaStream?.adjustRenderedVideoPosition(
                 videoRef.current as HTMLCanvasElement,
                 userId,
