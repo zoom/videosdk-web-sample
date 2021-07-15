@@ -110,10 +110,13 @@ export function getVideoLayout(
   const verticalMargin = (rootHeight - cellBoxHeight * row) / 2 + cellOffset;
   const cellDimensions = [];
   const lastRowColumns = column - ((column * row) % actualCount);
-  const lastRowMargin =
-    (rootWidth - cellBoxWidth * lastRowColumns) / 2 + cellOffset;
+  const lastRowMargin = (rootWidth - cellBoxWidth * lastRowColumns) / 2 + cellOffset;
   let quality = VideoQuality.Video_90P;
-  if (actualCount <= 4 && cellHeight >= 270) {
+  
+  if (actualCount <= 4 && cellBoxHeight >= 510) {
+    // GROUP HD
+    quality = VideoQuality.Video_720P;
+  } else if (actualCount <= 4 && cellHeight >= 270) {
     quality = VideoQuality.Video_360P;
   } else if (actualCount > 4 && cellHeight >= 180) {
     quality = VideoQuality.Video_180P;
