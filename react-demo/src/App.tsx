@@ -12,6 +12,7 @@ import "antd/dist/antd.css";
 import produce from "immer";
 import Home from "./feature/home/home";
 import Video from "./feature/video/video";
+import VideoSingle from './feature/video/video-single';
 import Preview from "./feature/preview/preview";
 import ZoomContext from "./context/zoom-context";
 import ZoomMediaContext from "./context/media-context";
@@ -86,6 +87,7 @@ function App(props: AppProps) {
   const [mediaState, dispatch] = useReducer(mediaReducer, mediaShape);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [chatClient, setChatClient] = useState<ChatClient | null>(null);
+  const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(true);
   const zmClient = useContext(ZoomContext);
   
   useEffect(() => {
@@ -94,7 +96,9 @@ function App(props: AppProps) {
       try {
         setLoadingText("Joining the session...");
         await zmClient.join(topic, signature, name, password);
-        setMediaStream(zmClient.getMediaStream());
+        const stream = zmClient.getMediaStream();
+        setMediaStream(stream);
+	      setIsSupportGalleryView(stream.isSupportMultipleVideos());
         const chatClient = zmClient.getChatClient();
         setChatClient(chatClient);
         setIsLoading(false);
@@ -191,7 +195,7 @@ function App(props: AppProps) {
                   path="/preview"
                   component={Preview}
                 />
-                <Route path="/video" component={Video} />
+                <Route path="/video" component={isSupportGalleryView ? Video : VideoSingle} />
                 <Route path="/chat" component={Chat} />
               </Switch>
             </Router>
