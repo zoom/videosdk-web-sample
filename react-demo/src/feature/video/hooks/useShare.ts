@@ -4,7 +4,7 @@ import { ZoomClient, MediaStream } from '../../../index-types';
 export function useShare(
   zmClient: ZoomClient,
   mediaStream: MediaStream | null,
-  shareRef: MutableRefObject<HTMLCanvasElement | null>,
+  shareRef: MutableRefObject<HTMLCanvasElement | HTMLVideoElement| null>,
 ) {
   const [isRecieveSharing, setIsReceiveSharing] = useState(false);
   const [isStartedShare, setIsStartedShare] = useState(false);
@@ -60,7 +60,7 @@ export function useShare(
   useEffect(() => {
     if (shareRef.current && previousIsRecieveSharing !== isRecieveSharing) {
       if (isRecieveSharing) {
-        mediaStream?.startShareView(shareRef.current, activeSharingId);
+        mediaStream?.startShareView(shareRef.current as HTMLCanvasElement, activeSharingId);
       } else if (previousIsRecieveSharing === true && isRecieveSharing === false) {
         mediaStream?.stopShareView();
       }
