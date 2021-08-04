@@ -24,3 +24,8 @@ export function getExploreName() {
   }
   return 'Unkonwn';
 }
+
+
+export function isSupportWebCodecs(){
+  return typeof (window as any).MediaStreamTrackProcessor ==='function'
+}
