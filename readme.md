@@ -56,7 +56,7 @@ Before you can use the demo app, you must update your config in ```purejs-demo/s
 You can launch the app at http://localhost:3000 or https://localhost:3000 (if using ```npm run https```)
 
 ## Changelog
-Please refer to the CHANGELOG file for all changes
+Please refer to the official release CHANGELOG for all changes
 
 
 ## Need help?
