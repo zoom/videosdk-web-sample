@@ -11,8 +11,10 @@ import './camera.scss';
 import { MediaDevice } from '../video-types';
 interface CameraButtonProps {
   isStartedVideo: boolean;
+  isMirrored?: boolean;
   onCameraClick: () => void;
   onSwitchCamera: (deviceId: string) => void;
+  onMirrorVideo?: () => void;
   className?: string;
   cameraList?: MediaDevice[];
   activeCamera?: string;
@@ -23,11 +25,17 @@ const CameraButton = (props: CameraButtonProps) => {
     className,
     cameraList,
     activeCamera,
+    isMirrored,
     onCameraClick,
     onSwitchCamera,
+    onMirrorVideo
   } = props;
   const onMenuItemClick = (payload: { key: any }) => {
-    onSwitchCamera(payload.key);
+    if (payload.key === 'mirror') {
+      onMirrorVideo?.();
+    } else {
+      onSwitchCamera(payload.key);
+    }
   };
   const menu = cameraList && cameraList.length > 0 && (
     <Menu onClick={onMenuItemClick} theme="dark" className="camera-menu">
@@ -41,6 +49,10 @@ const CameraButton = (props: CameraButtonProps) => {
           </Menu.Item>
         ))}
       </Menu.ItemGroup>
+      <Menu.Divider />
+      <Menu.Item key="mirror" icon={isMirrored && <CheckOutlined />}>
+        Mirror My Video
+      </Menu.Item>
     </Menu>
   );
   return (

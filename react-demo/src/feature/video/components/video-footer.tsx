@@ -10,11 +10,13 @@ import { message } from 'antd';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
 import MicrophoneButton from './microphone';
-import { ScreenShareButton, ScreenShareLockButton } from './screen-share';
+import { ScreenShareButton } from './screen-share';
 import ZoomMediaContext from '../../../context/media-context';
 import { useUnmount } from '../../../hooks';
 import { MediaDevice } from '../video-types';
 import './video-footer.scss';
+import { isAndroidBrowser, isSupportOffscreenCanvas } from '../../../utils/platform';
+import { SELF_VIDEO_ID } from '../video-constants';
 interface VideoFooterProps {
   className?: string;
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
@@ -26,8 +28,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isStartedAudio, setIsStartedAudio] = useState(false);
   const [isStartedVideo, setIsStartedVideo] = useState(false);
   const [isStartedScreenShare, setIsStartedScreenShare] = useState(false);
-  const [isLockedScreenShare, setIsLockedScreenShare] = useState(false);
-  
+  const [isMirrored, setIsMirrored] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [activeMicrophone, setActiveMicrophone] = useState('');
   const [activeSpeaker, setActiveSpeaker] = useState('');
@@ -42,7 +43,20 @@ const VideoFooter = (props: VideoFooterProps) => {
       await mediaStream?.stopVideo();
       setIsStartedVideo(false);
     } else {
-      await mediaStream?.startVideo();
+      if (
+        isAndroidBrowser() ||
+        (isSupportOffscreenCanvas() && !mediaStream?.isSupportMultipleVideos())
+      ) {
+        const videoElement = document.querySelector(
+          `#${SELF_VIDEO_ID}`,
+        ) as HTMLVideoElement;
+        if (videoElement) {
+          await mediaStream?.startVideo({ videoElement });
+        }
+      } else {
+        await mediaStream?.startVideo();
+      }
+
       setIsStartedVideo(true);
     }
   }, [mediaStream, isStartedVideo]);
@@ -86,6 +100,10 @@ const VideoFooter = (props: VideoFooterProps) => {
         setActiveCamera(mediaStream.getActiveCamera());
       }
     }
+  };
+  const onMirrorVideo = async () => {
+    await mediaStream?.mirrorVideo(!isMirrored);
+    setIsMirrored(!isMirrored);
   };
   const onHostAudioMuted = useCallback((payload) => {
     const { action, source, type } = payload;
@@ -167,8 +185,10 @@ const VideoFooter = (props: VideoFooterProps) => {
         isStartedVideo={isStartedVideo}
         onCameraClick={onCameraClick}
         onSwitchCamera={onSwitchCamera}
+        onMirrorVideo={onMirrorVideo}
         cameraList={cameraList}
         activeCamera={activeCamera}
+        isMirrored={isMirrored}
       />
       {sharing && (
         <ScreenShareButton

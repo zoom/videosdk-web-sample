@@ -29,3 +29,11 @@ export function getExploreName() {
 export function isSupportWebCodecs(){
   return typeof (window as any).MediaStreamTrackProcessor ==='function'
 }
+
+export function isAndroidBrowser() {
+  return /android/i.test(navigator.userAgent);
+}
+
+export function isSupportOffscreenCanvas() {
+  return typeof (window as any).OffscreenCanvas === 'function';
+}
