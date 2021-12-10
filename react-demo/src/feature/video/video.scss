@@ -40,6 +40,25 @@
       width: 100%;
       height: 100%;
     }
+    .self-video {
+      position: absolute;
+      width: 254px;
+      height: 143px;
+      top: 50px;
+      right: 30px;
+      z-index: 2;
+      display: none;
+      &.single-self-video{
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+      }
+      &.self-video-show{
+        display: block;
+      }
+
+    }
   }
   .avatar-list {
     position: absolute;
