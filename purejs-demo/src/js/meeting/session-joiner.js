@@ -23,7 +23,9 @@ const joinSession = async (zmClient) => {
         sessionConfig.sdkKey,
         sessionConfig.sdkSecret,
         sessionConfig.topic,
-        sessionConfig.password
+        sessionConfig.password,
+        sessionConfig.sessionKey,
+        sessionConfig.user_identity
     );
 
     let mediaStream;
@@ -31,8 +33,7 @@ const joinSession = async (zmClient) => {
     const initAndJoinSession = async () => {
         await zmClient.init(
             zmClientInitParams.language,
-            zmClientInitParams.dependentAssets,
-            zmClientInitParams.webEndpoint,
+            zmClientInitParams.dependentAssets
         );
 
         try {

@@ -11,7 +11,8 @@ import { KJUR } from 'jsrsasign';
  * @param passWord your session password
  */
 // eslint-disable-next-line import/prefer-default-export
-export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '') {
+export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '', sessionKey = '', userIdentity = '',
+) {
   let signature = '';
   try {
     const iat = Math.round(new Date().getTime() / 1000);
@@ -25,8 +26,9 @@ export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '') {
       iat,
       exp,
       tpc: topic,
-      pwd: passWord
-      // topic
+      pwd: passWord,
+      user_identity: userIdentity,
+      session_key: sessionKey
     };
     // Sign JWT, password=616161
     const sHeader = JSON.stringify(oHeader);
