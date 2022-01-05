@@ -3,5 +3,7 @@ export default {
     sdkSecret: '',
     topic: '',
     password: '',
-    name: ''
+    name: '',
+    sessionKey: '',
+    user_identity: ''
 };
