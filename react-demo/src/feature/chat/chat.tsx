@@ -89,7 +89,7 @@ const ChatContainer = () => {
       setChatReceivers(chatClient.getReceivers());
     }
     setIsHost(zmClient.isHost());
-    setIsManager(zmClient.isManager());
+    // setIsManager(zmClient.isManager());
   });
   useEffect(() => {
     if (chatUser) {

@@ -30,6 +30,12 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
       description: 'Session Chat, Chat Priviledge',
     },
     {
+      key: "command",
+      icon: "icon-chat",
+      title: "Command Channel chat",
+      description: "Session Command Channel chat"
+    },
+    {
       key: 'preview',
       icon: 'icon-meeting',
       title: 'Local Preview',
