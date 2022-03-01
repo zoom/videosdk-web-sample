@@ -6,9 +6,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set NODE_ENV=development && set BABEL_ENV=development && webpack serve --config webpack.config.dev.js",
+    "start": "set NODE_ENV=development && set BABEL_ENV=development && webpack serve --config webpack.config.dev.js --env corp",
     "https": "set NODE_ENV=development && set BABEL_ENV=development && webpack serve --config webpack.config.dev.js --env https",
-    "corp": "set NODE_ENV=development && set BABEL_ENV=development && webpack serve --config webpack.config.dev.js --env corp"
+    "nosab": "set NODE_ENV=development && set BABEL_ENV=development && webpack serve --config webpack.config.dev.js"
   },
   "keywords": [
     "zoom",
