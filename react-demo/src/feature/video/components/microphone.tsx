@@ -7,10 +7,10 @@ import {
   AudioMutedOutlined,
   CheckOutlined,
   UpOutlined,
-} from '@ant-design/icons';
-import { IconFont } from '../../../component/icon-font';
-import './microphone.scss';
-import { MediaDevice } from '../video-types';
+} from "@ant-design/icons";
+import { IconFont } from "../../../component/icon-font";
+import "./microphone.scss";
+import { MediaDevice } from "../video-types";
 import CallOutModel from "./call-out-model";
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
@@ -57,8 +57,8 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const menu = [];
   if (microphoneList && microphoneList.length && audio !== "phone") {
     menu.push({
-      group: 'microphone',
-      title: 'Select a Microphone',
+      group: "microphone",
+      title: "Select a Microphone",
       items: microphoneList.map((i) => ({
         label: i.label,
         value: i.deviceId,
@@ -68,8 +68,8 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   }
   if (speakerList && speakerList.length && audio !== "phone") {
     menu.push({
-      group: 'speaker',
-      title: 'Select a speaker',
+      group: "speaker",
+      title: "Select a speaker",
       items: speakerList.map((i) => ({
         label: i.label,
         value: i.deviceId,
@@ -131,14 +131,14 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     </Menu>
   );
   return (
-    <div className={classNames('microphone-footer', className)}>
+    <div className={classNames("microphone-footer", className)}>
       {isStartedAudio ? (
         <DropdownButton
-          className={'microphone-dropdown-button'}
+          className={"microphone-dropdown-button"}
           size="large"
           overlay={overlayMenu}
           onClick={onMicrophoneClick}
-          trigger={['click']}
+          trigger={["click"]}
           type="ghost"
           icon={<UpOutlined />}
           placement="topRight"

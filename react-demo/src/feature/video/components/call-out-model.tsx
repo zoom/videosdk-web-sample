@@ -93,7 +93,7 @@ const CallOutModel = (props: CallOutModelProps) => {
               </Select>
             </Form.Item>
             <Form.Item name={["phone", "phoneNumber"]} noStyle>
-              <Input className="number" placeholder="phone number" />
+              <Input className="number" placeholder="phone number"/>
             </Form.Item>
           </Input.Group>
         </Form.Item>
