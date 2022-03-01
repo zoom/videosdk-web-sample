@@ -1,0 +1,28 @@
+.join-by-phone-dialog {
+  .ant-form-item {
+    margin-bottom: 10px;
+  }
+  .phone-number {
+    display: flex;
+    .country-code {
+      flex-basis: 300px;
+    }
+    .number {
+      flex-grow: 1;
+    }
+  }
+  .phone-call-status {
+    .status-text{
+      margin-left: 15px;
+    }
+    .pending{
+      color: #666;
+    }
+    .fail {
+      color: #f00;
+    }
+    .success {
+      color: green;
+    }
+  }
+}

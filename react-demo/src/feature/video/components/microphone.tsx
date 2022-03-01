@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
-import React from 'react';
-import { Menu, Tooltip, Dropdown, Button } from 'antd';
-import classNames from 'classnames';
+import React, { useState, useEffect } from "react";
+import { Menu, Tooltip, Dropdown, Button, Modal, Select, Input } from "antd";
+import classNames from "classnames";
 import {
   AudioOutlined,
   AudioMutedOutlined,
@@ -11,33 +11,51 @@ import {
 import { IconFont } from '../../../component/icon-font';
 import './microphone.scss';
 import { MediaDevice } from '../video-types';
+import CallOutModel from "./call-out-model";
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
   isMuted: boolean;
+  isSupportPhone?: boolean;
+  audio?: string;
+  phoneCountryList?: any[];
   onMicrophoneClick: () => void;
   onMicrophoneMenuClick: (key: string) => void;
+  onPhoneCallClick?: (code: string, phoneNumber: string,name:string,option:any) => void;
+  onPhoneCallCancel?: (code: string, phoneNumber: string,option:any) => Promise<any>;
   className?: string;
   microphoneList?: MediaDevice[];
   speakerList?: MediaDevice[];
   activeMicrophone?: string;
   activeSpeaker?: string;
+  phoneCallStatus?: { text: string; type: string };
 }
 const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const {
     isStartedAudio,
+    isSupportPhone,
     isMuted,
+    audio,
     className,
     microphoneList,
     speakerList,
+    phoneCountryList,
     activeMicrophone,
     activeSpeaker,
+    phoneCallStatus,
     onMicrophoneClick,
     onMicrophoneMenuClick,
+    onPhoneCallClick,
+    onPhoneCallCancel,
   } = props;
-  const tooltipText = isStartedAudio ? (isMuted ? 'unmute' : 'mute') : 'start audio';
+  const [isPhoneModelOpen, setIsPhoneModelOpen] = useState(false);
+  const tooltipText = isStartedAudio
+    ? isMuted
+      ? "unmute"
+      : "mute"
+    : "start audio";
   const menu = [];
-  if (microphoneList && microphoneList.length) {
+  if (microphoneList && microphoneList.length && audio !== "phone") {
     menu.push({
       group: 'microphone',
       title: 'Select a Microphone',
@@ -48,7 +66,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
       })),
     });
   }
-  if (speakerList && speakerList.length) {
+  if (speakerList && speakerList.length && audio !== "phone") {
     menu.push({
       group: 'speaker',
       title: 'Select a speaker',
@@ -62,14 +80,24 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   menu.push({
     items: [
       {
-        label: 'Leave Audio',
-        value: 'leave audio',
+        label: audio === "phone" ? "Hang Up" : "Leave Audio",
+        value: "leave audio",
       },
     ],
   });
   const onMenuItemClick = (payload: { key: any }) => {
     onMicrophoneMenuClick(payload.key);
   };
+  const onPhoneMenuClick = (payload: { key: any }) => {
+    if (payload.key === "phone") {
+      setIsPhoneModelOpen(true);
+    }
+  };
+  useEffect(() => {
+    if (isStartedAudio) {
+      setIsPhoneModelOpen(false);
+    }
+  }, [isStartedAudio]);
   const overlayMenu = (
     <Menu onClick={onMenuItemClick} theme="dark" className="microphone-menu">
       {menu.map((e) => {
@@ -91,12 +119,15 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
             </React.Fragment>
           );
         }
-        // initialData.products.map(product => product.id)
-        // (initialData.products as Array<CompoundType['products'][0]>).map(product => product.id)
-        return (e.items as Array<{ value: string; label: string }>).map((m: any) => (
-          <Menu.Item key={m?.value}>{m?.label}</Menu.Item>
-        ));
+        return (e.items as Array<{ value: string; label: string }>).map(
+          (m: any) => <Menu.Item key={m?.value}>{m?.label}</Menu.Item>
+        );
       })}
+    </Menu>
+  );
+  const phoneCallMenu = (
+    <Menu onClick={onPhoneMenuClick} theme="dark" className="microphone-menu">
+      <Menu.Item key="phone">Join audio by phone</Menu.Item>
     </Menu>
   );
   return (
@@ -112,20 +143,53 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
           icon={<UpOutlined />}
           placement="topRight"
         >
-          {isMuted ? <AudioMutedOutlined /> : <AudioOutlined />}
+          {isMuted ? (
+            audio === "phone" ? (
+              <IconFont type="icon-phone-off" />
+            ) : (
+              <AudioMutedOutlined />
+            )
+          ) : audio === "phone" ? (
+            <IconFont type="icon-phone" />
+          ) : (
+            <AudioOutlined />
+          )}
         </DropdownButton>
       ) : (
-    <Tooltip title={tooltipText}>
-      <Button
-            className={'microphone-button'}
-            icon={<IconFont type="icon-headset" />}
-            size="large"
-        ghost
-        shape="circle"
-        onClick={onMicrophoneClick}
-      />
-    </Tooltip>
+        <Tooltip title={tooltipText}>
+          {isSupportPhone ? (
+            <DropdownButton
+              className={"microphone-dropdown-button"}
+              size="large"
+              overlay={phoneCallMenu}
+              onClick={onMicrophoneClick}
+              trigger={["click"]}
+              type="ghost"
+              icon={<UpOutlined />}
+              placement="topRight"
+            >
+              <IconFont type="icon-headset" />
+            </DropdownButton>
+          ) : (
+            <Button
+              className={"microphone-button"}
+              icon={<IconFont type="icon-headset" />}
+              size="large"
+              ghost
+              shape="circle"
+              onClick={onMicrophoneClick}
+            />
+          )}
+        </Tooltip>
       )}
+      <CallOutModel
+        visible={isPhoneModelOpen}
+        setVisible={(visible: boolean) => setIsPhoneModelOpen(visible)}
+        phoneCallStatus={phoneCallStatus}
+        phoneCountryList={phoneCountryList}
+        onPhoneCallCancel={onPhoneCallCancel}
+        onPhoneCallClick={onPhoneCallClick}
+      />
     </div>
   );
 };
