@@ -223,6 +223,7 @@ function App(props: AppProps) {
                 />
                 <Route path="/video" component={isSupportGalleryView ? Video : VideoSingle} />
                 <Route path="/chat" component={Chat} />
+                <Route path="/command" component={Command} />
               </Switch>
             </Router>
             </CommandContext.Provider>

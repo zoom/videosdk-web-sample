@@ -127,7 +127,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   );
   const phoneCallMenu = (
     <Menu onClick={onPhoneMenuClick} theme="dark" className="microphone-menu">
-      <Menu.Item key="phone">Join audio by phone</Menu.Item>
+      <Menu.Item key="phone">Invite by phone</Menu.Item>
     </Menu>
   );
   return (

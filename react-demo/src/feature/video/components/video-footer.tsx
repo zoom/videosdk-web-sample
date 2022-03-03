@@ -25,6 +25,7 @@ interface VideoFooterProps {
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
   sharing?: boolean;
 }
+
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
   const { className, shareRef, sharing } = props;
@@ -63,7 +64,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           await mediaStream?.startVideo({ videoElement });
         }
       } else {
-        await mediaStream?.startVideo();
+        await mediaStream?.startVideo({hd:true});
       }
 
       setIsStartedVideo(true);
