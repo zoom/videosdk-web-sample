@@ -5,8 +5,9 @@ export function generateVideoToken(
   sdkSecret: string,
   topic: string,
   passWord = '',
+  sessionKey = '',
   userIdentity = '',
-  sessionKey = ''
+  roleType = 1,
 ) {
   let signature = '';
   try {
@@ -23,10 +24,9 @@ export function generateVideoToken(
       tpc: topic,
       pwd: passWord,
       user_identity: userIdentity,
-      session_key: sessionKey
-      // topic
+      session_key: sessionKey,
+      role_type: roleType, // role=1, host, role=0 is attendee, only role=1 can start session when session not start
     };
-    // Sign JWT, password=616161
     const sHeader = JSON.stringify(oHeader);
     const sPayload = JSON.stringify(oPayload);
     signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, sdkSecret);
