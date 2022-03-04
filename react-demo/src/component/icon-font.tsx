@@ -12,6 +12,21 @@ import { ReactComponent as IconShare } from './svgs/icon-share.svg';
 import { ReactComponent as IconSpotlight } from './svgs/icon-spotlight.svg';
 import { ReactComponent as IconStart } from './svgs/icon-start.svg';
 import { ReactComponent as IconStop } from './svgs/icon-stop.svg';
+
+import { ReactComponent as IconPhone } from './svgs/icon-phone.svg';
+import { ReactComponent as IconPhoneOff } from './svgs/icon-phone-off.svg';
+
+import { ReactComponent as IconRecording } from './svgs/icon-recording-default.svg';
+import { ReactComponent as IconRecordingHovered } from './svgs/icon-recording-hovered.svg';
+import { ReactComponent as IconRecordingAnimated } from './svgs/icon-recording-animated.svg';
+import { ReactComponent as IconRecordingAnimatedHovered } from './svgs/icon-recording-animated-hovered.svg';
+import { ReactComponent as IconRecordingStop } from './svgs/icon-recording-stop.svg';
+import { ReactComponent as IconRecordingStopHovered } from './svgs/icon-recording-stop-hovered.svg';
+import { ReactComponent as IconRecordingResume } from './svgs/icon-recording-resume.svg';
+import { ReactComponent as IconRecordingResumeHovered } from './svgs/icon-recording-resume-hovered.svg';
+import { ReactComponent as IconRecordingPause } from './svgs/icon-recording-pause.svg';
+import { ReactComponent as IconRecordingPauseHovered } from './svgs/icon-recording-pause-hovered.svg';
+
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -24,7 +39,19 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-share': IconShare,
   'icon-spotlight': IconSpotlight,
   'icon-start': IconStart,
-  'icon-stop': IconStop
+  'icon-stop': IconStop,
+  'icon-recording': IconRecording,
+  'icon-recording-hover': IconRecordingHovered,
+  'icon-recording-stop': IconRecordingStop,
+  'icon-recording-stop-hover': IconRecordingStopHovered,
+  'icon-recording-resume': IconRecordingResume,
+  'icon-recording-resume-hover': IconRecordingResumeHovered,
+  'icon-recording-pause': IconRecordingPause,
+  'icon-recording-pause-hover': IconRecordingPauseHovered,
+  'icon-recording-animated': IconRecordingAnimated,
+  'icon-recording-animated-hover': IconRecordingAnimatedHovered,
+  'icon-phone':IconPhone,
+  'icon-phone-off':IconPhoneOff
 };
 interface IconFontProps {
   type: string;

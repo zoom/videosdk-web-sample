@@ -1,0 +1,14 @@
+<svg width="32" height="16" viewBox="0 0 32 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="3.89062" cy="8" r="3" fill="#DE2828">
+  <animate attributeName="fill" from="#DE2828" to="#FF5C5C" dur="1.5s" repeatCount="indefinite" calcMode="discrete" />
+</circle>
+<path d="M12.3652 8.94482H13.5713L14.8848 11.5229H16.5547L15.0703 8.7251C15.8809 8.40771 16.3496 7.62646 16.3496 6.72314C16.3496 5.33154 15.3975 4.47705 13.8496 4.47705H10.8906V11.5229H12.3652V8.94482ZM12.3652 5.62939H13.6445C14.377 5.62939 14.8359 6.05908 14.8359 6.74268C14.8359 7.44092 14.4014 7.84619 13.6592 7.84619H12.3652V5.62939Z" fill="white" fill-opacity="0.62">
+<!-- <animate attributeName="fill-opacity" from="0.62" to="0.8" dur="1.5s" repeatCount="indefinite" calcMode="discrete"/> -->
+</path>
+<path d="M22.502 10.3071H19.3086V8.5249H22.3213V7.39209H19.3086V5.69287H22.502V4.47705H17.834V11.5229H22.502V10.3071Z" fill="white" fill-opacity="0.62">
+<!-- <animate attributeName="fill-opacity" from="0.62" to="0.8" dur="1.5s" repeatCount="indefinite" calcMode="discrete"/> -->
+</path>
+<path d="M27.0479 11.7036C28.7471 11.7036 29.9873 10.6733 30.1094 9.16943H28.6738C28.5322 9.9458 27.8975 10.4438 27.0527 10.4438C25.9395 10.4438 25.251 9.50635 25.251 7.99756C25.251 6.48877 25.9395 5.55127 27.0479 5.55127C27.8877 5.55127 28.5273 6.08838 28.6689 6.90381H30.1045C29.9971 5.39014 28.7178 4.29639 27.0479 4.29639C25.002 4.29639 23.7422 5.70752 23.7422 7.99756C23.7422 10.2876 25.0068 11.7036 27.0479 11.7036Z" fill="white" fill-opacity="0.62">
+<!-- <animate attributeName="fill-opacity" from="0.62" to="0.8" dur="1.5s" repeatCount="indefinite" calcMode="discrete"/> -->
+</path>
+</svg>

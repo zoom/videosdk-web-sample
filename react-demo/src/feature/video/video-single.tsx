@@ -9,6 +9,7 @@ import React, {
 import { RouteComponentProps } from 'react-router-dom';
 import { VideoQuality } from '@zoom/videosdk';
 import classnames from 'classnames';
+import _ from "lodash";
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import Avatar from './components/avatar';
@@ -16,7 +17,7 @@ import VideoFooter from './components/video-footer';
 import { useShare } from './hooks/useShare';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
-import { useMount } from '../../hooks';
+import { useMount, useSizeCallback } from '../../hooks';
 import { Participant } from '../../index-types';
 import './video.scss';
 import {
@@ -25,6 +26,7 @@ import {
   isSupportWebCodecs,
 } from '../../utils/platform';
 import { SELF_VIDEO_ID } from './video-constants';
+import { isShallowEqual } from '../../utils/util';
 
 const isUseVideoElementToDrawSelfVideo =
   isAndroidBrowser() || isSupportOffscreenCanvas();
@@ -49,17 +51,14 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     shareRef,
   );
   const isSharing = isRecieveSharing || isStartedShare;
-  const contentDimension = sharedContentDimension;
-  if (isSharing && shareContainerRef.current) {
-    const { width, height } = sharedContentDimension;
-    const {
-      width: containerWidth,
-      height: containerHeight,
-    } = shareContainerRef.current.getBoundingClientRect();
-    const ratio = Math.min(containerWidth / width, containerHeight / height, 1);
-    contentDimension.width = Math.floor(width * ratio);
-    contentDimension.height = Math.floor(height * ratio);
-  }
+  const [containerDimension, setContainerDimension] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [shareViewDimension, setShareViewDimension] = useState({
+    width: 0,
+    height: 0,
+  });
 
   useParticipantsChange(zmClient, (payload) => {
     setParticipants(payload);
@@ -129,6 +128,36 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       setActiveVideo(mediaStream.getActiveVideoId());
     }
   });
+  useEffect(() => {
+    if (isSharing && shareContainerRef.current) {
+      const { width, height } = sharedContentDimension;
+      const { width: containerWidth, height: containerHeight } =containerDimension;
+      const ratio = Math.min(
+        containerWidth / width,
+        containerHeight / height,
+        1
+      );
+      setShareViewDimension({
+        width:Math.floor(width * ratio),
+        height:Math.floor(height * ratio)
+      })
+    }
+  },[isSharing,sharedContentDimension,containerDimension]);
+
+  const onShareContainerResize = useCallback(({ width, height }) => {
+    _.throttle(() => {
+      setContainerDimension({ width, height });
+    }, 50).call(this);
+  }, []);
+  useSizeCallback(shareContainerRef.current, onShareContainerResize);
+  useEffect(() => {
+    if (!isShallowEqual(shareViewDimension, sharedContentDimension)) {
+      mediaStream?.updateSharingCanvasDimension(
+        shareViewDimension.width,
+        shareViewDimension.height
+      );
+    }
+  }, [mediaStream, sharedContentDimension, shareViewDimension]);
   return (
     <div className="viewport">
       <div
@@ -140,8 +169,8 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         <div
           className="share-container-viewport"
           style={{
-            width: `${contentDimension.width}px`,
-            height: `${contentDimension.height}px`,
+            width: `${shareViewDimension.width}px`,
+            height: `${shareViewDimension.height}px`,
           }}
         >
           <canvas

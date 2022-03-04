@@ -1,0 +1,29 @@
+.chat-receiver {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 25px;
+  margin: 15px 0;
+  .chat-to {
+    margin-right: 5px;
+  }
+  
+}
+
+.chat-receiver-item{
+  padding-left: 30px;
+  &.selected {
+    padding-left: 10px;
+  }
+  .chat-receiver-item-affix{
+    color:#999;
+    margin-left: 5px;
+  }
+}
+.chat-privilege-item {
+  padding-left: 25px;
+  &.selected {
+    padding-left: 5px;
+  }
+}

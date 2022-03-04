@@ -11,7 +11,14 @@ import { KJUR } from 'jsrsasign';
  * @param passWord your session password
  */
 // eslint-disable-next-line import/prefer-default-export
-export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '', sessionKey = '', userIdentity = '',
+export function generateSessionToken(
+  sdkKey,
+  sdkSecret,
+  topic,
+  passWord = '',
+  sessionKey = '',
+  userIdentity = '',
+  roleType = 1,
 ) {
   let signature = '';
   try {
@@ -28,9 +35,9 @@ export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '', se
       tpc: topic,
       pwd: passWord,
       user_identity: userIdentity,
-      session_key: sessionKey
+      session_key: sessionKey,
+      role_type: roleType, // role=1, host, role=0 is attendee, only role=1 can start session when session not start
     };
-    // Sign JWT, password=616161
     const sHeader = JSON.stringify(oHeader);
     const sPayload = JSON.stringify(oPayload);
     signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, sdkSecret);
@@ -38,4 +45,18 @@ export function generateSessionToken(sdkKey, sdkSecret, topic, passWord = '', se
     console.error(e);
   }
   return signature;
+}
+
+
+export function isSupportWebCodecs(){
+  return typeof MediaStreamTrackProcessor ==='function'
+}
+
+
+export function isAndroidBrowser() {
+  return /android/i.test(navigator.userAgent);
+}
+
+export function isSupportOffscreenCanvas() {
+  return typeof OffscreenCanvas === 'function';
 }

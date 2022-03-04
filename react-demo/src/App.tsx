@@ -17,9 +17,12 @@ import Preview from "./feature/preview/preview";
 import ZoomContext from "./context/zoom-context";
 import ZoomMediaContext from "./context/media-context";
 import ChatContext from "./context/chat-context";
+import CommandContext from "./context/cmd-context";
+import RecordingContext from "./context/recording-context";
 import LoadingLayer from "./component/loading-layer";
 import Chat from "./feature/chat/chat";
-import { ChatClient, MediaStream } from "./index-types";
+import Command from "./feature/command/command";
+import { ChatClient, CommandChannelClient, MediaStream, RecordingClient } from "./index-types";
 import "./App.css";
 
 interface AppProps {
@@ -87,7 +90,11 @@ function App(props: AppProps) {
   const [mediaState, dispatch] = useReducer(mediaReducer, mediaShape);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [chatClient, setChatClient] = useState<ChatClient | null>(null);
-  const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(true);
+  const [recordingClient, setRecordingClient] = useState<RecordingClient | null>(null);
+  const [commandClient, setCommandClient] = useState<CommandChannelClient | null>(null);
+  const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(
+    true
+  );
   const zmClient = useContext(ZoomContext);
   
   useEffect(() => {
@@ -100,7 +107,11 @@ function App(props: AppProps) {
         setMediaStream(stream);
 	      setIsSupportGalleryView(stream.isSupportMultipleVideos());
         const chatClient = zmClient.getChatClient();
+        const commandClient = zmClient.getCommandClient();
+        const recordingClient = zmClient.getRecordingClient();
         setChatClient(chatClient);
+        setCommandClient(commandClient);
+        setRecordingClient(recordingClient);
         setIsLoading(false);
       } catch (e) {
         setIsLoading(false);
@@ -143,6 +154,15 @@ function App(props: AppProps) {
     const { action, type, result } = payload;
     dispatch({ type: `${type}-${action}`, payload: result === "success" });
   }, []);
+
+  const onDialoutChange = useCallback(payload => {
+    console.log('onDialoutChange', payload);
+  }, []);
+
+  const onAudioMerged = useCallback(payload => {
+    console.log('onAudioMerged', payload);
+  }, []);
+
   const onLeaveOrJoinSession = useCallback(async () => {
     if (status === "closed") {
       setIsLoading(true);
@@ -156,17 +176,23 @@ function App(props: AppProps) {
   useEffect(() => {
     zmClient.on("connection-change", onConnectionChange);
     zmClient.on("media-sdk-change", onMediaSDKChange);
+    zmClient.on("dialout-state-change", onDialoutChange);
+    zmClient.on("merged-audio", onAudioMerged);
     return () => {
       zmClient.off("connection-change", onConnectionChange);
       zmClient.off("media-sdk-change", onMediaSDKChange);
+      zmClient.off("dialout-state-change", onDialoutChange);
+      zmClient.off("merged-audio", onAudioMerged);
     };
-  }, [zmClient, onConnectionChange, onMediaSDKChange]);
+  }, [zmClient, onConnectionChange, onMediaSDKChange, onDialoutChange, onAudioMerged]);
   return (
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
         <ZoomMediaContext.Provider value={{ ...mediaState, mediaStream }}>
           <ChatContext.Provider value={chatClient}>
+          <RecordingContext.Provider value={recordingClient}>
+            <CommandContext.Provider value={commandClient} >
             <Router>
               <Switch>
                 <Route
@@ -197,8 +223,11 @@ function App(props: AppProps) {
                 />
                 <Route path="/video" component={isSupportGalleryView ? Video : VideoSingle} />
                 <Route path="/chat" component={Chat} />
+                <Route path="/command" component={Command} />
               </Switch>
             </Router>
+            </CommandContext.Provider>
+            </RecordingContext.Provider>
           </ChatContext.Provider>
         </ZoomMediaContext.Provider>
       )}

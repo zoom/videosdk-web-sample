@@ -24,3 +24,4 @@ yarn-error.log*
 dist
 /public/lib
 .eslintcache
+src/config/dev.ts
