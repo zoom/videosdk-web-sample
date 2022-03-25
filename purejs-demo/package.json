@@ -1,7 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/coffeelint",
   "name": "videosdk-demo-purejs",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "description": "Zoom Web Video SDK Pure JS Demo",
   "main": "index.js",
   "scripts": {
@@ -51,6 +51,6 @@
     "webpack-dev-server": "3.11.2"
   },
   "dependencies": {
-    "@zoom/videosdk": "^1.2.0"
+    "@zoom/videosdk": "^1.2.3"
   }
 }
