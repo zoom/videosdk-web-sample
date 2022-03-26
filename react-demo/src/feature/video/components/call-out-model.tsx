@@ -64,8 +64,11 @@ const CallOutModel = (props: CallOutModelProps) => {
           phone: { countryCode, phoneNumber },
           callme,
         } = form.getFieldsValue();
-        const [, code] = countryCode.split("&&");
+        if(countryCode){
+          const [, code] = countryCode.split("&&");
         await onPhoneCallCancel?.(code || "", phoneNumber, { callMe: callme });
+        }
+        
         setVisible(false);
       }}
       destroyOnClose
@@ -93,7 +96,7 @@ const CallOutModel = (props: CallOutModelProps) => {
               </Select>
             </Form.Item>
             <Form.Item name={["phone", "phoneNumber"]} noStyle>
-              <Input className="number" placeholder="phone number"/>
+              <Input className="number" placeholder="phone number" />
             </Form.Item>
           </Input.Group>
         </Form.Item>

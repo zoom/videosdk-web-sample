@@ -19,7 +19,7 @@ import './video-footer.scss';
 import { isAndroidBrowser, isSupportOffscreenCanvas } from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
 import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
-import { DialoutState, RecordingStatus,MutedSource,AudioChangeAction, DialOutOption } from '@zoom/videosdk';
+import { DialoutState, RecordingStatus,MutedSource,AudioChangeAction, DialOutOption, VideoCapturingState } from '@zoom/videosdk';
 interface VideoFooterProps {
   className?: string;
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
@@ -207,6 +207,13 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   };
+  const onVideoCaptureChange = useCallback((payload)=>{
+    if(payload.state === VideoCapturingState.Started){
+      setIsStartedVideo(true);
+    }else {
+      setIsStartedVideo(false);
+    }
+  },[])
 
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
@@ -214,14 +221,16 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('device-change', onDeviceChange);
     zmClient.on('recording-change', onRecordingChange);
     zmClient.on('dialout-state-change',onDialOutChange);
+    zmClient.on('video-capturing-change',onVideoCaptureChange)
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
       zmClient.off('device-change', onDeviceChange);
       zmClient.off('recording-change', onRecordingChange)
       zmClient.off('dialout-state-change',onDialOutChange);
+      zmClient.off('video-capturing-change',onVideoCaptureChange)
     };
-  }, [zmClient, onHostAudioMuted, onPassivelyStopShare, onDeviceChange, onRecordingChange,onDialOutChange]);
+  }, [zmClient, onHostAudioMuted, onPassivelyStopShare, onDeviceChange, onRecordingChange,onDialOutChange,onVideoCaptureChange]);
   useUnmount(() => {
     if (isStartedAudio) {
       mediaStream?.stopAudio();

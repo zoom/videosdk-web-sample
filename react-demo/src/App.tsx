@@ -12,7 +12,7 @@ import "antd/dist/antd.css";
 import produce from "immer";
 import Home from "./feature/home/home";
 import Video from "./feature/video/video";
-import VideoSingle from './feature/video/video-single';
+import VideoSingle from "./feature/video/video-single";
 import Preview from "./feature/preview/preview";
 import ZoomContext from "./context/zoom-context";
 import ZoomMediaContext from "./context/media-context";
@@ -105,7 +105,7 @@ function App(props: AppProps) {
         await zmClient.join(topic, signature, name, password);
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
-	      setIsSupportGalleryView(stream.isSupportMultipleVideos());
+        setIsSupportGalleryView(stream.isSupportMultipleVideos());
         const chatClient = zmClient.getChatClient();
         const commandClient = zmClient.getCommandClient();
         const recordingClient = zmClient.getRecordingClient();
