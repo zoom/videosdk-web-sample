@@ -74,6 +74,11 @@ const mediaReducer = produce((draft, action) => {
       draft.share.decode = action.payload;
       break;
     }
+    case "reset-media":{
+     Object.assign(draft,{...mediaShape});
+      break;
+    }
+
     default:
       break;
   }
@@ -140,6 +145,7 @@ function App(props: AppProps) {
         }
       } else if (payload.state === ConnectionState.Closed) {
         setStatus("closed");
+        dispatch({type:'reset-media'});
         if (payload.reason === "ended by host") {
           Modal.warning({
             title: "Meeting ended",
