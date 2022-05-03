@@ -19,11 +19,16 @@ import { usePagination } from './hooks/usePagination';
 import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useShare } from './hooks/useShare';
 import './video.scss';
-import { isSupportWebCodecs } from '../../utils/platform';
-import { isShallowEqual } from "../../utils/util";
-import { useSizeCallback } from "../../hooks/useSizeCallback";
+import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '../../utils/platform';
+import { isShallowEqual } from '../../utils/util';
+import { useSizeCallback } from '../../hooks/useSizeCallback';
+import { SELF_VIDEO_ID } from './video-constants';
+const isUseVideoElementToDrawSelfVideo =
+  isAndroidBrowser() || isSupportOffscreenCanvas();
 
-const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+const VideoContainer: React.FunctionComponent<RouteComponentProps> = (
+  props
+) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
@@ -31,7 +36,9 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   } = useContext(ZoomMediaContext);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareRef = useRef<HTMLCanvasElement | null>(null);
-  const selfShareRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(null);
+  const selfShareRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(
+    null
+  );
   const shareContainerRef = useRef<HTMLDivElement | null>(null);
   const [containerDimension, setContainerDimension] = useState({
     width: 0,
@@ -45,7 +52,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   const activeVideo = useActiveVideo(zmClient);
   const { page, pageSize, totalPage, totalSize, setPage } = usePagination(
     zmClient,
-    canvasDimension,
+    canvasDimension
   );
   const { visibleParticipants, layout: videoLayout } = useGalleryLayout(
     zmClient,
@@ -58,14 +65,25 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       pageSize,
       totalPage,
       totalSize,
-    },
+    }
   );
   const { isRecieveSharing, isStartedShare, sharedContentDimension } = useShare(
     zmClient,
     mediaStream,
-    shareRef,
+    shareRef
   );
   const isSharing = isRecieveSharing || isStartedShare;
+  /**
+   * position for self video
+   */
+  const currentUserIndex = visibleParticipants.findIndex(user=>user.userId===zmClient.getCurrentUserInfo().userId);
+  let selfVideoLayout = null;
+  if(currentUserIndex){
+    const item = videoLayout[currentUserIndex];
+    if(item && canvasDimension){
+      selfVideoLayout = {...item,y:canvasDimension.height-item.y-item.height};
+    }
+  }
   useEffect(() => {
     if (isSharing && shareContainerRef.current) {
       const { width, height } = sharedContentDimension;
@@ -145,6 +163,20 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           height="600"
           ref={videoRef}
         />
+         {isUseVideoElementToDrawSelfVideo && (
+          <video
+            id={SELF_VIDEO_ID}
+            className={classnames('self-video-non-sab')}
+            style={selfVideoLayout?{
+              display:'block',
+              width:`${selfVideoLayout.width}px`,
+              height:`${selfVideoLayout.height}px`,
+              top:`${selfVideoLayout.y}px`,
+              left:`${selfVideoLayout.x}px`,
+              pointerEvents:'none'
+            }:undefined}
+          />
+        )}
         <ul className="avatar-list">
           {visibleParticipants.map((user, index) => {
             if (index > videoLayout.length - 1) {

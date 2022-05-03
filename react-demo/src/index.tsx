@@ -10,13 +10,15 @@ import { devConfig } from './config/dev';
 import { generateVideoToken } from './utils/util';
 
 let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
+// Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
 if (
   !meetingArgs.sdkKey ||
   !meetingArgs.topic ||
   !meetingArgs.name ||
   !meetingArgs.signature
 ) {
-  meetingArgs = devConfig;
+    meetingArgs = {...meetingArgs,...devConfig};
+    meetingArgs.enforceGalleryView = true;
 }
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(

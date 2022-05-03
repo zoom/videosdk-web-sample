@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Card,Button } from 'antd';
+import { Card, Button } from 'antd';
 import { IconFont } from '../../component/icon-font';
 import './home.scss';
 
@@ -11,9 +11,9 @@ interface HomeProps extends RouteComponentProps {
   onLeaveOrJoinSession: () => void;
 }
 const Home: React.FunctionComponent<HomeProps> = (props) => {
-  const { history, status, onLeaveOrJoinSession} = props;
+  const { history, status, onLeaveOrJoinSession } = props;
   const onCardClick = (type: string) => {
-    history.push(`/${type}${location.search}`);
+      history.push(`/${type}${location.search}`);
   };
   const featureList = [
     {
@@ -30,10 +30,10 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
       description: 'Session Chat, Chat Priviledge',
     },
     {
-      key: "command",
-      icon: "icon-chat",
-      title: "Command Channel chat",
-      description: "Session Command Channel chat"
+      key: 'command',
+      icon: 'icon-chat',
+      title: 'Command Channel chat',
+      description: 'Session Command Channel chat',
     },
     {
       key: 'preview',
@@ -43,38 +43,34 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
     },
   ];
   let actionText;
-  if (status === "connected") {
-    actionText = "Leave";
-  } else if (status === "closed") {
-    actionText = "Join";
+  if (status === 'connected') {
+    actionText = 'Leave';
+  } else if (status === 'closed') {
+    actionText = 'Join';
   }
   return (
     <div>
       <div className="nav">
         <a href="/" className="navhome">
-          <img src="./logo.svg" alt="Home"  />
-          <span >
-            VideoSDK Demo
-          </span>
+          <img src="./logo.svg" alt="Home" />
+          <span>VideoSDK Demo</span>
         </a>
         <div className="navdoc">
-        <a
-          href="https://marketplace.zoom.us/docs/sdk/video/web/reference"
-          target="_blank"
-        >
-          <span >
-            API Reference
-          </span>
-        </a>
+          <a
+            href="https://marketplace.zoom.us/docs/sdk/video/web/reference"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>API Reference</span>
+          </a>
 
-        <a
-          href="https://marketplace.zoom.us/docs/sdk/video/web/build/sample-app"
-          target="_blank"
-        >
-          <span >
-            Doc
-          </span>
-        </a>
+          <a
+            href="https://marketplace.zoom.us/docs/sdk/video/web/build/sample-app"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>Doc</span>
+          </a>
         </div>
         {actionText && (
           <Button
