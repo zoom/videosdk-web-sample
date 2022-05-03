@@ -72,6 +72,7 @@ export function useGalleryLayout(
     layout,
     subscribedVideos,
     visibleParticipants,
+    zmClient.getCurrentUserInfo().userId
   );
   return {
     visibleParticipants,

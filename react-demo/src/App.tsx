@@ -13,6 +13,7 @@ import produce from "immer";
 import Home from "./feature/home/home";
 import Video from "./feature/video/video";
 import VideoSingle from "./feature/video/video-single";
+import VideoNonSAB from "./feature/video/video-non-sab";
 import Preview from "./feature/preview/preview";
 import ZoomContext from "./context/zoom-context";
 import ZoomMediaContext from "./context/media-context";
@@ -25,6 +26,15 @@ import Command from "./feature/command/command";
 import { ChatClient, CommandChannelClient, MediaStream, RecordingClient } from "./index-types";
 import "./App.css";
 
+declare global {
+  interface Window {
+    webEndpoint: string | undefined;
+    zmClient: any | undefined;
+    mediaStream: any | undefined;
+    crossOriginIsolated:boolean
+  }
+}
+
 interface AppProps {
   meetingArgs: {
     sdkKey: string;
@@ -32,6 +42,7 @@ interface AppProps {
     signature: string;
     name: string;
     password?: string;
+    enforceGalleryView?: string;
   };
 }
 const mediaShape = {
@@ -86,7 +97,7 @@ const mediaReducer = produce((draft, action) => {
 
 function App(props: AppProps) {
   const {
-    meetingArgs: { sdkKey, topic, signature, name, password },
+    meetingArgs: { sdkKey, topic, signature, name, password, enforceGalleryView }
   } = props;
   const [loading, setIsLoading] = useState(true);
   const [loadingText, setLoadingText] = useState("");
@@ -101,10 +112,18 @@ function App(props: AppProps) {
     true
   );
   const zmClient = useContext(ZoomContext);
-  
+  const webEndpoint = 'zoom.us';
+  const galleryViewWithoutSAB = !!enforceGalleryView && !window.crossOriginIsolated;
   useEffect(() => {
     const init = async () => {
-      await zmClient.init("en-US", `${window.location.origin}/lib`, 'zoom.us');
+      await zmClient.init(
+        "en-US",
+        `${window.location.origin}/lib`,
+        {
+          webEndpoint,
+          enforceMultipleVideos:galleryViewWithoutSAB
+        }
+      );
       try {
         setLoadingText("Joining the session...");
         await zmClient.join(topic, signature, name, password);
@@ -118,7 +137,8 @@ function App(props: AppProps) {
         setCommandClient(commandClient);
         setRecordingClient(recordingClient);
         setIsLoading(false);
-      } catch (e) {
+      } catch (e: any) {
+        console.log('Error joining meeting', e);
         setIsLoading(false);
         message.error(e.reason);
       }
@@ -127,7 +147,7 @@ function App(props: AppProps) {
     return () => {
       ZoomVideo.destroyClient();
     };
-  }, [sdkKey, signature, zmClient, topic, name, password]);
+  }, [sdkKey, signature, zmClient, topic, name, password, webEndpoint, galleryViewWithoutSAB]);
   const onConnectionChange = useCallback(
     (payload) => {
       if (payload.state === ConnectionState.Reconnecting) {
@@ -161,11 +181,11 @@ function App(props: AppProps) {
     dispatch({ type: `${type}-${action}`, payload: result === "success" });
   }, []);
 
-  const onDialoutChange = useCallback(payload => {
+  const onDialoutChange = useCallback((payload) => {
     console.log('onDialoutChange', payload);
   }, []);
 
-  const onAudioMerged = useCallback(payload => {
+  const onAudioMerged = useCallback((payload) => {
     console.log('onAudioMerged', payload);
   }, []);
 
@@ -223,11 +243,8 @@ function App(props: AppProps) {
                   )}
                   exact
                 />
-                <Route
-                  path="/preview"
-                  component={Preview}
-                />
-                <Route path="/video" component={isSupportGalleryView ? Video : VideoSingle} />
+                <Route path="/preview" component={Preview} />
+                <Route path="/video" component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle} />
                 <Route path="/chat" component={Chat} />
                 <Route path="/command" component={Command} />
               </Switch>
