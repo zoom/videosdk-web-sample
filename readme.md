@@ -12,9 +12,11 @@ To get started, clone the repo:
 
 ## Setup
 
-1. Once cloned, navigate to the `sample-app-videosdk/purejs-demo` directory for the Vanilla JavaScript sample or `sample-app-videosdk/react-demo` for the React sample:
+1. Once cloned, navigate to the `sample-app-videosdk/react-demo` directory for the React sample or `sample-app-videosdk/purejs-demo` for the Vanilla JavaScript sample:
 
-   `$ cd sample-app-videosdk/purejs-demo` or `$ cd sample-app-videosdk/react-demo`
+   `$ cd sample-app-videosdk/react-demo` or `$ cd sample-app-videosdk/purejs-demo`
+
+   <i>Primary differences are that the former is built in React and is a much more comprehensive overview of the Video SDK, while the latter showcases a very simple use-case for those uncomfortable with React</i>
 
 1. Then install the dependencies:
 
@@ -22,7 +24,7 @@ To get started, clone the repo:
 
 1. Open the directory in your code editor.
 
-1. Open the `purejs-demo/src/js/config.js` or `react-demo/src/config/dev.ts` file respectively, and enter required session values for the variables:
+1. Open the `react-demo/src/config/dev.ts` or `purejs-demo/src/js/config.js` file respectively, and enter required session values for the variables:
 
    | Key                   | Value Description |
    | -----------------------|-------------|
