@@ -9,7 +9,7 @@ export function useParticipantsChange(
   fnRef.current = fn;
   const callback = useCallback(() => {
     const participants = zmClient.getAllUser();
-    fnRef.current && fnRef.current(participants);
+    fnRef.current?.(participants);
   }, [zmClient]);
   useEffect(() => {
     zmClient.on('user-added', callback);

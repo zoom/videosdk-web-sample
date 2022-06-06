@@ -17,6 +17,7 @@ interface MicrophoneButtonProps {
   isStartedAudio: boolean;
   isMuted: boolean;
   isSupportPhone?: boolean;
+  disabled?: boolean;
   audio?: string;
   phoneCountryList?: any[];
   onMicrophoneClick: () => void;
@@ -77,6 +78,17 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
       })),
     });
   }
+  if (audio !== 'phone') {
+    menu.push({
+      items: [
+        {
+          label: 'Audio Statistic',
+          value: 'statistic'
+        }
+      ]
+    });
+  }
+
   menu.push({
     items: [
       {

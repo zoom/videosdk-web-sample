@@ -15,6 +15,7 @@ interface CameraButtonProps {
   onCameraClick: () => void;
   onSwitchCamera: (deviceId: string) => void;
   onMirrorVideo?: () => void;
+  onVideoStatistic?: () => void;
   className?: string;
   cameraList?: MediaDevice[];
   activeCamera?: string;
@@ -28,11 +29,14 @@ const CameraButton = (props: CameraButtonProps) => {
     isMirrored,
     onCameraClick,
     onSwitchCamera,
-    onMirrorVideo
+    onMirrorVideo,
+    onVideoStatistic
   } = props;
   const onMenuItemClick = (payload: { key: any }) => {
     if (payload.key === 'mirror') {
       onMirrorVideo?.();
+    } else if (payload.key === 'statistic') {
+      onVideoStatistic?.();
     } else {
       onSwitchCamera(payload.key);
     }
@@ -53,6 +57,8 @@ const CameraButton = (props: CameraButtonProps) => {
       <Menu.Item key="mirror" icon={isMirrored && <CheckOutlined />}>
         Mirror My Video
       </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="statistic">Video Statistic</Menu.Item>
     </Menu>
   );
   return (

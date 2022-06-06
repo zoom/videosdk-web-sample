@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useReducer,
+  useMemo
 } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import ZoomVideo, { ConnectionState } from "@zoom/videosdk";
@@ -113,6 +114,7 @@ function App(props: AppProps) {
   );
   const zmClient = useContext(ZoomContext);
   const webEndpoint = 'zoom.us';
+  const mediaContext = useMemo(() => ({ ...mediaState, mediaStream }), [mediaState, mediaStream]);
   const galleryViewWithoutSAB = !!enforceGalleryView && !window.crossOriginIsolated;
   useEffect(() => {
     const init = async () => {
@@ -215,7 +217,7 @@ function App(props: AppProps) {
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
-        <ZoomMediaContext.Provider value={{ ...mediaState, mediaStream }}>
+        <ZoomMediaContext.Provider value={mediaContext}>
           <ChatContext.Provider value={chatClient}>
           <RecordingContext.Provider value={recordingClient}>
             <CommandContext.Provider value={commandClient} >
