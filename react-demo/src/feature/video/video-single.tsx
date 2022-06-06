@@ -195,29 +195,27 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           'in-sharing': isSharing,
         })}
       >
-        <canvas
-          className="video-canvas"
-          id="video-canvas"
-          width="800"
-          height="600"
-          ref={videoRef}
-        />
-        {isUseVideoElementToDrawSelfVideo && (
+        <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
+        {isUseVideoElementToDrawSelfVideo ? (
           <video
             id={SELF_VIDEO_ID}
             className={classnames('self-video', {
               'single-self-video': participants.length === 1,
-              'self-video-show': isCurrentUserStartedVideo,
+              'self-video-show': isCurrentUserStartedVideo
+            })}
+          />
+        ) : (
+          <canvas
+            id={SELF_VIDEO_ID}
+            width="254"
+            height="143"
+            className={classnames('self-video', {
+              'single-self-video': participants.length === 1,
+              'self-video-show': isCurrentUserStartedVideo
             })}
           />
         )}
-        {activeUser && (
-          <Avatar
-            participant={activeUser}
-            isActive={false}
-            className="single-view-avatar"
-          />
-        )}
+        {activeUser && <Avatar participant={activeUser} isActive={false} className="single-view-avatar" />}
       </div>
       <VideoFooter className="video-operations" sharing shareRef={selfShareRef} />
     </div>

@@ -29,6 +29,10 @@
       color: #40a9ff;
     }
   }
+  > .ant-btn[disabled]{
+    background: transparent;
+    color: #999;
+  }
   > .ant-dropdown-trigger {
     width: 20px !important;
     margin-right: 0;
