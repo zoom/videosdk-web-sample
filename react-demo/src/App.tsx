@@ -26,6 +26,7 @@ import Chat from "./feature/chat/chat";
 import Command from "./feature/command/command";
 import { ChatClient, CommandChannelClient, MediaStream, RecordingClient } from "./index-types";
 import "./App.css";
+import { isAndroidBrowser } from "./utils/platform";
 
 declare global {
   interface Window {
@@ -131,7 +132,7 @@ function App(props: AppProps) {
         await zmClient.join(topic, signature, name, password);
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
-        setIsSupportGalleryView(stream.isSupportMultipleVideos());
+        setIsSupportGalleryView(stream.isSupportMultipleVideos() && !isAndroidBrowser());
         const chatClient = zmClient.getChatClient();
         const commandClient = zmClient.getCommandClient();
         const recordingClient = zmClient.getRecordingClient();
