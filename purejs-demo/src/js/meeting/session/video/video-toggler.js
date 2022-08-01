@@ -1,9 +1,7 @@
 import state from "../simple-state";
-import {
-    VIDEO_CANVAS,
-    VIDEO_CANVAS_DIMS,
-    VIDEO_QUALITY_360P,
-} from "./video-render-props";
+import { VideoQuality } from '@zoom/videosdk';
+import { VIDEO_CANVAS, VIDEO_CANVAS_DIMS, SELF_VIDEO_ELEMENT } from './video-render-props';
+
 
 let prevIsSelfVideoOn = false;
 let prevIsParticipantVideoOn = false;
@@ -38,46 +36,55 @@ let prevIsParticipantVideoOn = false;
  */
 
 export const toggleSelfVideo = async (mediaStream, isVideoOn) => {
-    if (typeof isVideoOn !== 'boolean' || prevIsSelfVideoOn === isVideoOn) {
-        return;
-    }
-    if (isVideoOn) {
-        await mediaStream.startVideo();
-        await mediaStream.renderVideo(
-            VIDEO_CANVAS,
-            state.selfId,
-            VIDEO_CANVAS_DIMS.Width / 2,
-            VIDEO_CANVAS_DIMS.Height,
-            VIDEO_CANVAS_DIMS.Width / 2,
-            0,
-            VIDEO_QUALITY_360P,
-        );
+  const isUsingVideoElementToStartVideo =
+    typeof window.OffscreenCanvas === 'function' && !mediaStream.isSupportMultipleVideos();
+  if (typeof isVideoOn !== 'boolean' || prevIsSelfVideoOn === isVideoOn) {
+    return;
+  }
+  if (isVideoOn) {
+    if (isUsingVideoElementToStartVideo) {
+      SELF_VIDEO_ELEMENT.style.display = 'block';
+      SELF_VIDEO_ELEMENT.style.width = '50%';
+      SELF_VIDEO_ELEMENT.style.left = '50%';
+      await mediaStream.startVideo({ videoElement: SELF_VIDEO_ELEMENT });
     } else {
-        await mediaStream.stopVideo();
-        await mediaStream.stopRenderVideo(VIDEO_CANVAS, state.selfId);
-        await mediaStream.clearVideoCanvas(VIDEO_CANVAS);
+      await mediaStream.startVideo();
+      await mediaStream.renderVideo(
+        VIDEO_CANVAS,
+        state.selfId,
+        VIDEO_CANVAS_DIMS.Width / 2,
+        VIDEO_CANVAS_DIMS.Height,
+        VIDEO_CANVAS_DIMS.Width / 2,
+        0,
+        VideoQuality.Video_360P
+      );
     }
-    prevIsSelfVideoOn = isVideoOn;
-}
+  } else {
+    await mediaStream.stopVideo();
+    if (!isUsingVideoElementToStartVideo) {
+      await mediaStream.stopRenderVideo(VIDEO_CANVAS, state.selfId);
+    }
+  }
+  prevIsSelfVideoOn = isVideoOn;
+};
 
-export const toggleParticipantVideo = async (mediaStream, isVideoOn) => {
-    if (typeof isVideoOn !== 'boolean' || prevIsParticipantVideoOn === isVideoOn) {
-        return;
-    }
+export const toggleParticipantVideo = async (mediaStream, userId, isVideoOn) => {
+  if (typeof isVideoOn !== 'boolean' || prevIsParticipantVideoOn === isVideoOn) {
+    return;
+  }
 
-    if (isVideoOn) {
-        await mediaStream.renderVideo(
-            VIDEO_CANVAS,
-            state.participantId,
-            VIDEO_CANVAS_DIMS.Width / 2,
-            VIDEO_CANVAS_DIMS.Height,
-            0,
-            0,
-            VIDEO_QUALITY_360P,
-        );
-    } else {
-        await mediaStream.stopRenderVideo(VIDEO_CANVAS, state.participantId);
-        await mediaStream.clearVideoCanvas(VIDEO_CANVAS);
-    }
-    prevIsParticipantVideoOn = isVideoOn;
-}
+  if (isVideoOn) {
+    await mediaStream.renderVideo(
+      VIDEO_CANVAS,
+      userId,
+      VIDEO_CANVAS_DIMS.Width / 2,
+      VIDEO_CANVAS_DIMS.Height,
+      0,
+      0,
+      VideoQuality.Video_360P
+    );
+  } else {
+    await mediaStream.stopRenderVideo(VIDEO_CANVAS, userId);
+  }
+  prevIsParticipantVideoOn = isVideoOn;
+};
