@@ -7,7 +7,7 @@ const initPreviewButtons = () => {
     const zmClient = VideoSDK.createClient();
     const audioTrack = VideoSDK.createLocalAudioTrack();
     const videoTrack = VideoSDK.createLocalVideoTrack();
-
+    let isPreviewAudioConnected = false;
     const initPreviewAudioButtonClick = () => {
         const VOLUME_ANIMATION_INTERVAL_MS = 100;
         let volumeAnimation = null;
@@ -16,7 +16,6 @@ const initPreviewButtons = () => {
         const micButton = document.getElementById('js-preview-mic-button');
         const micIcon = document.getElementById('js-preview-mic-icon');
         
-        let isPreviewAudioConnected = false;
         let isMuted = true;
 
         let isButtonAlreadyClicked = false;
@@ -155,7 +154,10 @@ const initPreviewButtons = () => {
                 // Blocks logic from executing again if already in progress
                 isButtonAlreadyClicked = true;
                 try {
-                    audioTrack.stop();
+                    if (isPreviewAudioConnected) {
+                      audioTrack.stop();
+                      isPreviewAudioConnected = false;
+                    }
                     switchPreviewToLoadingView();
                     await joinSession(zmClient);
                     switchLoadingToSessionView();

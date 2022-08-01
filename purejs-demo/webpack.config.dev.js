@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const args = process.argv;
 let https = false;
 let disableCORP = true;
@@ -8,8 +8,8 @@ if (args.includes('https')) https = true;
 if (args.includes('corp')) disableCORP = false;
 
 module.exports = {
-  mode: "development",
-  devtool: 'eval',
+  mode: 'development',
+  devtool: 'eval-source-map',
   entry: {
     index: ['./src/js/index.js']
   },
@@ -18,7 +18,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, '/static'),
-    publicPath: '/static',
+    publicPath: '/',
     hashDigestLength: 5,
     filename: '[name].min.js'
   },
@@ -62,31 +62,40 @@ module.exports = {
   context: __dirname,
   target: 'web',
   devServer: {
-    https,
-    cert: './localhost.crt',
-    key: './localhost.key',
     host: '0.0.0.0',
     port: 3000,
     hot: true,
-    overlay: true,
+    https: https
+      ? {
+          cert: './localhost.crt',
+          key: './localhost.key'
+        }
+      : undefined,
+    client: {
+      overlay: true
+    },
     historyApiFallback: false,
-    watchContentBase: true,
-    disableHostCheck: true,
+    watchFiles: ['src/**/*.js'],
+    allowedHosts: ['all'],
     headers: {
-      'Access-Control-Allow-Origin': https
-        ? 'https://0.0.0.0:3000'
-        : 'http://0.0.0.0:3000',
-      'Cross-Origin-Embedder-Policy': disableCORP ? '' : 'require-corp',
+      'Access-Control-Allow-Origin': https ? 'https://0.0.0.0:3000' : 'http://0.0.0.0:3000',
+      'Cross-Origin-Embedder-Policy': disableCORP ? '' : 'credentialless',
       'Cross-Origin-Opener-Policy': disableCORP ? '' : 'same-origin'
     },
-    open: 'chrome',
-    openPage: https ? 'https://127.0.0.1:3000' : 'http://127.0.0.1:3000'
+    open: [https ? 'https://localhost:3000/' : 'http://localhost:3000/'],
+    static: {
+      directory: path.resolve(__dirname, 'node_modules/@zoom/videosdk/dist')
+    }
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development'),
       'process.env.BABEL_ENV': JSON.stringify('development')
+    }),
+    new HtmlWebpackPlugin({
+      template: 'index.html',
+      filename: 'index.html'
     })
   ]
 };
