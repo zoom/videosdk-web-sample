@@ -1,11 +1,6 @@
 import React from 'react';
 import { Button, Tooltip, Menu, Dropdown } from 'antd';
-import {
-  CheckOutlined,
-  UpOutlined,
-  VideoCameraAddOutlined,
-  VideoCameraOutlined,
-} from '@ant-design/icons';
+import { CheckOutlined, UpOutlined, VideoCameraAddOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 import './camera.scss';
 import { MediaDevice } from '../video-types';
@@ -45,10 +40,7 @@ const CameraButton = (props: CameraButtonProps) => {
     <Menu onClick={onMenuItemClick} theme="dark" className="camera-menu">
       <Menu.ItemGroup title="Select a Camera">
         {cameraList.map((item) => (
-          <Menu.Item
-            key={item.deviceId}
-            icon={item.deviceId === activeCamera && <CheckOutlined />}
-          >
+          <Menu.Item key={item.deviceId} icon={item.deviceId === activeCamera && <CheckOutlined />}>
             {item.label}
           </Menu.Item>
         ))}
@@ -65,7 +57,7 @@ const CameraButton = (props: CameraButtonProps) => {
     <div className={classNames('camera-footer', className)}>
       {isStartedVideo && menu ? (
         <Dropdown.Button
-          className={'camera-dropdown-button'}
+          className="camera-dropdown-button"
           size="large"
           overlay={menu}
           onClick={onCameraClick}
@@ -77,18 +69,16 @@ const CameraButton = (props: CameraButtonProps) => {
           <VideoCameraOutlined />
         </Dropdown.Button>
       ) : (
-    <Tooltip title={`${isStartedVideo ? 'stop camera' : 'start camera'}`}>
-      <Button
-        className={classNames('camere-button', className)}
-            icon={
-              isStartedVideo ? <VideoCameraOutlined /> : <VideoCameraAddOutlined />
-            }
-        ghost={true}
-        shape="circle"
-        size="large"
-        onClick={onCameraClick}
-      />
-    </Tooltip>
+        <Tooltip title={`${isStartedVideo ? 'stop camera' : 'start camera'}`}>
+          <Button
+            className={classNames('camere-button', className)}
+            icon={isStartedVideo ? <VideoCameraOutlined /> : <VideoCameraAddOutlined />}
+            ghost={true}
+            shape="circle"
+            size="large"
+            onClick={onCameraClick}
+          />
+        </Tooltip>
       )}
     </div>
   );

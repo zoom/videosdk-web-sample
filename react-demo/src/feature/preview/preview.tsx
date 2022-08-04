@@ -1,11 +1,11 @@
 import React, { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import produce from 'immer';
-import ZoomVideo from "@zoom/videosdk";
+import ZoomVideo, { TestMicrophoneReturn, TestSpeakerReturn } from '@zoom/videosdk';
 import { useMount } from '../../hooks';
 import './preview.scss';
 import MicrophoneButton from '../video/components/microphone';
 import CameraButton from '../video/components/camera';
-import { message } from 'antd';
+import { message, Button, Progress, Select } from 'antd';
 import { MediaDevice } from '../video/video-types';
 
 // label: string;
@@ -47,9 +47,9 @@ const mountDevices: () => Promise<{
   };
 };
 
-const AUDIO_MASK = 1,
-  MIC_MASK = 2,
-  VIDEO_MASK = 4;
+const AUDIO_MASK = 1;
+const MIC_MASK = 2;
+const VIDEO_MASK = 4;
 
 let PREVIEW_VIDEO: any;
 
@@ -84,15 +84,11 @@ const updateMicFeedbackStyle = () => {
   prevMicFeedbackStyle = newMicFeedbackStyle;
 };
 
-const encodePreviewOptions = (
-  isStartedAudio: boolean,
-  isMuted: boolean,
-  isStartedVideo: boolean,
-) => {
+const encodePreviewOptions = (isStartedAudio: boolean, isMuted: boolean, isStartedVideo: boolean) => {
   let res = 0;
-  res = (res | +isStartedVideo) << 1;
-  res = (res | +isMuted) << 1;
-  res = res | +isStartedAudio;
+  res = (res | Number(isStartedVideo)) << 1;
+  res = (res | Number(isMuted)) << 1;
+  res = res | Number(isStartedAudio);
   return res;
 };
 const decodePreviewOptions = (val: number) => {
@@ -105,6 +101,7 @@ const decodePreviewOptions = (val: number) => {
   const isStartedVideo = !!((val & VIDEO_MASK) === VIDEO_MASK);
   return { isStartedVideo, isMuted, isStartedAudio };
 };
+const { Option } = Select;
 
 const PreviewContainer = () => {
   const [isStartedAudio, setIsStartedAudio] = useState<boolean>(false);
@@ -116,6 +113,13 @@ const PreviewContainer = () => {
   const [activeMicrophone, setActiveMicrophone] = useState('');
   const [activeSpeaker, setActiveSpeaker] = useState('');
   const [activeCamera, setActiveCamera] = useState('');
+  const [outputLevel, setOutputLevel] = useState(0);
+  const [inputLevel, setInputLevel] = useState(0);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  const speakerTesterRef = useRef<TestSpeakerReturn>();
+  const microphoneTesterRef = useRef<TestMicrophoneReturn>();
 
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
@@ -185,9 +189,72 @@ const PreviewContainer = () => {
       console.log('devicesdevicesdevicesdevices', devices);
       setMicList(devices.mics);
       setCameraList(devices.cameras);
-      // setSpeakerList(devices.speakers);
+      setSpeakerList(devices.speakers);
+      if (devices.speakers.length > 0) {
+        setActiveSpeaker(devices.speakers[0].deviceId);
+      }
+      if (devices.mics.length > 0) {
+        setActiveMicrophone(devices.mics[0].deviceId);
+      }
     });
   });
+  const onTestSpeakerClick = () => {
+    if (microphoneTesterRef.current) {
+      microphoneTesterRef.current.destroy();
+      microphoneTesterRef.current = undefined;
+    }
+    if (isPlayingAudio) {
+      speakerTesterRef.current?.stop();
+      setIsPlayingAudio(false);
+      setOutputLevel(0);
+    } else {
+      speakerTesterRef.current = localAudio.testSpeaker({
+        speakerId: activeSpeaker,
+        onAnalyseFrequency: (value) => {
+          setOutputLevel(Math.min(100, value));
+        }
+      });
+      setIsPlayingAudio(true);
+    }
+  };
+  const onTestMicrophoneClick = () => {
+    if (speakerTesterRef.current) {
+      speakerTesterRef.current.destroy();
+      speakerTesterRef.current = undefined;
+    }
+    if (!isPlayingRecording && !isRecordingVoice) {
+      microphoneTesterRef.current = localAudio.testMicrophone({
+        microphoneId: activeMicrophone,
+        speakerId: activeSpeaker,
+        recordAndPlay: true,
+        onAnalyseFrequency: (value) => {
+          setInputLevel(Math.min(100, value));
+        },
+        onStartRecording: () => {
+          setIsRecordingVoice(true);
+        },
+        onStartPlayRecording: () => {
+          setIsRecordingVoice(false);
+          setIsPlayingRecording(true);
+        },
+        onStopPlayRecording: () => {
+          setIsPlayingRecording(false);
+        }
+      });
+    } else if (isRecordingVoice) {
+      microphoneTesterRef.current?.stopRecording();
+      setIsRecordingVoice(false);
+    } else if (isPlayingRecording) {
+      microphoneTesterRef.current?.stop();
+      setIsPlayingRecording(false);
+    }
+  };
+  let microphoneBtn = 'Test Microphone';
+  if (isRecordingVoice) {
+    microphoneBtn = 'Recording';
+  } else if (isPlayingRecording) {
+    microphoneBtn = 'Playing';
+  }
 
   return (
     <div className="js-preview-view">
@@ -196,12 +263,7 @@ const PreviewContainer = () => {
           <h1>Audio And Video Preview</h1>
         </span>
         <div className="container video-app">
-          <video
-            id="js-preview-video"
-            className="preview-video"
-            muted={true}
-            data-video="0"
-          ></video>
+          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" />
           <div className="video-footer video-operations video-operations-preview">
             <MicrophoneButton
               isStartedAudio={isStartedAudio}
@@ -220,6 +282,62 @@ const PreviewContainer = () => {
               cameraList={cameraList}
               activeCamera={activeCamera}
             />
+          </div>
+        </div>
+        <div className="audio-test">
+          <div className="audio-test-wrap">
+            <h3>Speaker Test</h3>
+            <div className="speaker-action">
+              <Button type="primary" onClick={onTestSpeakerClick} className="speaker-btn">
+                {isPlayingAudio ? 'Stop' : 'Test Speaker'}
+              </Button>
+              <Select
+                onChange={(value) => {
+                  setActiveSpeaker(value);
+                }}
+                value={activeSpeaker}
+                className="speaker-list"
+              >
+                {speakerList.map((item) => {
+                  return (
+                    <Option value={item.deviceId} key={item.deviceId}>
+                      {item.label}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </div>
+            <div className="speaker-output">
+              <span className="speaker-label">Output level</span>
+              <Progress percent={outputLevel} showInfo={false} />
+            </div>
+          </div>
+          <div className="audio-test-wrap">
+            <h3>Microphone Test</h3>
+            <div className="speaker-action">
+              <Button type="primary" onClick={onTestMicrophoneClick} className="speaker-btn">
+                {microphoneBtn}
+              </Button>
+              <Select
+                onChange={(value) => {
+                  setActiveMicrophone(value);
+                }}
+                value={activeMicrophone}
+                className="speaker-list"
+              >
+                {micList.map((item) => {
+                  return (
+                    <Option value={item.deviceId} key={item.deviceId}>
+                      {item.label}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </div>
+            <div className="speaker-output">
+              <span className="speaker-label">Input level</span>
+              <Progress percent={inputLevel} showInfo={false} />
+            </div>
           </div>
         </div>
       </div>
