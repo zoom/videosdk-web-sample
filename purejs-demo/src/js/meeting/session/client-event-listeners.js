@@ -54,11 +54,25 @@ const onPeerVideoStateChangedListener = (zoomClient, mediaStream) => {
   });
 };
 
+const onMediaWorkerReadyListener = (zoomClient) => {
+  zoomClient.on('media-sdk-change', (payload) => {
+    const { action, type, result } = payload;
+    if (type === 'audio' && result === 'success') {
+      if (action === 'encode') {
+        state.audioEncode = true;
+      } else if (action === 'decode') {
+        state.audioDecode = true;
+      }
+    }
+  });
+};
+
 const initClientEventListeners = (zoomClient, mediaStream) => {
   onUserAddedListener(zoomClient);
   onUserRemovedListener(zoomClient, mediaStream);
   onUserUpdatedListener(zoomClient);
   onPeerVideoStateChangedListener(zoomClient, mediaStream);
+  onMediaWorkerReadyListener(zoomClient);
   // The started video before join the session
   setTimeout(() => {
     const peerParticipants = state.participants.filter((user) => user.userId !== state.selfId);

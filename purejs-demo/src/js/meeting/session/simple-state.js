@@ -14,6 +14,9 @@ class SimpleState {
   reset() {
     this.selfId = -1;
     this.participants = [];
+    this.audioEncode = false;
+    this.audioDecode = false;
+    this.isStartedAudio = false;
   }
 
   resetParticipantId() {

@@ -4,6 +4,7 @@ import initClientEventListeners from './session/client-event-listeners';
 import initButtonClickHandlers from "./session/button-click-handlers";
 import state from './session/simple-state';
 
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 /**
  * Creates a zoom video client, and uses it to join/start a video session. It:
  *      1) Creates a zoom client
@@ -41,12 +42,13 @@ const joinSession = async (zmClient) => {
     }
   };
 
-    const startAudioMuted = async () => {
-        await mediaStream.startAudio();
-        if (!mediaStream.isAudioMuted()) {
-            mediaStream.muteAudio();
-        }
-    };
+  const startAudioMuted = async () => {
+    await mediaStream.startAudio();
+    state.isStartedAudio = true;
+    if (!mediaStream.isAudioMuted()) {
+      mediaStream.muteAudio();
+    }
+  };
 
     const join = async () => {
         console.log('======= Initializing video session =======');
@@ -63,7 +65,10 @@ const joinSession = async (zmClient) => {
         console.log('======= Initializing client event handlers =======');
         initClientEventListeners(zmClient, mediaStream);
         console.log('======= Starting audio muted =======');
-        await startAudioMuted();
+        if (!isSafari) {
+              await startAudioMuted();
+            }
+
         console.log('======= Initializing button click handlers =======');
         await initButtonClickHandlers(zmClient, mediaStream);
         console.log('======= Session joined =======');
