@@ -50,8 +50,8 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-recording-pause-hover': IconRecordingPauseHovered,
   'icon-recording-animated': IconRecordingAnimated,
   'icon-recording-animated-hover': IconRecordingAnimatedHovered,
-  'icon-phone':IconPhone,
-  'icon-phone-off':IconPhoneOff
+  'icon-phone': IconPhone,
+  'icon-phone-off': IconPhoneOff
 };
 interface IconFontProps {
   type: string;
@@ -60,7 +60,5 @@ interface IconFontProps {
 export const IconFont = (props: IconFontProps) => {
   const { type, style } = props;
   const component = iconComponentMap[type];
-  return component ? (
-    <Icon component={component} style={{ ...(style || {}) }} />
-  ) : null;
+  return component ? <Icon component={component} style={{ ...(style || {}) }} /> : null;
 };

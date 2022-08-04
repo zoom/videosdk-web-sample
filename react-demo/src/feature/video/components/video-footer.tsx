@@ -234,6 +234,10 @@ const VideoFooter = (props: VideoFooterProps) => {
       setIsComputerAudioDisabled(false);
     }
   }, []);
+  const onHostAskToUnmute = useCallback((payload) => {
+    const { reason } = payload;
+    console.log(`Host ask to unmute the audio.`, reason);
+  }, []);
 
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
@@ -243,6 +247,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('video-capturing-change', onVideoCaptureChange);
     zmClient.on('share-audio-change', onShareAudioChange);
+    zmClient.on('host-ask-unmute-audio', onHostAskToUnmute);
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
@@ -251,6 +256,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('video-capturing-change', onVideoCaptureChange);
       zmClient.off('share-audio-change', onShareAudioChange);
+      zmClient.off('host-ask-unmute-audio', onHostAskToUnmute);
     };
   }, [
     zmClient,
@@ -260,7 +266,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     onRecordingChange,
     onDialOutChange,
     onVideoCaptureChange,
-    onShareAudioChange
+    onShareAudioChange,
+    onHostAskToUnmute
   ]);
   useUnmount(() => {
     if (isStartedAudio) {
@@ -278,15 +285,17 @@ const VideoFooter = (props: VideoFooterProps) => {
     setPhoneCountryList(mediaStream?.getSupportCountryInfo()||[]);
   });
   useEffect(() => {
-    if (mediaStream) {
+    if (mediaStream && zmClient.getSessionInfo().isInMeeting) {
       mediaStream.subscribeAudioStatisticData();
       mediaStream.subscribeVideoStatisticData();
     }
     return () => {
-      mediaStream?.unsubscribeAudioStatisticData();
-      mediaStream?.unsubscribeVideoStatisticData();
+      if (zmClient.getSessionInfo().isInMeeting) {
+        mediaStream?.unsubscribeAudioStatisticData();
+        mediaStream?.unsubscribeVideoStatisticData();
+      }
     };
-  }, [mediaStream]);
+  }, [mediaStream, zmClient]);
   const recordingButtons: RecordButtonProps[] = getRecordingButtons(recordingStatus, zmClient.isHost());
   return (
     <div className={classNames('video-footer', className)}>

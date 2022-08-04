@@ -11,14 +11,9 @@ import { generateVideoToken } from './utils/util';
 
 let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
 // Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
-if (
-  !meetingArgs.sdkKey ||
-  !meetingArgs.topic ||
-  !meetingArgs.name ||
-  !meetingArgs.signature
-) {
-    meetingArgs = {...meetingArgs,...devConfig};
-    meetingArgs.enforceGalleryView = true;
+if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingArgs.signature) {
+  meetingArgs = { ...meetingArgs, ...devConfig };
+  meetingArgs.enforceGalleryView = true;
 }
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(
@@ -38,7 +33,7 @@ ReactDOM.render(
       <App meetingArgs={meetingArgs as any} />
     </ZoomContext.Provider>
   </React.StrictMode>,
-  document.getElementById('root'),
+  document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
