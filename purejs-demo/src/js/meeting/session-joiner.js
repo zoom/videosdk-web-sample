@@ -15,10 +15,10 @@ const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
  *      5) Joins the audio stream on mute
  */
 const joinSession = async (zmClient) => {
-  const videoSDKLibDir = '/lib';
+  // const videoSDKLibDir = '/lib';
   const zmClientInitParams = {
-    language: 'en-US',
-    dependentAssets: `${window.location.origin}${videoSDKLibDir}`
+    language: 'en-US'
+    // dependentAssets: `${window.location.origin}${videoSDKLibDir}`
   };
   const sessionToken = generateSessionToken(
     sessionConfig.sdkKey,

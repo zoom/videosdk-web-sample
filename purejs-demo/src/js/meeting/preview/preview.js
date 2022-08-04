@@ -4,6 +4,7 @@ import { switchLoadingToSessionView, switchPreviewToLoadingView } from '../simpl
 import { PREVIEW_VIDEO_ELEMENT } from "./preview-video-props";
 
 const initPreviewButtons = () => {
+    VideoSDK.preloadDependentAssets();
     const zmClient = VideoSDK.createClient();
     const audioTrack = VideoSDK.createLocalAudioTrack();
     const videoTrack = VideoSDK.createLocalVideoTrack();
