@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState, useCallback, useReducer, useMem
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import ZoomVideo, { ConnectionState } from '@zoom/videosdk';
 import { message, Modal } from 'antd';
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.min.css';
 import produce from 'immer';
 import Home from './feature/home/home';
 import Video from './feature/video/video';
