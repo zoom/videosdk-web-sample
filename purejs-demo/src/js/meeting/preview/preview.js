@@ -8,6 +8,7 @@ const initPreviewButtons = () => {
     const audioTrack = VideoSDK.createLocalAudioTrack();
     const videoTrack = VideoSDK.createLocalVideoTrack();
     let isPreviewAudioConnected = false;
+    let isWebcamOn = false;
     const initPreviewAudioButtonClick = () => {
         const VOLUME_ANIMATION_INTERVAL_MS = 100;
         let volumeAnimation = null;
@@ -114,7 +115,6 @@ const initPreviewButtons = () => {
     const initVideoPreviewButtonClick = () => {
         const webcamButton = document.getElementById('js-preview-webcam-button');
 
-        let isWebcamOn = false;
         let isButtonAlreadyClicked = false;
 
         const toggleWebcamButtonStyle = () => webcamButton.classList.toggle('meeting-control-button__off');
@@ -157,6 +157,9 @@ const initPreviewButtons = () => {
                     if (isPreviewAudioConnected) {
                       audioTrack.stop();
                       isPreviewAudioConnected = false;
+          }
+          if (isWebcamOn) {
+            videoTrack.stop();
                     }
                     switchPreviewToLoadingView();
                     await joinSession(zmClient);
