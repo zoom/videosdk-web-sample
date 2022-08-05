@@ -1,21 +1,16 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 const { override, addWebpackPlugin, overrideDevServer } = require('customize-cra');
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
-const WriteFilePlugin = require('write-file-webpack-plugin');
-
-const addWriteFilePlugin = (config) => {
-  config.plugins.push(new WriteFilePlugin());
-  // https://github.com/gajus/write-file-webpack-plugin/issues/74
-  return config;
-};
-
 const addDevServerCOOPReponseHeader = (config) => {
   config.headers = {
     ...config.headers,
     'Cross-Origin-Embedder-Policy': 'require-corp',
     'Cross-Origin-Opener-Policy': 'same-origin'
   };
+  config.devMiddleware = {
+    ...config.devMiddleware,
+    writeToDisk: true,
+  }
   return config;
 };
 
@@ -30,8 +25,7 @@ module.exports = {
           }
         ]
       })
-    ),
-    addWriteFilePlugin
+    )
   ),
   devServer: overrideDevServer(addDevServerCOOPReponseHeader)
 };
