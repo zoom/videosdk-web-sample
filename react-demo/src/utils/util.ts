@@ -25,10 +25,9 @@ export function generateVideoToken(
       pwd: passWord,
       user_identity: userIdentity,
       session_key: sessionKey,
-      role_type: roleType
+      role_type: roleType // role = 1 for host, 0 for attendee; a host must first start a session for attendees to join
       // topic
     };
-    // Sign JWT, password=616161
     const sHeader = JSON.stringify(oHeader);
     const sPayload = JSON.stringify(oPayload);
     signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, sdkSecret);
