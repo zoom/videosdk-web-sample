@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState, useRef } from 'react';
-import produce from 'immer';
 import ZoomVideo, { TestMicrophoneReturn, TestSpeakerReturn } from '@zoom/videosdk';
 import { useMount } from '../../hooks';
 import './preview.scss';
@@ -23,15 +22,13 @@ const mountDevices: () => Promise<{
   cameras: MediaDevice[];
 }> = async () => {
   allDevices = await ZoomVideo.getDevices();
-  const cameraDevices: Array<MediaDeviceInfo> = allDevices.filter(function (device) {
+  const cameraDevices: Array<MediaDeviceInfo> = allDevices.filter((device) => {
     return device.kind === 'videoinput';
   });
-  const micDevices: Array<MediaDeviceInfo> = allDevices.filter(function (device) {
+  const micDevices: Array<MediaDeviceInfo> = allDevices.filter((device) => {
     return device.kind === 'audioinput';
   });
-  const speakerDevices: Array<MediaDeviceInfo> = allDevices.filter(function (
-    device,
-  ) {
+  const speakerDevices: Array<MediaDeviceInfo> = allDevices.filter((device) => {
     return device.kind === 'audiooutput';
   });
   return {
@@ -43,7 +40,7 @@ const mountDevices: () => Promise<{
     }),
     cameras: cameraDevices.map((item) => {
       return { label: item.label, deviceId: item.deviceId };
-    }),
+    })
   };
 };
 
@@ -186,7 +183,7 @@ const PreviewContainer = () => {
   useMount(() => {
     PREVIEW_VIDEO = document.getElementById('js-preview-video');
     mountDevices().then((devices) => {
-      console.log('devicesdevicesdevicesdevices', devices);
+      console.log('devices', devices);
       setMicList(devices.mics);
       setCameraList(devices.cameras);
       setSpeakerList(devices.speakers);

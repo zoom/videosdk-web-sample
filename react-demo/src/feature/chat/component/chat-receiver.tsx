@@ -1,7 +1,7 @@
 import React, { useCallback, useContext } from 'react';
 import { Menu, Dropdown, Button } from 'antd';
 import { CheckOutlined, DownOutlined, DashOutlined } from '@ant-design/icons';
-import {ChatPrivilege} from '@zoom/videosdk'
+import { ChatPrivilege } from '@zoom/videosdk';
 import classNames from 'classnames';
 import { ChatReceiver } from '../chat-types';
 import ChatContext from '../../../context/chat-context';
@@ -17,39 +17,31 @@ interface ChatReceiverProps {
 const meetingChatPrivilegeList = [
   {
     name: 'No One',
-    value: ChatPrivilege.NoOne,
+    value: ChatPrivilege.NoOne
   },
   {
     name: 'Everyone Publicly',
-    value: ChatPrivilege.EveryonePublicly,
+    value: ChatPrivilege.EveryonePublicly
   },
   {
     name: 'Everyone Publicly and Directly',
-    value: ChatPrivilege.All,
-  },
+    value: ChatPrivilege.All
+  }
 ];
 const ChatReceiverContainer = (props: ChatReceiverProps) => {
-  const {
-    chatUsers,
-    selectedChatUser,
-    chatPrivilege,
-    isHostOrManager,
-    setChatUser,
-  } = props;
+  const { chatUsers, selectedChatUser, chatPrivilege, isHostOrManager, setChatUser } = props;
   const chatClient = useContext(ChatContext);
   const menuItems = chatUsers.map((item) => (
     <MenuItem
       key={item.userId}
       className={classNames('chat-receiver-item', {
-        selected: item.userId === selectedChatUser?.userId,
+        selected: item.userId === selectedChatUser?.userId
       })}
       icon={item.userId === selectedChatUser?.userId && <CheckOutlined />}
     >
       {item.displayName}
       {(item.isCoHost || item.isHost) && (
-        <span className="chat-receiver-item-affix">
-          ({item.isHost ? 'Host' : 'Co-host'})
-        </span>
+        <span className="chat-receiver-item-affix">({item.isHost ? 'Host' : 'Co-host'})</span>
       )}
     </MenuItem>
   ));
@@ -60,7 +52,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
         setChatUser(userId);
       }
     },
-    [selectedChatUser, setChatUser],
+    [selectedChatUser, setChatUser]
   );
   const onMenuItemPrivilegeClick = useCallback(
     ({ key }) => {
@@ -69,7 +61,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
         chatClient?.setPrivilege(privilege);
       }
     },
-    [chatPrivilege, chatClient],
+    [chatPrivilege, chatClient]
   );
   const menu = (
     <Menu onClick={onMenuItemClick} className="chat-receiver-dropdown-menu">
@@ -83,7 +75,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
       <MenuItem
         key={item.value}
         className={classNames('chat-privilege-item', {
-          selected: item.value === chatPrivilege,
+          selected: item.value === chatPrivilege
         })}
         icon={item.value === chatPrivilege && <CheckOutlined />}
       >
@@ -91,10 +83,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
       </MenuItem>
     ));
     privilegeMenu = (
-      <Menu
-        onClick={onMenuItemPrivilegeClick}
-        className="chat-receiver-dropdown-menu"
-      >
+      <Menu onClick={onMenuItemPrivilegeClick} className="chat-receiver-dropdown-menu">
         <MenuItemGroup key="privilege" title="Participant Can Chat With:">
           {privilegeMenuItems}
         </MenuItemGroup>

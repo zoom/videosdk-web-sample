@@ -1,0 +1,26 @@
+.room-create {
+  display: flex;
+  flex-direction: column;
+  .ant-input-number {
+    width: 65px;
+    margin: 0 3px;
+  }
+  .room-create-title {
+    margin-bottom: 30px;
+    font-size: 24px;
+  }
+  .room-create-option {
+    flex-grow: 1;
+  }
+  .room-create-footer {
+    height: 50px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    .room-create-tip{
+      flex-grow: 1;
+      font-size: 14px;
+      color: #999;
+    }
+  }
+}

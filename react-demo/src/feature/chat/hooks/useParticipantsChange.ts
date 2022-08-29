@@ -1,15 +1,12 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useMount } from '../../../hooks';
 import { ZoomClient, Participant } from '../../../index-types';
-export function useParticipantsChange(
-  zmClient: ZoomClient,
-  fn: (participants: Participant[]) => void,
-) {
+export function useParticipantsChange(zmClient: ZoomClient, fn: (participants: Participant[]) => void) {
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const callback = useCallback(() => {
     const participants = zmClient.getAllUser();
-    fnRef.current && fnRef.current(participants);
+    fnRef.current?.(participants);
   }, [zmClient]);
   useEffect(() => {
     zmClient.on('user-added', callback);

@@ -1,15 +1,8 @@
-import React, {
-  useContext,
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-} from 'react';
+import React, { useContext, useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { VideoQuality } from '@zoom/videosdk';
 import classnames from 'classnames';
-import _ from "lodash";
+import _ from 'lodash';
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import Avatar from './components/avatar';
@@ -20,22 +13,17 @@ import { useCanvasDimension } from './hooks/useCanvasDimension';
 import { useMount, useSizeCallback } from '../../hooks';
 import { Participant } from '../../index-types';
 import './video.scss';
-import {
-  isAndroidBrowser,
-  isSupportOffscreenCanvas,
-  isSupportWebCodecs,
-} from '../../utils/platform';
+import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '../../utils/platform';
 import { SELF_VIDEO_ID } from './video-constants';
 import { isShallowEqual } from '../../utils/util';
 
-const isUseVideoElementToDrawSelfVideo =
-  isAndroidBrowser() || isSupportOffscreenCanvas();
+const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || isSupportOffscreenCanvas();
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
-    video: { decode: isVideoDecodeReady },
+    video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareRef = useRef<HTMLCanvasElement | null>(null);
@@ -45,19 +33,15 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   const [activeVideo, setActiveVideo] = useState<number>(0);
   const previousActiveUser = useRef<Participant>();
   const canvasDimension = useCanvasDimension(mediaStream, videoRef);
-  const { isRecieveSharing, isStartedShare, sharedContentDimension } = useShare(
-    zmClient,
-    mediaStream,
-    shareRef,
-  );
+  const { isRecieveSharing, isStartedShare, sharedContentDimension } = useShare(zmClient, mediaStream, shareRef);
   const isSharing = isRecieveSharing || isStartedShare;
   const [containerDimension, setContainerDimension] = useState({
     width: 0,
-    height: 0,
+    height: 0
   });
   const [shareViewDimension, setShareViewDimension] = useState({
     width: 0,
-    height: 0,
+    height: 0
   });
 
   useParticipantsChange(zmClient, (payload) => {
@@ -76,7 +60,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
 
   const activeUser = useMemo(
     () => participants.find((user) => user.userId === activeVideo),
-    [participants, activeVideo],
+    [participants, activeVideo]
   );
   const isCurrentUserStartedVideo = zmClient.getCurrentUserInfo()?.bVideoOn;
   useEffect(() => {
@@ -90,14 +74,11 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
             canvasDimension.height,
             0,
             0,
-            VideoQuality.Video_360P as any,
+            VideoQuality.Video_360P as any
           );
         } else {
           if (previousActiveUser.current?.bVideoOn) {
-            mediaStream.stopRenderVideo(
-              videoRef.current,
-              previousActiveUser.current?.userId,
-            );
+            mediaStream.stopRenderVideo(videoRef.current, previousActiveUser.current?.userId);
           }
         }
       }
@@ -106,10 +87,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         previousActiveUser.current?.bVideoOn &&
         activeUser.userId !== previousActiveUser.current.userId
       ) {
-        mediaStream.stopRenderVideo(
-          videoRef.current,
-          previousActiveUser.current?.userId,
-        );
+        mediaStream.stopRenderVideo(videoRef.current, previousActiveUser.current?.userId);
         mediaStream.renderVideo(
           videoRef.current,
           activeUser.userId,
@@ -117,7 +95,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           canvasDimension.height,
           0,
           0,
-          VideoQuality.Video_360P as any,
+          VideoQuality.Video_360P as any
         );
       }
       previousActiveUser.current = activeUser;
@@ -131,38 +109,31 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   useEffect(() => {
     if (isSharing && shareContainerRef.current) {
       const { width, height } = sharedContentDimension;
-      const { width: containerWidth, height: containerHeight } =containerDimension;
-      const ratio = Math.min(
-        containerWidth / width,
-        containerHeight / height,
-        1
-      );
+      const { width: containerWidth, height: containerHeight } = containerDimension;
+      const ratio = Math.min(containerWidth / width, containerHeight / height, 1);
       setShareViewDimension({
-        width:Math.floor(width * ratio),
-        height:Math.floor(height * ratio)
-      })
+        width: Math.floor(width * ratio),
+        height: Math.floor(height * ratio)
+      });
     }
-  },[isSharing,sharedContentDimension,containerDimension]);
+  }, [isSharing, sharedContentDimension, containerDimension]);
 
   const onShareContainerResize = useCallback(({ width, height }) => {
     _.throttle(() => {
       setContainerDimension({ width, height });
-    }, 50).call(this);
+    }, 50)();
   }, []);
   useSizeCallback(shareContainerRef.current, onShareContainerResize);
   useEffect(() => {
     if (!isShallowEqual(shareViewDimension, sharedContentDimension)) {
-      mediaStream?.updateSharingCanvasDimension(
-        shareViewDimension.width,
-        shareViewDimension.height
-      );
+      mediaStream?.updateSharingCanvasDimension(shareViewDimension.width, shareViewDimension.height);
     }
   }, [mediaStream, sharedContentDimension, shareViewDimension]);
   return (
     <div className="viewport">
       <div
         className={classnames('share-container', {
-          'in-sharing': isSharing,
+          'in-sharing': isSharing
         })}
         ref={shareContainerRef}
       >
@@ -170,29 +141,20 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           className="share-container-viewport"
           style={{
             width: `${shareViewDimension.width}px`,
-            height: `${shareViewDimension.height}px`,
+            height: `${shareViewDimension.height}px`
           }}
         >
-          <canvas
-            className={classnames('share-canvas', { hidden: isStartedShare })}
-            ref={shareRef}
-          />
+          <canvas className={classnames('share-canvas', { hidden: isStartedShare })} ref={shareRef} />
           {isSupportWebCodecs() ? (
-            <video
-              className={classnames('share-canvas', { hidden: isRecieveSharing })}
-              ref={selfShareRef}
-            />
+            <video className={classnames('share-canvas', { hidden: isRecieveSharing })} ref={selfShareRef} />
           ) : (
-            <canvas
-              className={classnames('share-canvas', { hidden: isRecieveSharing })}
-              ref={selfShareRef}
-            />
+            <canvas className={classnames('share-canvas', { hidden: isRecieveSharing })} ref={selfShareRef} />
           )}
         </div>
       </div>
       <div
         className={classnames('video-container', {
-          'in-sharing': isSharing,
+          'in-sharing': isSharing
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />

@@ -5,6 +5,7 @@ import ZoomContext from '../../context/zoom-context';
 import { CommandReceiver, CommandRecord } from './cmd-types';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import CommandContext from '../../context/cmd-context';
+import BreakoutContext from '../../context/subsession-context';
 import RecordingContext from '../../context/recording-context';
 import ChatMessageItem from './component/cmd-message-item';
 import CommandReceiverContainer from './component/cmd-receiver';
@@ -14,16 +15,16 @@ import { CommandChannelMsg } from '@zoom/videosdk';
 const { TextArea } = Input;
 
 const oneToAllUser = {
-  audio: "",
-  avatar: "",
+  audio: '',
+  avatar: '',
   bVideoOn: false,
-  displayName: "To All",
+  displayName: 'To All',
   isHost: false,
   isManager: false,
   muted: false,
   sharerOn: undefined,
   sharerPause: undefined,
-  userId: 0,
+  userId: 0
 };
 
 const CommandContainer = () => {
@@ -41,18 +42,20 @@ const CommandContainer = () => {
       setCommandRecords(
         produce((records: CommandRecord[]) => {
           console.log(payload);
-          const length = records.length;
-          const newPayload =  {
+          const { length } = records;
+          const newPayload = {
             message: payload.text,
             sender: {
               name: payload?.senderName || '',
-              userId: payload.senderId,
+              userId: payload.senderId
             },
-            receiver: payload?.receiverId ?{
-              name: '',
-              userId: payload?.receiverId,
-            }: {name: '', userId: 0},
-            timestamp: payload.timestamp,
+            receiver: payload?.receiverId
+              ? {
+                  name: '',
+                  userId: payload?.receiverId
+                }
+              : { name: '', userId: 0 },
+            timestamp: payload.timestamp
           };
           if (length > 0) {
             const lastRecord = records[length - 1];
@@ -72,45 +75,40 @@ const CommandContainer = () => {
           } else {
             records.push(newPayload);
           }
-        }),
+        })
       );
       if (chatWrapRef.current) {
         chatWrapRef.current.scrollTo(0, chatWrapRef.current.scrollHeight);
       }
     },
-    [chatWrapRef],
+    [chatWrapRef]
   );
-  
-  const onChatInput = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setCommandDraft(event.target.value);
-    },
-    [],
-  );
+
+  const onChatInput = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCommandDraft(event.target.value);
+  }, []);
   useEffect(() => {
     zmClient.on('command-channel-message', onCommandMessage);
     return () => {
       zmClient.off('command-channel-message', onCommandMessage);
     };
   }, [zmClient, onCommandMessage]);
-  
+
   useParticipantsChange(zmClient, () => {
     if (zmClient) {
-      setCommandReceivers([oneToAllUser, ...zmClient.getAllUser().filter(item => item.userId !== currentUserId)]);
+      setCommandReceivers([oneToAllUser, ...zmClient.getAllUser().filter((item) => item.userId !== currentUserId)]);
     }
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     if (zmClient) {
-      setCommandReceivers([oneToAllUser, ...zmClient.getAllUser().filter(item => item.userId !== currentUserId)]);
+      setCommandReceivers([oneToAllUser, ...zmClient.getAllUser().filter((item) => item.userId !== currentUserId)]);
     }
   }, [currentUserId, zmClient]);
 
   useEffect(() => {
     if (command) {
-      const index = commandReceivers.findIndex(
-        (user) => user.userId === command.userId,
-      );
+      const index = commandReceivers.findIndex((user) => user.userId === command.userId);
       if (index === -1) {
         setCommandUser(commandReceivers[0]);
       }
@@ -127,7 +125,7 @@ const CommandContainer = () => {
         setCommandUser(user);
       }
     },
-    [commandReceivers],
+    [commandReceivers]
   );
   const sendMessage = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -140,7 +138,7 @@ const CommandContainer = () => {
         setCommandDraft('');
       }
     },
-    [cmdClient, commandDraft, command],
+    [cmdClient, commandDraft, command]
   );
   useMount(() => {
     setCurrentUserId(zmClient.getSessionInfo().userId);
@@ -159,24 +157,20 @@ const CommandContainer = () => {
             />
           ))}
         </div>
-        {(
-          <>
-            <CommandReceiverContainer
-              chatUsers={commandReceivers}
-              selectedChatUser={command}
-              setCommandUser={setCommandUserId}
-              currentUserId={currentUserId}
-            />
-            <div className="chat-message-box">
-              <TextArea
-                onPressEnter={sendMessage}
-                onChange={onChatInput}
-                value={commandDraft}
-                placeholder="Type message here ..."
-              />
-            </div>
-          </>
-        )}
+        <CommandReceiverContainer
+          chatUsers={commandReceivers}
+          selectedChatUser={command}
+          setCommandUser={setCommandUserId}
+          currentUserId={currentUserId}
+        />
+        <div className="chat-message-box">
+          <TextArea
+            onPressEnter={sendMessage}
+            onChange={onChatInput}
+            value={commandDraft}
+            placeholder="Type message here ..."
+          />
+        </div>
       </div>
     </div>
   );

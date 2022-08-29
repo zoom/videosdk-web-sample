@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState, useCallback, useReducer, useMemo } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import ZoomVideo, { ConnectionState } from '@zoom/videosdk';
+import ZoomVideo, { ConnectionState, ReconnectReason } from '@zoom/videosdk';
 import { message, Modal } from 'antd';
 import 'antd/dist/antd.min.css';
 import produce from 'immer';
@@ -17,19 +17,11 @@ import RecordingContext from './context/recording-context';
 import LoadingLayer from './component/loading-layer';
 import Chat from './feature/chat/chat';
 import Command from './feature/command/command';
-import { ChatClient, CommandChannelClient, MediaStream, RecordingClient } from './index-types';
+import Subsession from './feature/subsession/subsession';
+import { ChatClient, CommandChannelClient, MediaStream, RecordingClient, SubsessionClient } from './index-types';
 import './App.css';
+import SubsessionContext from './context/subsession-context';
 import { isAndroidBrowser } from './utils/platform';
-
-declare global {
-  interface Window {
-    webEndpoint: string | undefined;
-    zmClient: any | undefined;
-    mediaStream: any | undefined;
-    crossOriginIsolated: boolean;
-  }
-}
-
 interface AppProps {
   meetingArgs: {
     sdkKey: string;
@@ -37,6 +29,7 @@ interface AppProps {
     signature: string;
     name: string;
     password?: string;
+    webEndpoint?: string;
     enforceGalleryView?: string;
   };
 }
@@ -84,15 +77,23 @@ const mediaReducer = produce((draft, action) => {
       Object.assign(draft, { ...mediaShape });
       break;
     }
-
     default:
       break;
   }
 }, mediaShape);
 
+declare global {
+  interface Window {
+    webEndpoint: string | undefined;
+    zmClient: any | undefined;
+    mediaStream: any | undefined;
+    crossOriginIsolated: boolean;
+  }
+}
+
 function App(props: AppProps) {
   const {
-    meetingArgs: { sdkKey, topic, signature, name, password, enforceGalleryView }
+    meetingArgs: { sdkKey, topic, signature, name, password, webEndpoint: webEndpointArg, enforceGalleryView }
   } = props;
   const [loading, setIsLoading] = useState(true);
   const [loadingText, setLoadingText] = useState('');
@@ -103,32 +104,46 @@ function App(props: AppProps) {
   const [chatClient, setChatClient] = useState<ChatClient | null>(null);
   const [recordingClient, setRecordingClient] = useState<RecordingClient | null>(null);
   const [commandClient, setCommandClient] = useState<CommandChannelClient | null>(null);
+  const [subsessionClient, setSubsessionClient] = useState<SubsessionClient | null>(null);
   const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(true);
   const zmClient = useContext(ZoomContext);
-  const webEndpoint = 'zoom.us';
+  let webEndpoint: any;
+  if (webEndpointArg) {
+    webEndpoint = webEndpointArg;
+  } else {
+    webEndpoint = window?.webEndpoint ?? 'zoom.us';
+  }
   const mediaContext = useMemo(() => ({ ...mediaState, mediaStream }), [mediaState, mediaStream]);
-  const galleryViewWithoutSAB = !!enforceGalleryView && !window.crossOriginIsolated;
+  const galleryViewWithoutSAB = Number(enforceGalleryView) === 1 && !window.crossOriginIsolated;
   useEffect(() => {
     const init = async () => {
-      await zmClient.init('en-US', `${window.location.origin}/lib`, {
-        webEndpoint,
-        enforceMultipleVideos: galleryViewWithoutSAB
-      });
+      await zmClient.init(
+        'en-US',
+        `${window.location.origin}/lib`,
+        {
+          webEndpoint,
+          enforceMultipleVideos: galleryViewWithoutSAB,
+          stayAwake: true
+        }
+      );
       try {
         setLoadingText('Joining the session...');
-        await zmClient.join(topic, signature, name, password);
+        await zmClient.join(topic, signature, name, password).catch((e) => {
+          console.log(e);
+        });
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
         setIsSupportGalleryView(stream.isSupportMultipleVideos() && !isAndroidBrowser());
         const chatClient = zmClient.getChatClient();
         const commandClient = zmClient.getCommandClient();
         const recordingClient = zmClient.getRecordingClient();
+        const ssClient = zmClient.getSubsessionClient();
         setChatClient(chatClient);
         setCommandClient(commandClient);
         setRecordingClient(recordingClient);
+        setSubsessionClient(ssClient);
         setIsLoading(false);
       } catch (e: any) {
-        console.log('Error joining meeting', e);
         setIsLoading(false);
         message.error(e.reason);
       }
@@ -144,15 +159,21 @@ function App(props: AppProps) {
         setIsLoading(true);
         setIsFailover(true);
         setStatus('connecting');
-        const { reason } = payload;
-        if (reason === 'failover') {
+        const { reason, subsessionName } = payload;
+        if (reason === ReconnectReason.Failover) {
           setLoadingText('Session Disconnected,Try to reconnect');
+        } else if (reason === ReconnectReason.JoinSubsession || reason === ReconnectReason.MoveToSubsession) {
+          setLoadingText(`Joining ${subsessionName}...`);
+        } else if (reason === ReconnectReason.BackToMainSession) {
+          setLoadingText('Returning to Main Session...');
         }
       } else if (payload.state === ConnectionState.Connected) {
         setStatus('connected');
         if (isFailover) {
           setIsLoading(false);
         }
+        window.zmClient = zmClient;
+        window.mediaStream = zmClient.getMediaStream();
       } else if (payload.state === ConnectionState.Closed) {
         setStatus('closed');
         dispatch({ type: 'reset-media' });
@@ -164,7 +185,7 @@ function App(props: AppProps) {
         }
       }
     },
-    [isFailover]
+    [isFailover, zmClient]
   );
   const onMediaSDKChange = useCallback((payload) => {
     const { action, type, result } = payload;
@@ -209,31 +230,25 @@ function App(props: AppProps) {
           <ChatContext.Provider value={chatClient}>
             <RecordingContext.Provider value={recordingClient}>
               <CommandContext.Provider value={commandClient}>
-                <Router>
-                  <Switch>
-                    <Route
-                      path="/"
-                      render={(props) => (
-                        <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />
-                      )}
-                      exact
-                    />
-                    <Route
-                      path="/index.html"
-                      render={(props) => (
-                        <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />
-                      )}
-                      exact
-                    />
-                    <Route path="/preview" component={Preview} />
-                    <Route
-                      path="/video"
-                      component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle}
-                    />
-                    <Route path="/chat" component={Chat} />
-                    <Route path="/command" component={Command} />
-                  </Switch>
-                </Router>
+                <SubsessionContext.Provider value={subsessionClient}>
+                  <Router>
+                    <Switch>
+                      <Route
+                        path="/"
+                        render={(props) => (
+                          <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />
+                        )}
+                        exact
+                      />
+                      <Route path="/index.html" component={Home} exact />
+                      <Route path="/chat" component={Chat} />
+                      <Route path="/command" component={Command} />
+                      <Route path="/video" component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle} />
+                      <Route path="/subsession" component={Subsession} />
+                      <Route path="/preview" component={Preview} />
+                    </Switch>
+                  </Router>
+                </SubsessionContext.Provider>
               </CommandContext.Provider>
             </RecordingContext.Provider>
           </ChatContext.Provider>

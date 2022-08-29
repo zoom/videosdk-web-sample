@@ -34,13 +34,7 @@ const Pagination = (props: PaginationProps) => {
       >
         {pageIndication}
       </Button>
-      <Button
-        key="right"
-        className="next-page-button"
-        icon={<CaretRightOutlined />}
-        ghost={true}
-        onClick={toNextPage}
-      >
+      <Button key="right" className="next-page-button" icon={<CaretRightOutlined />} ghost={true} onClick={toNextPage}>
         {pageIndication}
       </Button>
     </div>

@@ -1,0 +1,43 @@
+.breakout-room-viewport {
+  position: relative;
+  .breakout-room-btn,
+  .breakout-room-attendee-dropdown {
+    position: absolute;
+    right: 2vw;
+    bottom: 10vh;
+  }
+  .room-remaining {
+    position: absolute;
+    right: 2vw;
+    top: 2vh;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: rgba(111, 111, 111, 0.3);
+    color: #fff;
+  }
+  .room-info {
+    position: absolute;
+    top: 2vh;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+}
+.breakout-room-title {
+  width: 100%;
+  cursor: move;
+}
+.attendee-bo-menu {
+  border: 1px solid #747487;
+  background: rgba(0, 0, 0, 0.9) !important;
+  .ant-dropdown-menu-item {
+    padding: 10px 30px;
+    color: #ccc;
+    position: relative;
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+}

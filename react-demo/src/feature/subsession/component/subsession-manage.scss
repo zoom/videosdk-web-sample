@@ -1,0 +1,47 @@
+.room-manage {
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+  .room-list-wrap {
+    max-height: 60vh;
+    overflow-y: auto;
+    flex-grow: 1;
+    .room-list {
+      &> .ant-collapse-item > .ant-collapse-header{
+        background-color: #eee;
+      }
+      .ant-collapse-content-box {
+        padding: 16px 6px;
+      }
+    }
+  }
+  .room-actions{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    .room-options-btn {
+      border: 0;
+      font-weight: 700;
+    }
+    .room-actions-list {
+      flex-grow: 1;
+      display: flex;
+      justify-content: flex-end;
+      .ant-btn {
+        margin-left: 5px;
+      }
+    }
+  }
+  .room-closing-coutdown {
+    padding:20px 0;
+    background: #ffc80f;
+    border-radius: 4px;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &-leave-btn {
+      margin-top: 5px;
+    }
+  }
+}

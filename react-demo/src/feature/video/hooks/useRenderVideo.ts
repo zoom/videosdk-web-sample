@@ -137,7 +137,7 @@ export function useRenderVideo(
     subscribedVideos,
     previousSubscribedVideos,
     isSkipSelfVideo,
-    currentUserId,
+    currentUserId
   ]);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export function useRenderVideo(
     isVideoDecodeReady,
     previousIsVideoDecodeReady,
     isSkipSelfVideo,
-    currentUserId,
+    currentUserId
   ]);
   const stopAllVideos = usePersistFn((videoCanvasDOM: HTMLCanvasElement) => {
     if (subscribedVideos.length > 0) {
