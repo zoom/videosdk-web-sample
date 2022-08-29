@@ -4,10 +4,12 @@ import { switchLoadingToSessionView, switchPreviewToLoadingView } from '../simpl
 import { PREVIEW_VIDEO_ELEMENT } from "./preview-video-props";
 
 const initPreviewButtons = () => {
+    VideoSDK.preloadDependentAssets();
     const zmClient = VideoSDK.createClient();
     const audioTrack = VideoSDK.createLocalAudioTrack();
     const videoTrack = VideoSDK.createLocalVideoTrack();
-
+    let isPreviewAudioConnected = false;
+    let isWebcamOn = false;
     const initPreviewAudioButtonClick = () => {
         const VOLUME_ANIMATION_INTERVAL_MS = 100;
         let volumeAnimation = null;
@@ -16,7 +18,6 @@ const initPreviewButtons = () => {
         const micButton = document.getElementById('js-preview-mic-button');
         const micIcon = document.getElementById('js-preview-mic-icon');
         
-        let isPreviewAudioConnected = false;
         let isMuted = true;
 
         let isButtonAlreadyClicked = false;
@@ -115,7 +116,6 @@ const initPreviewButtons = () => {
     const initVideoPreviewButtonClick = () => {
         const webcamButton = document.getElementById('js-preview-webcam-button');
 
-        let isWebcamOn = false;
         let isButtonAlreadyClicked = false;
 
         const toggleWebcamButtonStyle = () => webcamButton.classList.toggle('meeting-control-button__off');
@@ -155,7 +155,13 @@ const initPreviewButtons = () => {
                 // Blocks logic from executing again if already in progress
                 isButtonAlreadyClicked = true;
                 try {
-                    audioTrack.stop();
+                    if (isPreviewAudioConnected) {
+                      audioTrack.stop();
+                      isPreviewAudioConnected = false;
+          }
+          if (isWebcamOn) {
+            videoTrack.stop();
+                    }
                     switchPreviewToLoadingView();
                     await joinSession(zmClient);
                     switchLoadingToSessionView();

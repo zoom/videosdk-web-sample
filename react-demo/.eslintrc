@@ -1,0 +1,62 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:prettier/recommended",
+    "alloy",
+    "alloy/react",
+    "alloy/typescript",
+    "prettier"
+  ],
+  "globals": {
+    "React": true,
+    "JSX": true,
+    "jsdom": true
+  },
+  "plugins": ["@typescript-eslint", "react-hooks"],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "settings": {
+    "react": {
+      "pragma": "React",
+      "version": "detect"
+    }
+  },
+  "parserOptions": {
+    "ecmaVersion": 2015,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "react/prop-types": "off",
+    "no-console": 1,
+    "prefer-destructuring": 1,
+    "default-case": 2,
+    "eqeqeq": 2,
+    "no-alert": 2,
+    "no-unused-vars": 0,
+    "no-unreachable": 2,
+    "no-duplicate-imports": 2,
+    "max-params":["error", 8],
+    "react/display-name": 0,
+    "react-hooks/rules-of-hooks": 2,
+    "react-hooks/exhaustive-deps": 1,
+    "react/no-unescaped-entities": 1,
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "complexity": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  }
+}

@@ -4,23 +4,25 @@
  * If familiar with redux, it is the recommend approach for state management
  */
 class SimpleState {
-    constructor() {
-        this.reset();
-    };
+  constructor() {
+    this.reset();
+  }
 
-    /**
-     * Resets state to default values
-     */
-    reset() {
-        this.selfId = -1;
-        this.participantId = -1;
-        this.hasParticipant = false;
-    };
+  /**
+   * Resets state to default values
+   */
+  reset() {
+    this.selfId = -1;
+    this.participants = [];
+    this.audioEncode = false;
+    this.audioDecode = false;
+    this.isStartedAudio = false;
+  }
 
-    resetParticipantId() {
-        this.participantId = -1;
-    }
+  resetParticipantId() {
+    this.participants = [];
+  }
 }
 
 // Provide global state
-export default (new SimpleState);
+export default new SimpleState();

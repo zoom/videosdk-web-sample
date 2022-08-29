@@ -4,6 +4,7 @@ import initClientEventListeners from './session/client-event-listeners';
 import initButtonClickHandlers from "./session/button-click-handlers";
 import state from './session/simple-state';
 
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 /**
  * Creates a zoom video client, and uses it to join/start a video session. It:
  *      1) Creates a zoom client
@@ -14,48 +15,40 @@ import state from './session/simple-state';
  *      5) Joins the audio stream on mute
  */
 const joinSession = async (zmClient) => {
-    const videoSDKLibDir = '/node_modules/@zoom/videosdk/dist/lib';
-    const zmClientInitParams = {
-        language: 'en-US',
-        dependentAssets: `${window.location.origin}${videoSDKLibDir}`,
-    };
-    const sessionToken = generateSessionToken(
-        sessionConfig.sdkKey,
-        sessionConfig.sdkSecret,
-        sessionConfig.topic,
-        sessionConfig.password,
-        sessionConfig.sessionKey,
-        sessionConfig.user_identity
-    );
+  // const videoSDKLibDir = '/lib';
+  const zmClientInitParams = {
+    language: 'en-US'
+    // dependentAssets: `${window.location.origin}${videoSDKLibDir}`
+  };
+  const sessionToken = generateSessionToken(
+    sessionConfig.sdkKey,
+    sessionConfig.sdkSecret,
+    sessionConfig.topic,
+    sessionConfig.password,
+    sessionConfig.sessionKey
+  );
 
     let mediaStream;
 
-    const initAndJoinSession = async () => {
-        await zmClient.init(
-            zmClientInitParams.language,
-            zmClientInitParams.dependentAssets
-        );
+  const initAndJoinSession = async () => {
+    await zmClient.init(zmClientInitParams.language, zmClientInitParams.dependentAssets);
 
-        try {
-            await zmClient.join(
-                sessionConfig.topic,
-                sessionToken,
-                sessionConfig.name,
-                sessionConfig.password
-            );
-            mediaStream = zmClient.getMediaStream();
-            state.selfId = zmClient.getSessionInfo().userId;
-        } catch (e) {
-            console.error(e);
-        }
-    };
+    try {
+      await zmClient.join(sessionConfig.topic, sessionToken, sessionConfig.name, sessionConfig.password);
+      mediaStream = zmClient.getMediaStream();
+      state.selfId = zmClient.getSessionInfo().userId;
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-    const startAudioMuted = async () => {
-        await mediaStream.startAudio();
-        if (!mediaStream.isAudioMuted()) {
-            mediaStream.muteAudio();
-        }
-    };
+  const startAudioMuted = async () => {
+    await mediaStream.startAudio();
+    state.isStartedAudio = true;
+    if (!mediaStream.isAudioMuted()) {
+      mediaStream.muteAudio();
+    }
+  };
 
     const join = async () => {
         console.log('======= Initializing video session =======');
@@ -72,7 +65,10 @@ const joinSession = async (zmClient) => {
         console.log('======= Initializing client event handlers =======');
         initClientEventListeners(zmClient, mediaStream);
         console.log('======= Starting audio muted =======');
-        await startAudioMuted();
+        if (!isSafari) {
+              await startAudioMuted();
+            }
+
         console.log('======= Initializing button click handlers =======');
         await initButtonClickHandlers(zmClient, mediaStream);
         console.log('======= Session joined =======');

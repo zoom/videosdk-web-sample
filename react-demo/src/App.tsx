@@ -20,7 +20,6 @@ import Command from './feature/command/command';
 import Subsession from './feature/subsession/subsession';
 import { ChatClient, CommandChannelClient, MediaStream, RecordingClient, SubsessionClient } from './index-types';
 import './App.css';
-import { VersionPath } from './config/path';
 import SubsessionContext from './context/subsession-context';
 import { isAndroidBrowser } from './utils/platform';
 interface AppProps {

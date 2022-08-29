@@ -15,7 +15,6 @@
         integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" 
         crossorigin="anonymous" 
     />
-    <script src="./static/index.min.js" defer></script>
 </head>
 
 <body>
@@ -50,6 +49,8 @@
         <!-- In-session view -->
         <div id="js-video-view" class="container video-app hidden">
             <canvas id="video-canvas" class="video-canvas" width="1280" height="640"></canvas>
+            <video id="self-video" class="self-video"></video>
+            <canvas id="self-video-canvas" class="self-video-canvas" width="640" height="360"></canvas>
             <div class="container meeting-control-layer">
                 <!-- "fas" and "fa" are icon prefixes for the font-awesome library -->
                 <button id="js-mic-button" class="meeting-control-button">

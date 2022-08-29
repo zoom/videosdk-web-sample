@@ -2,90 +2,84 @@ import state from './simple-state';
 import { toggleParticipantVideo } from './video/video-toggler';
 
 const PARTICIPANT_CHANGE_TYPE = {
-    ADD: 'add', 
-    REMOVE: 'remove',
+  ADD: 'add',
+  REMOVE: 'remove',
+  UPDATE: 'update'
 };
 
 const PEER_VIDEO_STATE_CHANGE_ACTION_TYPE = {
-    Start: 'Start',
-    Stop: 'Stop',
+  Start: 'Start',
+  Stop: 'Stop'
 };
 
-const handleParticipantChange = (payloadEntry, addRemoveType) => {
-    const { userId } = payloadEntry;
-
-    // For this demo, only a single participant is handled to keep things simple
-    // and succinct. This can be extended into a participant array/set here 
-    if (userId === undefined) {
-        return;
-    }
-    
-    switch (addRemoveType) {
-        case PARTICIPANT_CHANGE_TYPE.ADD:
-            if (userId !== state.selfId && !state.hasParticipant) {
-                state.participantId = userId;
-                state.hasParticipant = !state.hasParticipant;
-            } else {
-                console.log('Detected new participant. Ignoring: ', userId);
-                console.log('State has participant: ', state.hasParticipant);
-                console.log('Participant ID: ', state.participantId);
-            }
-            break;
-        case PARTICIPANT_CHANGE_TYPE.REMOVE:
-            if (userId !== state.selfId && state.hasParticipant) {
-                state.resetParticipantId();
-                state.hasParticipant = !state.hasParticipant;
-            } else {
-                console.log('Detected unknown participant leaving. Ignoring: ', userId);
-                console.log('Participant ID: ', state.participantId);
-            }
-            break;
-        default:
-            console.log('Unexpected ADD_REMOVE_TYPE');
-            break;
-    }
-    
-}
-
 const onUserAddedListener = (zoomClient) => {
-    zoomClient.on('user-added', (payload) => {
-        console.log(`User added`, payload);
+  zoomClient.on('user-added', (payload) => {
+    console.log(`User added`, payload);
 
-        payload?.forEach((payloadEntry) => handleParticipantChange(payloadEntry, PARTICIPANT_CHANGE_TYPE.ADD));
-    });
+    state.participants = zoomClient.getAllUser();
+  });
 };
 
 const onUserRemovedListener = (zoomClient) => {
-    zoomClient.on('user-removed', (payload) => {
-        console.log(`User removed`, payload);
+  zoomClient.on('user-removed', (payload) => {
+    console.log(`User removed`, payload);
 
-        payload?.forEach((payloadEntry) => handleParticipantChange(payloadEntry, PARTICIPANT_CHANGE_TYPE.REMOVE));
-    });
+    state.participants = zoomClient.getAllUser();
+  });
+};
+
+const onUserUpdatedListener = (zoomClient) => {
+  zoomClient.on('user-updated', (payload) => {
+    console.log(`User updated`, payload);
+
+    state.participants = zoomClient.getAllUser();
+  });
 };
 
 const onPeerVideoStateChangedListener = (zoomClient, mediaStream) => {
-    zoomClient.on('peer-video-state-change', async (payload) => {
-        console.log('onPeerVideoStateChange', payload);
-        
-        const { action, userId } = payload;
+  zoomClient.on('peer-video-state-change', async (payload) => {
+    console.log('onPeerVideoStateChange', payload);
+    const { action, userId } = payload;
 
-        if (userId !== state.participantId) {
-            console.log('Detected unrecognized participant ID. Ignoring: ', userId);
-            return;
-        }
+    if (state.participants.findIndex((user) => user.userId === userId) === -1) {
+      console.log('Detected unrecognized participant ID. Ignoring: ', userId);
+      return;
+    }
 
-        if (action === PEER_VIDEO_STATE_CHANGE_ACTION_TYPE.Start) {
-            toggleParticipantVideo(mediaStream, true);
-        } else if (action === 'Stop') {
-            toggleParticipantVideo(mediaStream, false);
-        }
-    });
+    if (action === PEER_VIDEO_STATE_CHANGE_ACTION_TYPE.Start) {
+      toggleParticipantVideo(mediaStream, userId, true);
+    } else if (action === PEER_VIDEO_STATE_CHANGE_ACTION_TYPE.Stop) {
+      toggleParticipantVideo(mediaStream, userId, false);
+    }
+  });
+};
+
+const onMediaWorkerReadyListener = (zoomClient) => {
+  zoomClient.on('media-sdk-change', (payload) => {
+    const { action, type, result } = payload;
+    if (type === 'audio' && result === 'success') {
+      if (action === 'encode') {
+        state.audioEncode = true;
+      } else if (action === 'decode') {
+        state.audioDecode = true;
+      }
+    }
+  });
 };
 
 const initClientEventListeners = (zoomClient, mediaStream) => {
-    onUserAddedListener(zoomClient);
-    onUserRemovedListener(zoomClient, mediaStream);
-    onPeerVideoStateChangedListener(zoomClient, mediaStream);
+  onUserAddedListener(zoomClient);
+  onUserRemovedListener(zoomClient, mediaStream);
+  onUserUpdatedListener(zoomClient);
+  onPeerVideoStateChangedListener(zoomClient, mediaStream);
+  onMediaWorkerReadyListener(zoomClient);
+  // The started video before join the session
+  setTimeout(() => {
+    const peerParticipants = state.participants.filter((user) => user.userId !== state.selfId);
+    if (peerParticipants.length > 0 && peerParticipants[0].bVideoOn === true) {
+      toggleParticipantVideo(mediaStream, peerParticipants[0].userId, true);
+    }
+  }, 3000);
 };
 
 export default initClientEventListeners;
