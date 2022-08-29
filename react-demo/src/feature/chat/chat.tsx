@@ -18,9 +18,7 @@ const ChatContainer = () => {
   const [chatRecords, setChatRecords] = useState<ChatRecord[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [chatReceivers, setChatReceivers] = useState<ChatReceiver[]>([]);
-  const [chatPrivilege, setChatPrivilege] = useState<ChatPrivilege>(
-    ChatPrivilege.All,
-  );
+  const [chatPrivilege, setChatPrivilege] = useState<ChatPrivilege>(ChatPrivilege.All);
   const [chatUser, setChatUser] = useState<ChatReceiver | null>(null);
   const [isHost, setIsHost] = useState<boolean>(false);
   const [isManager, setIsManager] = useState<boolean>(false);
@@ -30,7 +28,7 @@ const ChatContainer = () => {
     (payload: ChatRecord) => {
       setChatRecords(
         produce((records: ChatRecord[]) => {
-          const length = records.length;
+          const { length } = records;
           if (length > 0) {
             const lastRecord = records[length - 1];
             if (
@@ -49,13 +47,13 @@ const ChatContainer = () => {
           } else {
             records.push(payload);
           }
-        }),
+        })
       );
       if (chatWrapRef.current) {
         chatWrapRef.current.scrollTo(0, chatWrapRef.current.scrollHeight);
       }
     },
-    [chatWrapRef],
+    [chatWrapRef]
   );
   const onChatPrivilegeChange = useCallback(
     (payload) => {
@@ -64,14 +62,11 @@ const ChatContainer = () => {
         setChatReceivers(chatClient.getReceivers());
       }
     },
-    [chatClient],
+    [chatClient]
   );
-  const onChatInput = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setChatDraft(event.target.value);
-    },
-    [],
-  );
+  const onChatInput = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setChatDraft(event.target.value);
+  }, []);
   useEffect(() => {
     zmClient.on('chat-on-message', onChatMessage);
     return () => {
@@ -93,9 +88,7 @@ const ChatContainer = () => {
   });
   useEffect(() => {
     if (chatUser) {
-      const index = chatReceivers.findIndex(
-        (user) => user.userId === chatUser.userId,
-      );
+      const index = chatReceivers.findIndex((user) => user.userId === chatUser.userId);
       if (index === -1) {
         setChatUser(chatReceivers[0]);
       }
@@ -112,7 +105,7 @@ const ChatContainer = () => {
         setChatUser(user);
       }
     },
-    [chatReceivers],
+    [chatReceivers]
   );
   const sendMessage = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -122,7 +115,7 @@ const ChatContainer = () => {
         setChatDraft('');
       }
     },
-    [chatClient, chatDraft, chatUser],
+    [chatClient, chatDraft, chatUser]
   );
   useMount(() => {
     setCurrentUserId(zmClient.getSessionInfo().userId);

@@ -14,25 +14,18 @@ interface CommandReceiverProps {
 }
 
 const CommandReceiverContainer = (props: CommandReceiverProps) => {
-  const {
-    chatUsers,
-    selectedChatUser,
-    setCommandUser,
-    currentUserId,
-  } = props;
+  const { chatUsers, selectedChatUser, setCommandUser, currentUserId } = props;
   const menuItems = chatUsers.map((item) => (
     <MenuItem
       key={item.userId}
       className={classNames('chat-receiver-item', {
-        selected: item.userId === selectedChatUser?.userId,
+        selected: item.userId === selectedChatUser?.userId
       })}
       icon={item.userId === selectedChatUser?.userId && <CheckOutlined />}
     >
-      {currentUserId === item.userId ? item.displayName + "(Me)" : item.displayName}
+      {currentUserId === item.userId ? item.displayName + '(Me)' : item.displayName}
       {(item?.isCoHost || item?.isHost) && (
-        <span className="chat-receiver-item-affix">
-          ({item?.isHost ? 'Host' : 'Co-host'})
-        </span>
+        <span className="chat-receiver-item-affix">({item?.isHost ? 'Host' : 'Co-host'})</span>
       )}
     </MenuItem>
   ));
@@ -44,9 +37,9 @@ const CommandReceiverContainer = (props: CommandReceiverProps) => {
         setCommandUser(userId);
       }
     },
-    [selectedChatUser, setCommandUser],
+    [selectedChatUser, setCommandUser]
   );
- 
+
   const menu = (
     <Menu onClick={onMenuItemClick} className="chat-receiver-dropdown-menu">
       {menuItems}

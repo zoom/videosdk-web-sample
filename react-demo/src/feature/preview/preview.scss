@@ -15,7 +15,7 @@
 }
 
 .video-operations-preview div {
-  background-color: black !important
+  background-color: black !important;
 }
 .join-button {
   color: rgba(255, 255, 255, 1);
@@ -40,34 +40,32 @@
   filter: brightness(80%);
 }
 
-
-.mic-feedback__very-low svg{
+.mic-feedback__very-low svg {
   color: green !important;
   opacity: 0.5 !important;
 }
 
-.mic-feedback__low svg{
+.mic-feedback__low svg {
   color: green !important;
   opacity: 0.6;
 }
 
-.mic-feedback__medium svg{
+.mic-feedback__medium svg {
   color: green !important;
   opacity: 0.7;
 }
 
-.mic-feedback__high svg{
+.mic-feedback__high svg {
   color: green !important;
   opacity: 0.8;
 }
 
-
-.mic-feedback__very-high svg{
+.mic-feedback__very-high svg {
   color: green !important;
   opacity: 0.9;
 }
 
-.mic-feedback__max svg{
+.mic-feedback__max svg {
   color: green !important;
 }
 

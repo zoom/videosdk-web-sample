@@ -19,9 +19,7 @@ const Avatar = (props: AvatarProps) => {
     >
       {(bVideoOn || (audio === 'computer' && muted)) && (
         <div className="corner-name">
-          {audio === 'computer' && muted && (
-            <AudioMutedOutlined style={{ color: '#f00' }} />
-          )}
+          {audio === 'computer' && muted && <AudioMutedOutlined style={{ color: '#f00' }} />}
           {bVideoOn && <span>{displayName}</span>}
         </div>
       )}

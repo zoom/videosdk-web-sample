@@ -17,12 +17,10 @@ interface ScreenShareLockButtonProps {
 const ScreenShareButton = (props: ScreenShareButtonProps) => {
   const { isStartedScreenShare, onScreenShareClick } = props;
   return (
-    <Tooltip
-      title={isStartedScreenShare ? 'stop screen share' : 'start screen share'}
-    >
+    <Tooltip title={isStartedScreenShare ? 'stop screen share' : 'start screen share'}>
       <Button
         className={classNames('screen-share-button', {
-          'started-share': isStartedScreenShare,
+          'started-share': isStartedScreenShare
         })}
         icon={<IconFont type="icon-share" />}
         // eslint-disable-next-line react/jsx-boolean-value
@@ -38,11 +36,9 @@ const ScreenShareButton = (props: ScreenShareButtonProps) => {
 const ScreenShareLockButton = (props: ScreenShareLockButtonProps) => {
   const { isLockedScreenShare, onScreenShareLockClick } = props;
   return (
-    <Tooltip
-      title={isLockedScreenShare ? 'unlock screen share' : ' lock screen share'}
-    >
+    <Tooltip title={isLockedScreenShare ? 'unlock screen share' : ' lock screen share'}>
       <Button
-        className={"screen-share-button"}
+        className="screen-share-button"
         icon={isLockedScreenShare ? <LockOutlined /> : <UnlockOutlined />}
         // eslint-disable-next-line react/jsx-boolean-value
         ghost={true}
@@ -54,4 +50,4 @@ const ScreenShareLockButton = (props: ScreenShareLockButtonProps) => {
   );
 };
 
-export { ScreenShareButton, ScreenShareLockButton};
+export { ScreenShareButton, ScreenShareLockButton };

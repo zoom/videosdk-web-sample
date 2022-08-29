@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useContext,
-  useEffect,
-  MutableRefObject,
-} from 'react';
+import React, { useState, useCallback, useContext, useEffect, MutableRefObject } from 'react';
 import classNames from 'classnames';
 import { message } from 'antd';
 import ZoomContext from '../../../context/zoom-context';
@@ -14,13 +8,20 @@ import MicrophoneButton from './microphone';
 import { ScreenShareButton } from './screen-share';
 import AudioVideoStatisticModal from './audio-video-statistic';
 import ZoomMediaContext from '../../../context/media-context';
-import { useUnmount,useMount } from '../../../hooks';
+import { useUnmount, useMount } from '../../../hooks';
 import { MediaDevice } from '../video-types';
 import './video-footer.scss';
 import { isAndroidBrowser, isSupportOffscreenCanvas } from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
 import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
-import { DialoutState, RecordingStatus,MutedSource,AudioChangeAction, DialOutOption, VideoCapturingState } from '@zoom/videosdk';
+import {
+  DialoutState,
+  RecordingStatus,
+  MutedSource,
+  AudioChangeAction,
+  DialOutOption,
+  VideoCapturingState
+} from '@zoom/videosdk';
 interface VideoFooterProps {
   className?: string;
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
@@ -32,10 +33,10 @@ const VideoFooter = (props: VideoFooterProps) => {
   const { className, shareRef, sharing } = props;
   const [isStartedAudio, setIsStartedAudio] = useState(false);
   const [isStartedVideo, setIsStartedVideo] = useState(false);
-  const [audio,setAudio]=useState('');
-  const [isSupportPhone,setIsSupportPhone] = useState(false);
-  const [phoneCountryList,setPhoneCountryList] = useState<any[]>([]);
-  const [phoneCallStatus,setPhoneCallStatus]= useState<DialoutState>();
+  const [audio, setAudio] = useState('');
+  const [isSupportPhone, setIsSupportPhone] = useState(false);
+  const [phoneCountryList, setPhoneCountryList] = useState<any[]>([]);
+  const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
   const [isStartedScreenShare, setIsStartedScreenShare] = useState(false);
   const [isMirrored, setIsMirrored] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -107,9 +108,9 @@ const VideoFooter = (props: VideoFooterProps) => {
           setActiveSpeaker(mediaStream.getActiveSpeaker());
         }
       } else if (type === 'leave audio') {
-        if(audio==='computer'){
+        if (audio === 'computer') {
           await mediaStream.stopAudio();
-        }else if(audio==='phone'){
+        } else if (audio === 'phone') {
           await mediaStream.hangup();
           setPhoneCallStatus(undefined);
         }
@@ -132,19 +133,23 @@ const VideoFooter = (props: VideoFooterProps) => {
     await mediaStream?.mirrorVideo(!isMirrored);
     setIsMirrored(!isMirrored);
   };
-  const onPhoneCall = async (code:string,phoneNumber:string,name:string,option:DialOutOption)=>{
-    await mediaStream?.inviteByPhone(code,phoneNumber,name,option);
-  }
-  const onPhoneCallCancel = async (code:string,phoneNumber:string,option:{callMe:boolean})=>{
-    if([DialoutState.Calling,DialoutState.Ringing,DialoutState.Accepted].includes(phoneCallStatus as any)){
-      await mediaStream?.cancelInviteByPhone(code,phoneNumber, option);
-      await new Promise((resolve)=>{setTimeout(()=>{resolve(true)},3000)});
+  const onPhoneCall = async (code: string, phoneNumber: string, name: string, option: DialOutOption) => {
+    await mediaStream?.inviteByPhone(code, phoneNumber, name, option);
+  };
+  const onPhoneCallCancel = async (code: string, phoneNumber: string, option: { callMe: boolean }) => {
+    if ([DialoutState.Calling, DialoutState.Ringing, DialoutState.Accepted].includes(phoneCallStatus as any)) {
+      await mediaStream?.cancelInviteByPhone(code, phoneNumber, option);
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true);
+        }, 3000);
+      });
     }
     return Promise.resolve();
-  }
+  };
   const onHostAudioMuted = useCallback((payload) => {
     const { action, source, type } = payload;
-    if (action === AudioChangeAction.Join ) {
+    if (action === AudioChangeAction.Join) {
       setIsStartedAudio(true);
       setAudio(type);
     } else if (action === AudioChangeAction.Leave) {
@@ -185,18 +190,18 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   }, [mediaStream]);
 
-  const onRecordingChange = useCallback(() =>{
+  const onRecordingChange = useCallback(() => {
     setRecordingStatus(recordingClient?.getCloudRecordingStatus() || '');
   }, [recordingClient]);
 
-  const onDialOutChange = useCallback((payload)=>{
-    setPhoneCallStatus(payload.code)
-  },[])
+  const onDialOutChange = useCallback((payload) => {
+    setPhoneCallStatus(payload.code);
+  }, []);
 
   const onRecordingClick = async (key: string) => {
-    switch(key) {
+    switch (key) {
       case 'Record': {
-        await recordingClient?.startCloudRecording();        
+        await recordingClient?.startCloudRecording();
         break;
       }
       case 'Resume': {
@@ -219,10 +224,10 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   };
-  const onVideoCaptureChange = useCallback((payload)=>{
-    if(payload.state === VideoCapturingState.Started){
+  const onVideoCaptureChange = useCallback((payload) => {
+    if (payload.state === VideoCapturingState.Started) {
       setIsStartedVideo(true);
-    }else {
+    } else {
       setIsStartedVideo(false);
     }
   }, []);
@@ -280,9 +285,9 @@ const VideoFooter = (props: VideoFooterProps) => {
       mediaStream?.stopShareScreen();
     }
   });
-  useMount(()=>{
+  useMount(() => {
     setIsSupportPhone(!!mediaStream?.isSupportPhoneFeature());
-    setPhoneCountryList(mediaStream?.getSupportCountryInfo()||[]);
+    setPhoneCountryList(mediaStream?.getSupportCountryInfo() || []);
   });
   useEffect(() => {
     if (mediaStream && zmClient.getSessionInfo().isInMeeting) {
@@ -300,16 +305,16 @@ const VideoFooter = (props: VideoFooterProps) => {
   return (
     <div className={classNames('video-footer', className)}>
       {isAudioEnable && (
-      <MicrophoneButton
-        isStartedAudio={isStartedAudio}
-        isMuted={isMuted}
-        isSupportPhone={isSupportPhone}
-        audio={audio}
-        phoneCountryList={phoneCountryList}
-        onPhoneCallClick={onPhoneCall}
-        onPhoneCallCancel={onPhoneCallCancel}
-        phoneCallStatus={getPhoneCallStatusDescription(phoneCallStatus)}
-        onMicrophoneClick={onMicrophoneClick}
+        <MicrophoneButton
+          isStartedAudio={isStartedAudio}
+          isMuted={isMuted}
+          isSupportPhone={isSupportPhone}
+          audio={audio}
+          phoneCountryList={phoneCountryList}
+          onPhoneCallClick={onPhoneCall}
+          onPhoneCallCancel={onPhoneCallCancel}
+          phoneCallStatus={getPhoneCallStatusDescription(phoneCallStatus)}
+          onMicrophoneClick={onMicrophoneClick}
           onMicrophoneMenuClick={onMicrophoneMenuClick}
           microphoneList={micList}
           speakerList={speakerList}

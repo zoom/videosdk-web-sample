@@ -1,0 +1,20 @@
+.broadcast-panel {
+  display: flex;
+  flex-direction: column;
+  height: 150px;
+  width: 230px;
+  .broadcast-panel-content {
+    flex-grow: 1;
+    textarea {
+      width: 100%;
+      height: 100%;
+      resize: none;
+    }
+  }
+  .broadcast-panel-btn {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

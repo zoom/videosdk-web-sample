@@ -1,0 +1,78 @@
+.room-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  flex-direction: column;
+  min-height: 30px;
+  .room-item-user {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    padding: 0 18px;
+    &:hover {
+      background: rgba(82, 82, 128, 0.09);
+    }
+    &-color-avatar {
+      font-size: 14px;
+      color: #fff;
+      text-align: center;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      box-sizing: border-box;
+      padding: 0 5px;
+      font-weight: 700;
+      margin-right: 8px;
+      border-radius: 20%;
+      &.avatar1 {
+        background: #27ae60;
+      }
+      &.avatar2 {
+        background: #16a085;
+      }
+      &.avatar3 {
+        background: #2980b9;
+      }
+      &.avatar4 {
+        background: #8e44ad;
+      }
+      &.avatar5 {
+        background: #34495e;
+      }
+      &.avatar6 {
+        background: #f39c12;
+      }
+      &.avatar7 {
+        background: #d35400;
+      }
+      &.avatar8 {
+        background: #c0392b;
+      }
+    }
+    &-avatar {
+      max-width: 26px;
+      max-height: 26px;
+      margin-right: 8px;
+    }
+    &-name {
+      line-height: 30px;
+      color: #333;
+    }
+    &-status {
+      position: absolute;
+      top: 17px;
+      left: 5px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      background-color: #999;
+      &.in-room {
+        background-color: #27ae60;
+      }
+    }
+  }
+}

@@ -20,27 +20,32 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
       key: 'video',
       icon: 'icon-meeting',
       title: 'Audio, video and share',
-      description:
-        'Gallery Layout, Start/Stop Audio, Mute/Unmute, Start/Stop Video, Start/Stop Screen Share',
+      description: 'Gallery Layout, Start/Stop Audio, Mute/Unmute, Start/Stop Video, Start/Stop Screen Share'
     },
     {
       key: 'chat',
       icon: 'icon-chat',
       title: 'Session chat',
-      description: 'Session Chat, Chat Priviledge',
+      description: 'Session Chat, Chat Priviledge'
     },
     {
       key: 'command',
       icon: 'icon-chat',
       title: 'Command Channel chat',
-      description: 'Session Command Channel chat',
+      description: 'Session Command Channel chat'
+    },
+    {
+      key: 'Subsession',
+      icon: 'icon-group',
+      title: 'Subsession',
+      description: 'Open/Close Subsession, Assign/Move Participants into Subsession, Join/Leave Subsession'
     },
     {
       key: 'preview',
       icon: 'icon-meeting',
       title: 'Local Preview',
-      description: 'Audio and Video preview',
-    },
+      description: 'Audio and Video preview'
+    }
   ];
   let actionText;
   if (status === 'connected') {
@@ -73,11 +78,7 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
           </a>
         </div>
         {actionText && (
-          <Button
-            type="link"
-            className="navleave"
-            onClick={onLeaveOrJoinSession}
-          >
+          <Button type="link" className="navleave" onClick={onLeaveOrJoinSession}>
             {actionText}
           </Button>
         )}

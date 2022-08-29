@@ -1,10 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useMount } from '../../../hooks';
 import { ZoomClient, Participant } from '../../../index-types';
-export function useParticipantsChange(
-  zmClient: ZoomClient,
-  fn: (participants: Participant[]) => void,
-) {
+export function useParticipantsChange(zmClient: ZoomClient, fn: (participants: Participant[]) => void) {
   const fnRef = useRef(fn);
   fnRef.current = fn;
   const callback = useCallback(() => {
