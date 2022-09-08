@@ -260,7 +260,7 @@ const PreviewContainer = () => {
           <h1>Audio And Video Preview</h1>
         </span>
         <div className="container video-app">
-          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" />
+          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" playsInline />
           <div className="video-footer video-operations video-operations-preview">
             <MicrophoneButton
               isStartedAudio={isStartedAudio}
