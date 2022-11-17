@@ -1,0 +1,22 @@
+.transcript-subtitle{
+  position: fixed;
+  bottom: 10vh;
+  width: 100vw;
+  min-height: 50px;
+  background: rgba(255,255,255,0.2);
+  display: none;
+  justify-content: center;
+  padding: 12px 0;
+  &.transcript-subtitle-show{
+    display: flex;
+  }
+  &-message {
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    width: 50vw;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}

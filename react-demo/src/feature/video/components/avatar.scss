@@ -5,6 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events:visible;
   &.avatar-active {
     outline: 3px solid #d4e280;
   }
@@ -28,5 +29,29 @@
     font-size: 38px;
     font-weight: 700;
     color: #fff;
+  }
+  .avatar-volume{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    opacity: 0.1;
+    top: 3%;
+    right: 2%;
+    width: 20%;
+    &:hover{
+      opacity: 0.5;
+    }
+    label {
+      transform: translateY(-10px);
+      color: #ccc;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+    .ant-slider{
+      flex:1;
+    }
+    .ant-slider-mark-text {
+      color: #ccc;
+    }
   }
 }

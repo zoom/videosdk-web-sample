@@ -1,16 +1,19 @@
-import React from 'react';
+import { useContext } from 'react';
 import { Button, Tooltip, Menu, Dropdown } from 'antd';
 import { CheckOutlined, UpOutlined, VideoCameraAddOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import ZoomMediaContext from '../../../context/media-context';
 import classNames from 'classnames';
 import './camera.scss';
 import { MediaDevice } from '../video-types';
 interface CameraButtonProps {
   isStartedVideo: boolean;
   isMirrored?: boolean;
+  isBlur?: boolean;
   onCameraClick: () => void;
   onSwitchCamera: (deviceId: string) => void;
   onMirrorVideo?: () => void;
   onVideoStatistic?: () => void;
+  onBlurBackground?: () => void;
   className?: string;
   cameraList?: MediaDevice[];
   activeCamera?: string;
@@ -22,16 +25,21 @@ const CameraButton = (props: CameraButtonProps) => {
     cameraList,
     activeCamera,
     isMirrored,
+    isBlur,
     onCameraClick,
     onSwitchCamera,
     onMirrorVideo,
-    onVideoStatistic
+    onVideoStatistic,
+    onBlurBackground
   } = props;
+  const { mediaStream } = useContext(ZoomMediaContext);
   const onMenuItemClick = (payload: { key: any }) => {
     if (payload.key === 'mirror') {
       onMirrorVideo?.();
     } else if (payload.key === 'statistic') {
       onVideoStatistic?.();
+    } else if (payload.key === 'blur') {
+      onBlurBackground?.();
     } else {
       onSwitchCamera(payload.key);
     }
@@ -49,6 +57,11 @@ const CameraButton = (props: CameraButtonProps) => {
       <Menu.Item key="mirror" icon={isMirrored && <CheckOutlined />}>
         Mirror My Video
       </Menu.Item>
+      {mediaStream?.isSupportVirtualBackground() && (
+        <Menu.Item key="blur" icon={isBlur && <CheckOutlined />}>
+          Blur My Background
+        </Menu.Item>
+      )}
       <Menu.Divider />
       <Menu.Item key="statistic">Video Statistic</Menu.Item>
     </Menu>

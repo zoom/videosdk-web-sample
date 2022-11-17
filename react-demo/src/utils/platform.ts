@@ -25,15 +25,24 @@ export function getExploreName() {
   return 'Unkonwn';
 }
 
-
-export function isSupportWebCodecs(){
-  return typeof (window as any).MediaStreamTrackProcessor ==='function'
+export function isSupportWebCodecs() {
+  return typeof (window as any).MediaStreamTrackProcessor === 'function';
 }
+const isIPad = () => {
+  return /MacIntel/i.test(navigator.platform) && navigator?.maxTouchPoints > 2;
+};
+export const isIOSMobile = () => {
+  const { userAgent } = navigator;
+  const isIOS = /iPad|iPhone|iPod/i.test(userAgent);
+  return isIOS || isIPad();
+};
 
 export function isAndroidBrowser() {
   return /android/i.test(navigator.userAgent);
 }
-
+export function isAndroidOrIOSBrowser() {
+  return isAndroidBrowser() || isIOSMobile();
+}
 export function isSupportOffscreenCanvas() {
   return typeof (window as any).OffscreenCanvas === 'function';
 }

@@ -12,6 +12,7 @@ import { useGalleryLayout } from './hooks/useGalleryLayout';
 import { usePagination } from './hooks/usePagination';
 import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useShare } from './hooks/useShare';
+import { useLocalVolume } from './hooks/useLocalVolume';
 import './video.scss';
 import { isSupportWebCodecs } from '../../utils/platform';
 import { isShallowEqual } from '../../utils/util';
@@ -52,6 +53,9 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     }
   );
   const { isRecieveSharing, isStartedShare, sharedContentDimension } = useShare(zmClient, mediaStream, shareRef);
+
+  const { userVolumeList, setLocalVolume } = useLocalVolume();
+
   const isSharing = isRecieveSharing || isStartedShare;
   useEffect(() => {
     if (isSharing && shareContainerRef.current) {
@@ -129,6 +133,8 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                 participant={user}
                 key={user.userId}
                 isActive={activeVideo === user.userId}
+                volume={userVolumeList.find((u) => u.userId === user.userId)?.volume}
+                setLocalVolume={setLocalVolume}
                 style={{
                   width: `${width}px`,
                   height: `${height}px`,
