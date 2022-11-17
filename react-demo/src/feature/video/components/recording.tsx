@@ -30,7 +30,7 @@ export const getRecordingButtons = (status: RecordingStatus | '', isHost: boolea
     buttons = [
       {
         text: 'Record',
-        tipText: 'Start Recording ?',
+        tipText: 'Start Recording',
         icon: 'icon-recording',
         hoverIcon: 'icon-recording-hover'
       }
@@ -41,13 +41,13 @@ export const getRecordingButtons = (status: RecordingStatus | '', isHost: boolea
       recordStatusIcon,
       {
         text: 'Pause',
-        tipText: 'Pause Recording ?',
+        tipText: 'Pause Recording',
         icon: 'icon-recording-pause',
         hoverIcon: 'icon-recording-pause-hover'
       },
       {
         text: 'Stop',
-        tipText: 'Stop Recording ?',
+        tipText: 'Stop Recording',
         icon: 'icon-recording-stop',
         hoverIcon: 'icon-recording-stop-hover'
       }
@@ -58,7 +58,7 @@ export const getRecordingButtons = (status: RecordingStatus | '', isHost: boolea
       recordStatusIcon,
       {
         text: 'Resume',
-        tipText: 'Resume Recording ?',
+        tipText: 'Resume Recording',
         icon: 'icon-recording-resume',
         hoverIcon: 'icon-recording-resume-hover'
       },

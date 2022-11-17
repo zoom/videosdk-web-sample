@@ -41,7 +41,6 @@ const CommandContainer = () => {
     (payload: CommandChannelMsg) => {
       setCommandRecords(
         produce((records: CommandRecord[]) => {
-          console.log(payload);
           const { length } = records;
           const newPayload = {
             message: payload.text,

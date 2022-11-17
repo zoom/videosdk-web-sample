@@ -26,6 +26,8 @@ import { ReactComponent as IconRecordingResume } from './svgs/icon-recording-res
 import { ReactComponent as IconRecordingResumeHovered } from './svgs/icon-recording-resume-hovered.svg';
 import { ReactComponent as IconRecordingPause } from './svgs/icon-recording-pause.svg';
 import { ReactComponent as IconRecordingPauseHovered } from './svgs/icon-recording-pause-hovered.svg';
+import { ReactComponent as IconLt } from './svgs/icon-lt.svg';
+import { ReactComponent as IconSubtitle } from './svgs/icon-subtitles.svg';
 
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
@@ -51,7 +53,9 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-recording-animated': IconRecordingAnimated,
   'icon-recording-animated-hover': IconRecordingAnimatedHovered,
   'icon-phone': IconPhone,
-  'icon-phone-off': IconPhoneOff
+  'icon-phone-off': IconPhoneOff,
+  'icon-lt': IconLt,
+  'icon-subtitle': IconSubtitle
 };
 interface IconFontProps {
   type: string;

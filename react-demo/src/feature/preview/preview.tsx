@@ -183,7 +183,7 @@ const PreviewContainer = () => {
   useMount(() => {
     PREVIEW_VIDEO = document.getElementById('js-preview-video');
     mountDevices().then((devices) => {
-      console.log('devices', devices);
+      console.log('devicesdevicesdevicesdevices', devices);
       setMicList(devices.mics);
       setCameraList(devices.cameras);
       setSpeakerList(devices.speakers);
@@ -260,7 +260,7 @@ const PreviewContainer = () => {
           <h1>Audio And Video Preview</h1>
         </span>
         <div className="container video-app">
-          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" playsInline />
+          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" />
           <div className="video-footer video-operations video-operations-preview">
             <MicrophoneButton
               isStartedAudio={isStartedAudio}

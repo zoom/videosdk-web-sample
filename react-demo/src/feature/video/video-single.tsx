@@ -16,6 +16,7 @@ import './video.scss';
 import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '../../utils/platform';
 import { SELF_VIDEO_ID } from './video-constants';
 import { isShallowEqual } from '../../utils/util';
+import { useLocalVolume } from './hooks/useLocalVolume';
 
 const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || isSupportOffscreenCanvas();
 
@@ -43,6 +44,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     width: 0,
     height: 0
   });
+  const { userVolumeList, setLocalVolume } = useLocalVolume();
 
   useParticipantsChange(zmClient, (payload) => {
     setParticipants(payload);
@@ -177,7 +179,15 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
             })}
           />
         )}
-        {activeUser && <Avatar participant={activeUser} isActive={false} className="single-view-avatar" />}
+        {activeUser && (
+          <Avatar
+            participant={activeUser}
+            isActive={false}
+            className="single-view-avatar"
+            volume={userVolumeList.find((u) => u.userId === activeUser.userId)?.volume}
+            setLocalVolume={setLocalVolume}
+          />
+        )}
       </div>
       <VideoFooter className="video-operations" sharing shareRef={selfShareRef} />
     </div>
