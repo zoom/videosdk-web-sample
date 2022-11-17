@@ -18,7 +18,7 @@ import { SELF_VIDEO_ID } from './video-constants';
 import { isShallowEqual } from '../../utils/util';
 import { useLocalVolume } from './hooks/useLocalVolume';
 
-const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || isSupportOffscreenCanvas();
+const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || (isSupportOffscreenCanvas() && isSupportWebCodecs());
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
