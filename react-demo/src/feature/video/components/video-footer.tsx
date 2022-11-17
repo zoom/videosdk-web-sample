@@ -12,7 +12,12 @@ import LiveTranscriptionContext from '../../../context/live-transcription';
 import { useUnmount, useMount } from '../../../hooks';
 import { MediaDevice } from '../video-types';
 import './video-footer.scss';
-import { isAndroidBrowser, isAndroidOrIOSBrowser, isSupportOffscreenCanvas } from '../../../utils/platform';
+import {
+  isAndroidBrowser,
+  isAndroidOrIOSBrowser,
+  isSupportOffscreenCanvas,
+  isSupportWebCodecs
+} from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
 import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
 import {
@@ -75,6 +80,10 @@ const VideoFooter = (props: VideoFooterProps) => {
         const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
         if (videoElement) {
           await mediaStream?.startVideo({ videoElement });
+          if (!isSupportWebCodecs() && !isAndroidBrowser()) {
+            const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
+            mediaStream?.renderVideo(canvasElement, zmClient.getSessionInfo().userId, 254, 143, 0, 0, 3);
+          }
         }
       } else {
         const startVideoOptions = { hd: true };
