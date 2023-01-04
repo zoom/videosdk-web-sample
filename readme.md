@@ -1,6 +1,6 @@
 # Zoom Video SDK Sample App - Web
 
-Use of this sample app is subject to our [Terms of Use](https://zoom.us/docs/en-us/zoom_api_license_and_tou.html).
+Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/en/video-sdk-terms/).
 
 The [Zoom Video SDK](https://marketplace.zoom.us/docs/sdk/video/web) enables you to build custom video experiences with Zoom's core technology through a highly optimized WebAssembly module.
 
