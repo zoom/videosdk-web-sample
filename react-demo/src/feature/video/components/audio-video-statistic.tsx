@@ -248,13 +248,7 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
     clearVideoTimer();
   });
   return (
-    <Modal
-      visible={visible}
-      onCancel={() => setVisible(false)}
-      destroyOnClose
-      footer={null}
-      title="Audio/Video Statistic"
-    >
+    <Modal open={visible} onCancel={() => setVisible(false)} destroyOnClose footer={null} title="Audio/Video Statistic">
       <div>
         <Tabs onChange={onTabChange} activeKey={tab} type="card" size="large">
           <TabPane tab="Audio" key="audio">

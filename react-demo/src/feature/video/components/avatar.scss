@@ -21,7 +21,7 @@
     font-size: 14px;
     color: #fff;
     background-color: rgba(0,0,0,0.6);
-    .anticon-audio-muted{
+    span.anticon{
       margin-right: 5px;
     }
   }
@@ -30,12 +30,27 @@
     font-weight: 700;
     color: #fff;
   }
+  .more-button {
+    position: absolute;
+    top:3px;
+    right: 3px;
+    border:0;
+    border-radius: 3px;
+    background: #0171eB;
+    display: none;
+    &:hover{
+      background: #2681f2;
+    }
+    &.more-button-active{
+      display: inline-block;
+    }
+  }
   .avatar-volume{
     position: absolute;
     display: flex;
     align-items: center;
     opacity: 0.1;
-    top: 3%;
+    top: 10%;
     right: 2%;
     width: 20%;
     &:hover{

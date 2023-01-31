@@ -28,7 +28,13 @@ import { ReactComponent as IconRecordingPause } from './svgs/icon-recording-paus
 import { ReactComponent as IconRecordingPauseHovered } from './svgs/icon-recording-pause-hovered.svg';
 import { ReactComponent as IconLt } from './svgs/icon-lt.svg';
 import { ReactComponent as IconSubtitle } from './svgs/icon-subtitles.svg';
-
+import { ReactComponent as IconLeave } from './svgs/icon-leave.svg';
+import { ReactComponent as IconStopLeave } from './svgs/icon-stop-leave.svg';
+import { ReactComponent as IconControl } from './svgs/icon-control.svg';
+import { ReactComponent as IconSwitch } from './svgs/icon-switch.svg';
+import { ReactComponent as IconNetworkGood } from './svgs/icon-network-good.svg';
+import { ReactComponent as IconNetworkNormal } from './svgs/icon-network-normal.svg';
+import { ReactComponent as IconNetworkBad } from './svgs/icon-network-bad.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -55,7 +61,14 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-phone': IconPhone,
   'icon-phone-off': IconPhoneOff,
   'icon-lt': IconLt,
-  'icon-subtitle': IconSubtitle
+  'icon-subtitle': IconSubtitle,
+  'icon-leave': IconLeave,
+  'icon-stop-leave': IconStopLeave,
+  'icon-control': IconControl,
+  'icon-switch': IconSwitch,
+  'icon-network-good': IconNetworkGood,
+  'icon-network-normal': IconNetworkNormal,
+  'icon-network-bad': IconNetworkBad
 };
 interface IconFontProps {
   type: string;

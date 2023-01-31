@@ -1,13 +1,16 @@
 import { KJUR } from 'jsrsasign';
 
+// eslint-disable-next-line max-params
 export function generateVideoToken(
   sdkKey: string,
   sdkSecret: string,
   topic: string,
   passWord = '',
-  userIdentity = '',
   sessionKey = '',
-  roleType = 1
+  userIdentity = '',
+  roleType = 1,
+  cloud_recording_option = '',
+  cloud_recording_election = ''
 ) {
   let signature = '';
   try {
@@ -17,17 +20,36 @@ export function generateVideoToken(
     // Header
     const oHeader = { alg: 'HS256', typ: 'JWT' };
     // Payload
-    const oPayload = {
-      app_key: sdkKey,
-      iat,
-      exp,
-      tpc: topic,
-      pwd: passWord,
-      user_identity: userIdentity,
-      session_key: sessionKey,
-      role_type: roleType // role = 1 for host, 0 for attendee; a host must first start a session for attendees to join
-      // topic
-    };
+    let oPayload = {};
+    if (cloud_recording_election === '' && cloud_recording_option === '1') {
+      oPayload = {
+        app_key: sdkKey,
+        iat,
+        exp,
+        tpc: topic,
+        pwd: passWord,
+        role_type: roleType,
+        cloud_recording_option: 1
+      };
+    } else {
+      oPayload = {
+        app_key: sdkKey,
+        iat,
+        exp,
+        tpc: topic,
+        pwd: passWord,
+        role_type: roleType,
+        cloud_recording_option: parseInt(cloud_recording_option, 10),
+        cloud_recording_election: parseInt(cloud_recording_election, 10)
+      };
+    }
+    if (sessionKey) {
+      Object.assign(oPayload, { session_key: sessionKey });
+    }
+    if (userIdentity) {
+      Object.assign(oPayload, { user_identity: userIdentity });
+    }
+    // Sign JWT, password=616161
     const sHeader = JSON.stringify(oHeader);
     const sPayload = JSON.stringify(oPayload);
     signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, sdkSecret);
@@ -58,7 +80,7 @@ export function isShallowEqual(objA: any, objB: any) {
   for (let i = 0; i < len; i++) {
     const key = aKeys[i];
 
-    if (objA[key] !== objB[key] || !Object.prototype.hasOwnProperty.call(objB, key)) {
+    if (objA[key] !== objB[key] || !Object.hasOwn(objB, key)) {
       return false;
     }
   }

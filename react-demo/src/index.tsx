@@ -63,14 +63,25 @@ if (meetingArgs.web) {
     meetingArgs.role = 1;
   }
 }
+if (meetingArgs?.cloud_recording_option) {
+  meetingArgs.cloud_recording_option = parseInt(meetingArgs.cloud_recording_option, 10);
+} else {
+  meetingArgs.cloud_recording_option = 0;
+}
+
+if (meetingArgs?.cloud_recording_election) {
+  meetingArgs.cloud_recording_election = parseInt(meetingArgs.cloud_recording_election, 10);
+} else {
+  meetingArgs.cloud_recording_election = '';
+}
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(
     meetingArgs.sdkKey,
     meetingArgs.sdkSecret,
     meetingArgs.topic,
     meetingArgs.password,
-    meetingArgs.userIdentity,
     meetingArgs.sessionKey,
+    meetingArgs.userIdentity,
     parseInt(meetingArgs.role, 10)
   );
 }

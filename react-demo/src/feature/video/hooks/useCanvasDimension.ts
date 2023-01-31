@@ -4,7 +4,7 @@ import { useSizeCallback, useMount } from '../../../hooks';
 import { MediaStream } from '../../../index-types';
 export function useCanvasDimension(
   mediaStream: MediaStream | null,
-  videoRef: MutableRefObject<HTMLCanvasElement | null>,
+  videoRef: MutableRefObject<HTMLCanvasElement | null>
 ) {
   const [dimension, setDimension] = useState({ width: 0, height: 0 });
   const onCanvasResize = useCallback(
@@ -13,12 +13,12 @@ export function useCanvasDimension(
         _.debounce((...args) => {
           setDimension({
             width: args[0],
-            height: args[1],
+            height: args[1]
           });
         }, 300).call(null, width, height);
       }
     },
-    [videoRef],
+    [videoRef]
   );
   useSizeCallback(videoRef.current, onCanvasResize);
   useMount(() => {
@@ -35,11 +35,7 @@ export function useCanvasDimension(
         videoRef.current.height = height;
       }
     } catch (e) {
-      mediaStream?.updateVideoCanvasDimension(
-        videoRef.current as HTMLCanvasElement,
-        width,
-        height,
-      );
+      mediaStream?.updateVideoCanvasDimension(videoRef.current as HTMLCanvasElement, width, height);
     }
   }, [mediaStream, dimension, videoRef]);
   return dimension;

@@ -17,7 +17,7 @@ const LiveTranscriptionButton = (props: LiveTranscriptionButtonProps) => {
   const { isStartedLiveTranscription, onLiveTranscriptionClick } = props;
   return (
     <Button
-      className={classNames('live-transcription-button', {
+      className={classNames('vc-button', {
         'started-transcription': isStartedLiveTranscription
       })}
       icon={<IconFont type="icon-subtitle" />}
