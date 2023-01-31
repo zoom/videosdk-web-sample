@@ -79,13 +79,9 @@ const VideoFooter = (props: VideoFooterProps) => {
         const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
         if (videoElement) {
           await mediaStream?.startVideo({ videoElement });
-          if (!isSupportWebCodecs() && !isAndroidBrowser()) {
-            const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
-            mediaStream?.renderVideo(canvasElement, zmClient.getSessionInfo().userId, 254, 143, 0, 0, 3);
-          }
         }
       } else {
-        const startVideoOptions = { hd: true, ptz:mediaStream?.isBrowserSupportPTZ() };
+        const startVideoOptions = { hd: true, ptz: mediaStream?.isBrowserSupportPTZ() };
         if (mediaStream?.isSupportVirtualBackground() && isBlur) {
           Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
         }
@@ -336,7 +332,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('passively-stop-share', onPassivelyStopShare);
     zmClient.on('device-change', onDeviceChange);
     zmClient.on('recording-change', onRecordingChange);
-    zmClient.on('recording-iso-change', onRecordingISOChange);
+    zmClient.on('individual-recording-change', onRecordingISOChange);
     zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('video-capturing-change', onVideoCaptureChange);
     zmClient.on('share-audio-change', onShareAudioChange);
@@ -349,7 +345,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('passively-stop-share', onPassivelyStopShare);
       zmClient.off('device-change', onDeviceChange);
       zmClient.off('recording-change', onRecordingChange);
-      zmClient.off('recording-iso-change', onRecordingISOChange);
+      zmClient.off('individual-recording-change', onRecordingISOChange);
       zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('video-capturing-change', onVideoCaptureChange);
       zmClient.off('share-audio-change', onShareAudioChange);

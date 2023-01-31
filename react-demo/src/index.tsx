@@ -12,7 +12,7 @@ import { b64DecodeUnicode, generateVideoToken } from './utils/util';
 let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
 // Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
 if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingArgs.signature) {
-  meetingArgs = { ...meetingArgs, ...devConfig };
+  meetingArgs = { ...devConfig, ...meetingArgs };
   meetingArgs.enforceGalleryView = true;
 }
 
@@ -63,17 +63,14 @@ if (meetingArgs.web) {
     meetingArgs.role = 1;
   }
 }
-if (meetingArgs?.cloud_recording_option) {
-  meetingArgs.cloud_recording_option = parseInt(meetingArgs.cloud_recording_option, 10);
-} else {
-  meetingArgs.cloud_recording_option = 0;
-}
 
-if (meetingArgs?.cloud_recording_election) {
-  meetingArgs.cloud_recording_election = parseInt(meetingArgs.cloud_recording_election, 10);
-} else {
+if (!meetingArgs?.cloud_recording_option) {
+  meetingArgs.cloud_recording_option = "0";
+}
+if (!meetingArgs?.cloud_recording_election) {
   meetingArgs.cloud_recording_election = '';
 }
+
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(
     meetingArgs.sdkKey,
@@ -82,11 +79,27 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     meetingArgs.password,
     meetingArgs.sessionKey,
     meetingArgs.userIdentity,
-    parseInt(meetingArgs.role, 10)
+    parseInt(meetingArgs.role, 10),
+    meetingArgs.cloud_recording_option,
+    meetingArgs.cloud_recording_election
   );
+  console.log('=====================================');
+  console.log('meetingArgs', meetingArgs);
+
+  const urlArgs = {
+    topic: meetingArgs.topic,
+    name: meetingArgs.name,
+    password: meetingArgs.password,
+    sessionKey: meetingArgs.sessionKey,
+    userIdentity: meetingArgs.userIdentity,
+    role: meetingArgs.role || 1,
+    cloud_recording_option: meetingArgs.cloud_recording_option,
+    cloud_recording_election: meetingArgs.cloud_recording_election,
+    web: '1'
+  };
+  console.log('use url args');
+  console.log(window.location.origin + '/?' + new URLSearchParams(urlArgs).toString());
 }
-console.log('=====================================');
-console.log('meetingArgs', meetingArgs);
 const zmClient = ZoomVideo.createClient();
 ReactDOM.render(
   <React.StrictMode>

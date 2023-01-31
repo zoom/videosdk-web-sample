@@ -14,42 +14,38 @@ export function generateVideoToken(
 ) {
   let signature = '';
   try {
-    const iat = Math.round(new Date().getTime() / 1000);
+    const iat = Math.round(new Date().getTime() / 1000) - 30;
     const exp = iat + 60 * 60 * 2;
-
     // Header
     const oHeader = { alg: 'HS256', typ: 'JWT' };
     // Payload
-    let oPayload = {};
-    if (cloud_recording_election === '' && cloud_recording_option === '1') {
-      oPayload = {
-        app_key: sdkKey,
-        iat,
-        exp,
-        tpc: topic,
-        pwd: passWord,
-        role_type: roleType,
-        cloud_recording_option: 1
-      };
+    let oPayload = {
+      app_key: sdkKey,
+      iat,
+      exp,
+      tpc: topic,
+      pwd: passWord,
+      role_type: roleType
+    };
+    if (cloud_recording_option === '1') {
+      Object.assign(oPayload, { cloud_recording_option: 1 });
     } else {
-      oPayload = {
-        app_key: sdkKey,
-        iat,
-        exp,
-        tpc: topic,
-        pwd: passWord,
-        role_type: roleType,
-        cloud_recording_option: parseInt(cloud_recording_option, 10),
-        cloud_recording_election: parseInt(cloud_recording_election, 10)
-      };
+      Object.assign(oPayload, { cloud_recording_option: 0 });
     }
-    if (sessionKey) {
+
+    if (cloud_recording_election === '1') {
+      Object.assign(oPayload, { cloud_recording_election: 1 });
+    } else {
+      Object.assign(oPayload, { cloud_recording_election: 0 });
+    }
+
+    if (sessionKey || sessionKey === '') {
       Object.assign(oPayload, { session_key: sessionKey });
     }
-    if (userIdentity) {
+    if (userIdentity || userIdentity === '') {
       Object.assign(oPayload, { user_identity: userIdentity });
     }
-    // Sign JWT, password=616161
+    // Sign JWT
     const sHeader = JSON.stringify(oHeader);
     const sPayload = JSON.stringify(oPayload);
     signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, sdkSecret);
