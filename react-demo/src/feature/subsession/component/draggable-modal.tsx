@@ -63,7 +63,7 @@ const DraggableModal = (props: DraggableModalProps) => {
           {title}
         </div>
       }
-      visible={visible}
+      open={visible}
       // eslint-disable-next-line react/no-unstable-nested-components
       modalRender={(modal) => (
         <Draggable disabled={disabled} bounds={bounds} onStart={onDragStart} nodeRef={draggleRef}>

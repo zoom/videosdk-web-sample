@@ -12,13 +12,11 @@ import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
 import { useMount, useSizeCallback } from '../../hooks';
 import { Participant } from '../../index-types';
-import './video.scss';
-import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '../../utils/platform';
 import { SELF_VIDEO_ID } from './video-constants';
 import { isShallowEqual } from '../../utils/util';
 import { useLocalVolume } from './hooks/useLocalVolume';
-
-const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || (isSupportOffscreenCanvas() && isSupportWebCodecs());
+import './video.scss';
+import { useNetworkQuality } from './hooks/useNetworkQuality';
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
@@ -45,6 +43,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     height: 0
   });
   const { userVolumeList, setLocalVolume } = useLocalVolume();
+  const networkQuality = useNetworkQuality(zmClient);
 
   useParticipantsChange(zmClient, (payload) => {
     setParticipants(payload);
@@ -147,7 +146,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           }}
         >
           <canvas className={classnames('share-canvas', { hidden: isStartedShare })} ref={shareRef} />
-          {isSupportWebCodecs() ? (
+          {mediaStream?.isStartShareScreenWithVideoElement() ? (
             <video className={classnames('share-canvas', { hidden: isRecieveSharing })} ref={selfShareRef} />
           ) : (
             <canvas className={classnames('share-canvas', { hidden: isRecieveSharing })} ref={selfShareRef} />
@@ -160,7 +159,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
-        {isUseVideoElementToDrawSelfVideo ? (
+        {mediaStream?.isRenderSelfViewWithVideoElement() ? (
           <video
             id={SELF_VIDEO_ID}
             className={classnames('self-video', {
@@ -186,6 +185,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
             className="single-view-avatar"
             volume={userVolumeList.find((u) => u.userId === activeUser.userId)?.volume}
             setLocalVolume={setLocalVolume}
+            networkQuality={networkQuality[`${activeUser.userId}`]}
           />
         )}
       </div>
