@@ -17,6 +17,7 @@ import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '
 import { isShallowEqual } from '../../utils/util';
 import { useSizeCallback } from '../../hooks/useSizeCallback';
 import { SELF_VIDEO_ID } from './video-constants';
+import { useNetworkQuality } from './hooks/useNetworkQuality';
 const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || isSupportOffscreenCanvas();
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
@@ -59,7 +60,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
    * position for self video
    */
   const currentUserIndex = visibleParticipants.findIndex(
-    (user) => user.userId === zmClient.getCurrentUserInfo().userId
+    (user) => user.userId === zmClient.getCurrentUserInfo()?.userId
   );
   let selfVideoLayout = null;
   if (currentUserIndex) {
@@ -91,6 +92,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       mediaStream?.updateSharingCanvasDimension(shareViewDimension.width, shareViewDimension.height);
     }
   }, [mediaStream, sharedContentDimension, shareViewDimension]);
+  const networkQuality = useNetworkQuality(zmClient);
 
   return (
     <div className="viewport">
@@ -168,6 +170,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                   top: `${canvasHeight - y - height}px`,
                   left: `${x}px`
                 }}
+                networkQuality={networkQuality[`${user.userId}`]}
               />
             );
           })}

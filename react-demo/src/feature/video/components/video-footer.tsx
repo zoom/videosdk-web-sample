@@ -12,12 +12,7 @@ import LiveTranscriptionContext from '../../../context/live-transcription';
 import { useUnmount, useMount } from '../../../hooks';
 import { MediaDevice } from '../video-types';
 import './video-footer.scss';
-import {
-  isAndroidBrowser,
-  isAndroidOrIOSBrowser,
-  isSupportOffscreenCanvas,
-  isSupportWebCodecs
-} from '../../../utils/platform';
+import { isAndroidOrIOSBrowser } from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
 import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
 import {
@@ -31,7 +26,10 @@ import {
   MobileVideoFacingMode
 } from '@zoom/videosdk';
 import { LiveTranscriptionButton } from './live-transcription';
+import { LeaveButton } from './leave';
 import { TranscriptionSubtitle } from './transcription-subtitle';
+import { current } from 'immer';
+import IsoRecordingModal from './recording-ask-modal';
 interface VideoFooterProps {
   className?: string;
   shareRef?: MutableRefObject<HTMLCanvasElement | null>;
@@ -70,13 +68,14 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [recordingStatus, setRecordingStatus] = useState<'' | RecordingStatus>(
     recordingClient?.getCloudRecordingStatus() || ''
   );
+  const [recordingIsoStatus, setRecordingIsoStatus] = useState<'' | RecordingStatus>('');
   const zmClient = useContext(ZoomContext);
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
       await mediaStream?.stopVideo();
       setIsStartedVideo(false);
     } else {
-      if (isAndroidBrowser() || (isSupportOffscreenCanvas() && !mediaStream?.isSupportMultipleVideos())) {
+      if (mediaStream?.isRenderSelfViewWithVideoElement()) {
         const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
         if (videoElement) {
           await mediaStream?.startVideo({ videoElement });
@@ -86,7 +85,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           }
         }
       } else {
-        const startVideoOptions = { hd: true };
+        const startVideoOptions = { hd: true, ptz:mediaStream?.isBrowserSupportPTZ() };
         if (mediaStream?.isSupportVirtualBackground() && isBlur) {
           Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
         }
@@ -223,6 +222,16 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   }, [isStartedLiveTranscription, liveTranscriptionClient]);
 
+  const onLeaveClick = useCallback(async () => {
+    console.log('onLeaveClick');
+    await zmClient.leave();
+  }, [zmClient]);
+
+  const onEndClick = useCallback(async () => {
+    console.log('onEndClick');
+    await zmClient.leave(true);
+  }, [zmClient]);
+
   const onPassivelyStopShare = useCallback(({ reason }) => {
     console.log('passively stop reason:', reason);
     setIsStartedScreenShare(false);
@@ -243,6 +252,16 @@ const VideoFooter = (props: VideoFooterProps) => {
   const onRecordingChange = useCallback(() => {
     setRecordingStatus(recordingClient?.getCloudRecordingStatus() || '');
   }, [recordingClient]);
+
+  const onRecordingISOChange = useCallback(
+    (payload: any) => {
+      if (payload?.userId === zmClient.getSessionInfo().userId || payload?.status === RecordingStatus.Ask) {
+        setRecordingIsoStatus(payload?.status);
+      }
+      console.log('recording-iso-change', payload);
+    },
+    [zmClient]
+  );
 
   const onDialOutChange = useCallback((payload) => {
     setPhoneCallStatus(payload.code);
@@ -309,7 +328,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     });
   }, []);
   const onCanSeeMyScreen = useCallback(() => {
-    message.info('Users can now see your screen', 1000);
+    message.info('Users can now see your screen', 1);
   }, []);
 
   useEffect(() => {
@@ -317,6 +336,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('passively-stop-share', onPassivelyStopShare);
     zmClient.on('device-change', onDeviceChange);
     zmClient.on('recording-change', onRecordingChange);
+    zmClient.on('recording-iso-change', onRecordingISOChange);
     zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('video-capturing-change', onVideoCaptureChange);
     zmClient.on('share-audio-change', onShareAudioChange);
@@ -329,6 +349,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('passively-stop-share', onPassivelyStopShare);
       zmClient.off('device-change', onDeviceChange);
       zmClient.off('recording-change', onRecordingChange);
+      zmClient.off('recording-iso-change', onRecordingISOChange);
       zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('video-capturing-change', onVideoCaptureChange);
       zmClient.off('share-audio-change', onShareAudioChange);
@@ -456,6 +477,8 @@ const VideoFooter = (props: VideoFooterProps) => {
           <TranscriptionSubtitle text={caption.text} />
         </>
       )}
+      <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
+
       <AudioVideoStatisticModal
         visible={statisticVisible}
         setVisible={setStatisticVisible}
@@ -464,6 +487,17 @@ const VideoFooter = (props: VideoFooterProps) => {
         isMuted={isMuted}
         isStartedVideo={isStartedVideo}
       />
+
+      {recordingIsoStatus === RecordingStatus.Ask && (
+        <IsoRecordingModal
+          onClick={() => {
+            recordingClient?.acceptIndividualRecording();
+          }}
+          onCancel={() => {
+            recordingClient?.declineIndividualRecording();
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -15,7 +15,7 @@ const CallOutModal = (props: CallOutModalProps) => {
   const [form] = Form.useForm();
   return (
     <Modal
-      visible={visible}
+      open={visible}
       className="join-by-phone-dialog"
       title="Invite by phone"
       okText="Call"

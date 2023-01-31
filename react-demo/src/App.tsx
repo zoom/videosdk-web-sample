@@ -96,6 +96,7 @@ declare global {
     zmClient: any | undefined;
     mediaStream: any | undefined;
     crossOriginIsolated: boolean;
+    ltClient: any | undefined;
   }
 }
 

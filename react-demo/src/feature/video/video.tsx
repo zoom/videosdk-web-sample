@@ -17,6 +17,10 @@ import './video.scss';
 import { isSupportWebCodecs } from '../../utils/platform';
 import { isShallowEqual } from '../../utils/util';
 import { useSizeCallback } from '../../hooks/useSizeCallback';
+import { useAdvancedFeatureSwitch } from './hooks/useAdvancedFeatureSwith';
+import RemoteControlPanel, { RemoteControlIndication } from './components/remote-control';
+import { useCameraControl } from './hooks/useCameraControl';
+import { useNetworkQuality } from './hooks/useNetworkQuality';
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
@@ -55,6 +59,26 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   const { isRecieveSharing, isStartedShare, sharedContentDimension } = useShare(zmClient, mediaStream, shareRef);
 
   const { userVolumeList, setLocalVolume } = useLocalVolume();
+  const {
+    isControllingFarEnd,
+    currentControlledUser,
+    isInControl,
+    giveUpControl,
+    stopControl,
+    turnDown,
+    turnRight,
+    turnLeft,
+    turnUp,
+    zoomIn,
+    zoomOut,
+    switchCamera
+  } = useCameraControl(zmClient, mediaStream);
+
+  const { advancedSwitch, toggleAdjustVolume, toggleFarEndCameraControl } = useAdvancedFeatureSwitch(
+    zmClient,
+    mediaStream
+  );
+  const networkQuality = useNetworkQuality(zmClient);
 
   const isSharing = isRecieveSharing || isStartedShare;
   useEffect(() => {
@@ -80,7 +104,21 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       mediaStream?.updateSharingCanvasDimension(shareViewDimension.width, shareViewDimension.height);
     }
   }, [mediaStream, sharedContentDimension, shareViewDimension]);
-
+  const onAdvancedFeatureToggle = useCallback(
+    (userId: number, key: string) => {
+      if (key === 'volume') {
+        toggleAdjustVolume(userId);
+      } else if (key === 'farend') {
+        if (isControllingFarEnd) {
+          giveUpControl();
+        } else {
+          mediaStream?.requestFarEndCameraControl(userId);
+        }
+        // toggleFarEndCameraControl(userId);
+      }
+    },
+    [toggleAdjustVolume, giveUpControl, mediaStream, isControllingFarEnd]
+  );
   return (
     <div className="viewport">
       <div
@@ -135,6 +173,10 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                 isActive={activeVideo === user.userId}
                 volume={userVolumeList.find((u) => u.userId === user.userId)?.volume}
                 setLocalVolume={setLocalVolume}
+                advancedFeature={advancedSwitch[`${user.userId}`]}
+                onAdvancedFeatureToggle={onAdvancedFeatureToggle}
+                isUserCameraControlled={isControllingFarEnd}
+                networkQuality={networkQuality[`${user.userId}`]}
                 style={{
                   width: `${width}px`,
                   height: `${height}px`,
@@ -147,6 +189,19 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         </ul>
       </div>
       <VideoFooter className="video-operations" sharing shareRef={selfShareRef} />
+      {isControllingFarEnd && (
+        <RemoteControlPanel
+          turnDown={turnDown}
+          turnLeft={turnLeft}
+          turnRight={turnRight}
+          turnUp={turnUp}
+          zoomIn={zoomIn}
+          zoomOut={zoomOut}
+          switchCamera={switchCamera}
+          controlledName={currentControlledUser.displayName}
+        />
+      )}
+      {isInControl && <RemoteControlIndication stopCameraControl={stopControl} />}
       {totalPage > 1 && <Pagination page={page} totalPage={totalPage} setPage={setPage} inSharing={isSharing} />}
     </div>
   );
