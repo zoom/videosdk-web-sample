@@ -5,6 +5,7 @@ import { IconFont } from '../../../component/icon-font';
 import { LockOutlined, UnlockOutlined, UpOutlined, CheckOutlined } from '@ant-design/icons';
 import './screen-share.scss';
 import { SharePrivilege } from '@zoom/videosdk';
+import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 
 const { Button: DropdownButton } = Dropdown;
 interface ScreenShareButtonProps {
@@ -23,42 +24,33 @@ interface ScreenShareLockButtonProps {
 const ScreenShareButton = (props: ScreenShareButtonProps) => {
   const { isStartedScreenShare, sharePrivilege, isHostOrManager, onScreenShareClick, onSharePrivilegeClick } = props;
   const menu = [
-    {
-      label: 'Lock share',
-      value: SharePrivilege.Locked,
-      checked: sharePrivilege === SharePrivilege.Locked
-    },
-    {
-      label: 'One participant can share at a time',
-      value: SharePrivilege.Unlocked,
-      checked: sharePrivilege === SharePrivilege.Unlocked
-    },
-    {
-      label: 'Multiple participants can share simultaneously',
-      value: SharePrivilege.MultipleShare,
-      checked: sharePrivilege === SharePrivilege.MultipleShare
-    }
+    getAntdItem(
+      'Lock share',
+      `${SharePrivilege.Locked}`,
+      sharePrivilege === SharePrivilege.Locked && <CheckOutlined />
+    ),
+    getAntdItem(
+      'One participant can share at a time',
+      `${SharePrivilege.Unlocked}`,
+      sharePrivilege === SharePrivilege.Unlocked && <CheckOutlined />
+    ),
+    getAntdItem(
+      'Multiple participants can share simultaneously',
+      `${SharePrivilege.MultipleShare}`,
+      sharePrivilege === SharePrivilege.MultipleShare && <CheckOutlined />
+    )
   ];
   const onMenuItemClick = (payload: { key: any }) => {
     onSharePrivilegeClick?.(Number(payload.key));
   };
-  const overlayMenu = (
-    <Menu onClick={onMenuItemClick} theme="dark" className="microphone-menu">
-      {menu.map((e) => (
-        <Menu.Item key={`${e.value}`} icon={e.checked && <CheckOutlined />}>
-          {e.label}
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {isHostOrManager ? (
         <DropdownButton
-          className="screen-share-dropdown-button"
+          className="vc-dropdown-button"
           size="large"
-          overlay={overlayMenu}
+          menu={getAntdDropdownMenu(menu, onMenuItemClick)}
           onClick={onScreenShareClick}
           trigger={['click']}
           type="ghost"
@@ -69,7 +61,7 @@ const ScreenShareButton = (props: ScreenShareButtonProps) => {
         </DropdownButton>
       ) : (
         <Button
-          className={classNames('screen-share-button', {
+          className={classNames('screen-share-button', 'vc-button', {
             'started-share': isStartedScreenShare
           })}
           icon={<IconFont type="icon-share" />}

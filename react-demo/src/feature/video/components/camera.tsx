@@ -3,8 +3,8 @@ import { Button, Tooltip, Menu, Dropdown } from 'antd';
 import { CheckOutlined, UpOutlined, VideoCameraAddOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import ZoomMediaContext from '../../../context/media-context';
 import classNames from 'classnames';
-import './camera.scss';
 import { MediaDevice } from '../video-types';
+import { getAntdDropdownMenu, getAntdItem, MenuItem } from './video-footer-utils';
 interface CameraButtonProps {
   isStartedVideo: boolean;
   isMirrored?: boolean;
@@ -44,35 +44,34 @@ const CameraButton = (props: CameraButtonProps) => {
       onSwitchCamera(payload.key);
     }
   };
-  const menu = cameraList && cameraList.length > 0 && (
-    <Menu onClick={onMenuItemClick} theme="dark" className="camera-menu">
-      <Menu.ItemGroup title="Select a Camera">
-        {cameraList.map((item) => (
-          <Menu.Item key={item.deviceId} icon={item.deviceId === activeCamera && <CheckOutlined />}>
-            {item.label}
-          </Menu.Item>
-        ))}
-      </Menu.ItemGroup>
-      <Menu.Divider />
-      <Menu.Item key="mirror" icon={isMirrored && <CheckOutlined />}>
-        Mirror My Video
-      </Menu.Item>
-      {mediaStream?.isSupportVirtualBackground() && (
-        <Menu.Item key="blur" icon={isBlur && <CheckOutlined />}>
-          Blur My Background
-        </Menu.Item>
-      )}
-      <Menu.Divider />
-      <Menu.Item key="statistic">Video Statistic</Menu.Item>
-    </Menu>
-  );
+  const menuItems =
+    cameraList &&
+    cameraList.length > 0 &&
+    ([
+      getAntdItem(
+        'Select a Camera',
+        'camera',
+        undefined,
+        cameraList.map((item) =>
+          getAntdItem(item.label, item.deviceId, item.deviceId === activeCamera && <CheckOutlined />)
+        ),
+        'group'
+      ),
+      getAntdItem('', 'd1', undefined, undefined, 'divider'),
+      getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
+      mediaStream?.isSupportVirtualBackground()
+        ? getAntdItem('Blur My Background', 'blur', isBlur && <CheckOutlined />)
+        : undefined,
+      getAntdItem('', 'd2', undefined, undefined, 'divider'),
+      getAntdItem('Video Statistic', 'statistic')
+    ].filter(Boolean) as MenuItem[]);
   return (
     <div className={classNames('camera-footer', className)}>
-      {isStartedVideo && menu ? (
+      {isStartedVideo && menuItems ? (
         <Dropdown.Button
-          className="camera-dropdown-button"
+          className="vc-dropdown-button"
           size="large"
-          overlay={menu}
+          menu={getAntdDropdownMenu(menuItems, onMenuItemClick)}
           onClick={onCameraClick}
           trigger={['click']}
           type="ghost"
@@ -84,7 +83,7 @@ const CameraButton = (props: CameraButtonProps) => {
       ) : (
         <Tooltip title={`${isStartedVideo ? 'stop camera' : 'start camera'}`}>
           <Button
-            className={classNames('camere-button', className)}
+            className={classNames('vc-button', className)}
             icon={isStartedVideo ? <VideoCameraOutlined /> : <VideoCameraAddOutlined />}
             ghost={true}
             shape="circle"

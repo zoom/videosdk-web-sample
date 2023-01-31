@@ -4,6 +4,7 @@ interface SubsessionParticipant {
   userId: number;
   displayName: string;
   avatar?: string;
+  userGuid?: string;
 }
 export interface Subsession {
   subsessionName: string;

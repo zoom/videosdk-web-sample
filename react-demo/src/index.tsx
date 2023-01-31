@@ -12,7 +12,7 @@ import { b64DecodeUnicode, generateVideoToken } from './utils/util';
 let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
 // Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
 if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingArgs.signature) {
-  meetingArgs = { ...meetingArgs, ...devConfig };
+  meetingArgs = { ...devConfig, ...meetingArgs };
   meetingArgs.enforceGalleryView = true;
 }
 
@@ -63,19 +63,43 @@ if (meetingArgs.web) {
     meetingArgs.role = 1;
   }
 }
+
+if (!meetingArgs?.cloud_recording_option) {
+  meetingArgs.cloud_recording_option = "0";
+}
+if (!meetingArgs?.cloud_recording_election) {
+  meetingArgs.cloud_recording_election = '';
+}
+
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(
     meetingArgs.sdkKey,
     meetingArgs.sdkSecret,
     meetingArgs.topic,
     meetingArgs.password,
-    meetingArgs.userIdentity,
     meetingArgs.sessionKey,
-    parseInt(meetingArgs.role, 10)
+    meetingArgs.userIdentity,
+    parseInt(meetingArgs.role, 10),
+    meetingArgs.cloud_recording_option,
+    meetingArgs.cloud_recording_election
   );
+  console.log('=====================================');
+  console.log('meetingArgs', meetingArgs);
+
+  const urlArgs = {
+    topic: meetingArgs.topic,
+    name: meetingArgs.name,
+    password: meetingArgs.password,
+    sessionKey: meetingArgs.sessionKey,
+    userIdentity: meetingArgs.userIdentity,
+    role: meetingArgs.role || 1,
+    cloud_recording_option: meetingArgs.cloud_recording_option,
+    cloud_recording_election: meetingArgs.cloud_recording_election,
+    web: '1'
+  };
+  console.log('use url args');
+  console.log(window.location.origin + '/?' + new URLSearchParams(urlArgs).toString());
 }
-console.log('=====================================');
-console.log('meetingArgs', meetingArgs);
 const zmClient = ZoomVideo.createClient();
 ReactDOM.render(
   <React.StrictMode>

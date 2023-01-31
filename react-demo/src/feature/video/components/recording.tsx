@@ -3,7 +3,6 @@ import { RecordingStatus } from '@zoom/videosdk';
 import { Button, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { IconFont } from '../../../component/icon-font';
-import './recording.scss';
 
 export interface RecordButtonProps {
   text: string;
@@ -79,7 +78,7 @@ const RecordingButton = (props: RecordButtonProps) => {
   return (
     <Tooltip title={tipText}>
       <Button
-        className={classNames('recording-operation-button', {})}
+        className={classNames('vc-button')}
         icon={<IconFont type={isHover ? hoverIcon : icon} />}
         // eslint-disable-next-line react/jsx-boolean-value
         ghost={true}

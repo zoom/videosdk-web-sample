@@ -6,6 +6,7 @@
   height: 100vh;
   background-color: #000;
   display: flex;
+  overflow: hidden;
   .share-container{
     display: none;
     &.in-sharing {
