@@ -1,8 +1,10 @@
-# Zoom Video SDK Sample App - Web
+# Zoom Video SDK web sample
 
 Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/en/video-sdk-terms/).
 
-The [Zoom Video SDK](https://marketplace.zoom.us/docs/sdk/video/web) enables you to build custom video experiences with Zoom's core technology through a highly optimized WebAssembly module.
+The [Zoom Video SDK for web](https://developers.zoom.us/docs/video-sdk/web/) enables you to build custom video experiences on a webpage with Zoom's core technology through a highly optimized WebAssembly module.
+
+![Zoom Video SDK](/images/videosdk.gif)
 
 ## Installation
 
@@ -46,7 +48,7 @@ To get started, clone the repo:
    }
    ```
 
-   > Reminder to not publish this sample app as is. Replace the frontend signature generator with a [backend signature generator](https://marketplace.zoom.us/docs/sdk/video/auth#generate-the-video-sdk-jwt) to keep your SDK Secret safe.
+   > Reminder to not publish this sample app as is. Replace the Meeting SDK JWT generator with a [backend Meeting SDK JWT generator](https://developers.zoom.us/docs/video-sdk/auth/#generate-a-video-sdk-jwt) to keep your SDK Secret safe.
 
 1. Save `config.js` or `dev.ts` respectively.
 
@@ -58,10 +60,10 @@ To get started, clone the repo:
 
 1. Navigate to http://localhost:3000. For the `purejs-demo` click "Join" or for the `react-demo` click one of the feature boxes.
 
-> Learn more about [rendering multiple video streams](https://marketplace.zoom.us/docs/sdk/overview/websdk-gallery-view).
+> Learn more about [rendering multiple video streams](https://developers.zoom.us/docs/video-sdk/web/gallery-view/).
 
-For the full list of features and event listeners, as well as additional guides, see our [Video SDK docs](https://marketplace.zoom.us/docs/sdk/video/web).
+For the full list of features and event listeners, as well as additional guides, see our [Video SDK docs](https://developers.zoom.us/docs/video-sdk/web/).
 
 ## Need help?
 
-If you're looking for help, try [Developer Support](https://devsupport.zoom.us) or our [Developer Forum](https://devforum.zoom.us). Priority support is also available with [Premier Developer Support](https://zoom.us/docs/en-us/developer-support-plans.html) plans.
+If you're looking for help, try [Developer Support](https://devsupport.zoom.us) or our [Developer Forum](https://devforum.zoom.us). Priority support is also available with [Premier Developer Support](https://explore.zoom.us/docs/en-us/developer-support-plans.html) plans.
