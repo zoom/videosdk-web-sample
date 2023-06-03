@@ -1,77 +1,47 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import produce from 'immer';
-import { ZoomClient, MediaStream } from '../../../index-types';
-import { useParticipantsChange } from './useParticipantsChange';
+import { ZoomClient, MediaStream, Participant } from '../../../index-types';
 import type { AdvancedFeatureSwitch } from '../video-types';
 
-export const useAdvancedFeatureSwitch = (zmClient: ZoomClient, mediaStream: MediaStream | null) => {
+export const useAdvancedFeatureSwitch = (
+  zmClient: ZoomClient,
+  mediaStream: MediaStream | null,
+  participants: Array<Participant>
+) => {
   const [advancedSwitch, setAdvancedSwitch] = useState<Record<string, AdvancedFeatureSwitch>>({});
-  useParticipantsChange(zmClient, (participants, updatedParticipants) => {
-    if (!updatedParticipants) {
-      const data = participants.reduce((payload, current) => {
-        Object.assign(payload, {
-          [`${current.userId}`]: {
-            adjustVolumn: {
-              toggled: false,
-              enabled: current.audio === 'computer'
-            },
-            farEndCameraControl: {
-              toggled: false,
-              enabled: current.bVideoOn && mediaStream?.getFarEndCameraPTZCapability(current.userId)?.pan
-            }
+  useEffect(() => {
+    const concernedUsers = participants.filter((u) => u.audio !== '' || u.bVideoOn);
+    concernedUsers.forEach((user) => {
+      const { userId, audio, bVideoOn, isSpeakerOnly } = user;
+      setAdvancedSwitch(
+        produce((draft) => {
+          if (Object.hasOwn(draft, `${userId}`)) {
+            const element = draft[`${userId}`];
+            element.adjustVolumn.enabled = audio === 'computer' && !isSpeakerOnly;
+            element.farEndCameraControl.enabled =
+              zmClient.getSessionInfo().userId !== userId &&
+              !!mediaStream?.getFarEndCameraPTZCapability(userId)?.pan &&
+              bVideoOn;
+          } else {
+            const state = {
+              adjustVolumn: {
+                toggled: false,
+                enabled: audio === 'computer' && !isSpeakerOnly
+              },
+              farEndCameraControl: {
+                toggled: false,
+                enabled:
+                  zmClient.getSessionInfo().userId !== userId &&
+                  !!mediaStream?.getFarEndCameraPTZCapability(userId)?.pan &&
+                  bVideoOn
+              }
+            };
+            Object.assign(draft, { [`${userId}`]: state });
           }
-        });
-        return payload;
-      }, {});
-      setAdvancedSwitch(data);
-    } else {
-      const concernedItems = updatedParticipants.filter(
-        (item) => item.audio !== undefined || item.bVideoOn !== undefined
+        })
       );
-      concernedItems.forEach((item) => {
-        const { userId } = item;
-        if (Object.hasOwn(advancedSwitch, `${userId}`)) {
-          setAdvancedSwitch(
-            produce((draft) => {
-              const element = draft[`${userId}`];
-              if (item.audio !== undefined) {
-                element.adjustVolumn.enabled = item.audio === 'computer';
-              } else if (item.bVideoOn !== undefined) {
-                element.farEndCameraControl.enabled =
-                  zmClient.getSessionInfo().userId !== userId &&
-                  !!mediaStream?.getFarEndCameraPTZCapability(userId)?.pan &&
-                  item.bVideoOn;
-              }
-            })
-          );
-        } else {
-          setAdvancedSwitch(
-            produce((draft) => {
-              const initState = {
-                adjustVolumn: {
-                  toggled: false,
-                  enabled: false
-                },
-                farEndCameraControl: {
-                  toggled: false,
-                  enabled: false
-                }
-              };
-              if (item.audio !== undefined) {
-                initState.adjustVolumn.enabled = item.audio === 'computer';
-              } else if (item.bVideoOn !== undefined) {
-                initState.farEndCameraControl.enabled =
-                  zmClient.getSessionInfo().userId !== userId &&
-                  !!mediaStream?.getFarEndCameraPTZCapability(userId)?.pan &&
-                  item.bVideoOn;
-              }
-              Object.assign(draft, { [`${userId}`]: initState });
-            })
-          );
-        }
-      });
-    }
-  });
+    });
+  }, [zmClient, mediaStream, participants]);
   const toggleAdjustVolume = useCallback((userId: number) => {
     setAdvancedSwitch(
       produce((draft) => {

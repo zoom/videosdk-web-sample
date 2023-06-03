@@ -10,7 +10,7 @@ export function useRenderVideo(
   layout: CellLayout[],
   subscribedVideos: number[],
   participants: Participant[],
-  currentUserId?:number,
+  currentUserId?: number
 ) {
   const previousSubscribedVideos = usePrevious(subscribedVideos);
   const previousLayout = usePrevious(layout);
@@ -22,22 +22,15 @@ export function useRenderVideo(
   const isSkipSelfVideo = !window.crossOriginIsolated;
   useEffect(() => {
     if (videoRef.current && layout && layout.length > 0 && isVideoDecodeReady) {
-      const addedSubscribers = subscribedVideos.filter(
-        (id) => !(previousSubscribedVideos || []).includes(id),
-      );
+      const addedSubscribers = subscribedVideos.filter((id) => !(previousSubscribedVideos || []).includes(id));
       const removedSubscribers = (previousSubscribedVideos || []).filter(
-        (id: number) => !subscribedVideos.includes(id),
+        (id: number) => !subscribedVideos.includes(id)
       );
-      const unalteredSubscribers = subscribedVideos.filter((id) =>
-        (previousSubscribedVideos || []).includes(id),
-      );
+      const unalteredSubscribers = subscribedVideos.filter((id) => (previousSubscribedVideos || []).includes(id));
       if (removedSubscribers.length > 0) {
         removedSubscribers.forEach(async (userId: number) => {
-          if( (!isSkipSelfVideo ||(isSkipSelfVideo&&userId!==currentUserId))){
-            await mediaStream?.stopRenderVideo(
-              videoRef.current as HTMLCanvasElement,
-              userId,
-            );
+          if (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId)) {
+            await mediaStream?.stopRenderVideo(videoRef.current as HTMLCanvasElement, userId);
           }
         });
       }
@@ -45,17 +38,9 @@ export function useRenderVideo(
         addedSubscribers.forEach(async (userId) => {
           const index = participants.findIndex((user) => user.userId === userId);
           const cellDimension = layout[index];
-          if (cellDimension && (!isSkipSelfVideo ||(isSkipSelfVideo&&userId!==currentUserId))) {
+          if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
             const { width, height, x, y, quality } = cellDimension;
-            await mediaStream?.renderVideo(
-              videoRef.current as HTMLCanvasElement,
-              userId,
-              width,
-              height,
-              x,
-              y,
-              quality,
-            );
+            await mediaStream?.renderVideo(videoRef.current as HTMLCanvasElement, userId, width, height, x, y, quality);
           }
         });
       }
@@ -63,28 +48,15 @@ export function useRenderVideo(
         // layout changed
         if (
           previousLayout &&
-          (layout.length !== previousLayout.length ||
-            !isShallowEqual(layout[0], previousLayout[0]))
+          (layout.length !== previousLayout.length || !isShallowEqual(layout[0], previousLayout[0]))
         ) {
           unalteredSubscribers.forEach((userId) => {
             const index = participants.findIndex((user) => user.userId === userId);
             const cellDimension = layout[index];
-            if (cellDimension  &&(!isSkipSelfVideo ||(isSkipSelfVideo&&userId!==currentUserId))) {
+            if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
               const { width, height, x, y, quality } = cellDimension;
-              if (
-                previousLayout &&
-                previousLayout[index] &&
-                previousLayout[index].quality !== quality
-              ) {
-                mediaStream?.renderVideo(
-                  videoRef.current as HTMLCanvasElement,
-                  userId,
-                  width,
-                  height,
-                  x,
-                  y,
-                  quality,
-                );
+              if (previousLayout?.[index] && previousLayout[index].quality !== quality) {
+                mediaStream?.renderVideo(videoRef.current as HTMLCanvasElement, userId, width, height, x, y, quality);
               }
               mediaStream?.adjustRenderedVideoPosition(
                 videoRef.current as HTMLCanvasElement,
@@ -92,25 +64,21 @@ export function useRenderVideo(
                 width,
                 height,
                 x,
-                y,
+                y
               );
             }
           });
         }
         // the order of participants changed
         const participantsIds = participants.map((user) => user.userId);
-        const previousParticipantsIds = previousParticipants?.map(
-          (user) => user.userId,
-        );
+        const previousParticipantsIds = previousParticipants?.map((user) => user.userId);
         if (participantsIds.join('-') !== previousParticipantsIds?.join('-')) {
           unalteredSubscribers.forEach((userId) => {
             const index = participantsIds.findIndex((id) => id === userId);
-            const previousIndex = previousParticipantsIds?.findIndex(
-              (id) => id === userId,
-            );
+            const previousIndex = previousParticipantsIds?.findIndex((id) => id === userId);
             if (index !== previousIndex) {
               const cellDimension = layout[index];
-              if (cellDimension &&  (!isSkipSelfVideo ||(isSkipSelfVideo&&userId!==currentUserId))) {
+              if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
                 const { width, height, x, y } = cellDimension;
                 mediaStream?.adjustRenderedVideoPosition(
                   videoRef.current as HTMLCanvasElement,
@@ -118,7 +86,7 @@ export function useRenderVideo(
                   width,
                   height,
                   x,
-                  y,
+                  y
                 );
               }
             }
@@ -141,25 +109,13 @@ export function useRenderVideo(
   ]);
 
   useEffect(() => {
-    if (
-      previousIsVideoDecodeReady === false &&
-      isVideoDecodeReady === true &&
-      subscribedVideos.length > 0
-    ) {
+    if (previousIsVideoDecodeReady === false && isVideoDecodeReady === true && subscribedVideos.length > 0) {
       subscribedVideos.forEach(async (userId) => {
         const index = participants.findIndex((user) => user.userId === userId);
         const cellDimension = layout[index];
-        if (cellDimension &&(!isSkipSelfVideo ||(isSkipSelfVideo&&userId!==currentUserId))) {
+        if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
           const { width, height, x, y, quality } = cellDimension;
-          await mediaStream?.renderVideo(
-            videoRef.current as HTMLCanvasElement,
-            userId,
-            width,
-            height,
-            x,
-            y,
-            quality,
-          );
+          await mediaStream?.renderVideo(videoRef.current as HTMLCanvasElement, userId, width, height, x, y, quality);
         }
       });
     }

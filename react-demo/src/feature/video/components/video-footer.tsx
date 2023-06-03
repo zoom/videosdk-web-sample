@@ -61,6 +61,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isComputerAudioDisabled, setIsComputerAudioDisabled] = useState(false);
   const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
   const [caption, setCaption] = useState({ text: '', isOver: false });
+  const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
 
   const { mediaStream } = useContext(ZoomMediaContext);
   const liveTranscriptionClient = useContext(LiveTranscriptionContext);
@@ -88,7 +89,15 @@ const VideoFooter = (props: VideoFooterProps) => {
         await mediaStream?.startVideo(startVideoOptions);
         if (!mediaStream?.isSupportMultipleVideos()) {
           const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
-          mediaStream?.renderVideo(canvasElement, zmClient.getSessionInfo().userId, 254, 143, 0, 0, 3);
+          mediaStream?.renderVideo(
+            canvasElement,
+            zmClient.getSessionInfo().userId,
+            canvasElement.width,
+            canvasElement.height,
+            0,
+            0,
+            3
+          );
         }
       }
 
@@ -142,6 +151,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       if (activeCamera !== key) {
         await mediaStream.switchCamera(key);
         setActiveCamera(mediaStream.getActiveCamera());
+        setActivePlaybackUrl('');
       }
     }
   };
@@ -152,17 +162,10 @@ const VideoFooter = (props: VideoFooterProps) => {
   const onBlurBackground = async () => {
     const vbStatus = mediaStream?.getVirtualbackgroundStatus();
     if (vbStatus?.isVBPreloadReady) {
-      if (vbStatus?.isVBConfigured) {
-        if (!isBlur) {
-          await mediaStream?.updateVirtualBackgroundImage('blur');
-        } else {
-          await mediaStream?.updateVirtualBackgroundImage(undefined);
-        }
+      if (!isBlur) {
+        await mediaStream?.updateVirtualBackgroundImage('blur');
       } else {
-        if (!isBlur) {
-          await mediaStream?.stopVideo();
-          await mediaStream?.startVideo({ hd: true, virtualBackground: { imageUrl: 'blur' } });
-        }
+        await mediaStream?.updateVirtualBackgroundImage(undefined);
       }
 
       setIsBlur(!isBlur);
@@ -296,14 +299,19 @@ const VideoFooter = (props: VideoFooterProps) => {
       setIsStartedVideo(false);
     }
   }, []);
-  const onShareAudioChange = useCallback((payload) => {
-    const { state } = payload;
-    if (state === 'on') {
-      setIsComputerAudioDisabled(true);
-    } else if (state === 'off') {
-      setIsComputerAudioDisabled(false);
-    }
-  }, []);
+  const onShareAudioChange = useCallback(
+    (payload) => {
+      const { state } = payload;
+      if (!mediaStream?.isSupportMicrophoneAndShareAudioSimultaneously()) {
+        if (state === 'on') {
+          setIsComputerAudioDisabled(true);
+        } else if (state === 'off') {
+          setIsComputerAudioDisabled(false);
+        }
+      }
+    },
+    [mediaStream]
+  );
   const onHostAskToUnmute = useCallback((payload) => {
     const { reason } = payload;
     console.log(`Host ask to unmute the audio.`, reason);
@@ -326,6 +334,20 @@ const VideoFooter = (props: VideoFooterProps) => {
   const onCanSeeMyScreen = useCallback(() => {
     message.info('Users can now see your screen', 1);
   }, []);
+  const onSelectVideoPlayback = useCallback(
+    async (url: string) => {
+      if (activePlaybackUrl !== url) {
+        await mediaStream?.switchCamera({ url, loop: true });
+        if (isStartedAudio) {
+          await mediaStream?.switchMicrophone({ url, loop: true });
+        } else {
+          await mediaStream?.startAudio({ mediaFile: { url, loop: true } });
+        }
+        setActivePlaybackUrl(url);
+      }
+    },
+    [isStartedAudio, activePlaybackUrl, mediaStream]
+  );
 
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
@@ -366,7 +388,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     onHostAskToUnmute,
     onCaptionStatusChange,
     onCaptionMessage,
-    onCanSeeMyScreen
+    onCanSeeMyScreen,
+    onRecordingISOChange
   ]);
   useUnmount(() => {
     if (isStartedAudio) {
@@ -396,11 +419,13 @@ const VideoFooter = (props: VideoFooterProps) => {
     if (mediaStream && zmClient.getSessionInfo().isInMeeting) {
       mediaStream.subscribeAudioStatisticData();
       mediaStream.subscribeVideoStatisticData();
+      mediaStream.subscribeShareStatisticData();
     }
     return () => {
       if (zmClient.getSessionInfo().isInMeeting) {
         mediaStream?.unsubscribeAudioStatisticData();
         mediaStream?.unsubscribeVideoStatisticData();
+        mediaStream?.unsubscribeShareStatisticData();
       }
     };
   }, [mediaStream, zmClient]);
@@ -436,6 +461,8 @@ const VideoFooter = (props: VideoFooterProps) => {
           setStatisticVisible(true);
         }}
         onBlurBackground={onBlurBackground}
+        onSelectVideoPlayback={onSelectVideoPlayback}
+        activePlaybackUrl={activePlaybackUrl}
         cameraList={cameraList}
         activeCamera={activeCamera}
         isMirrored={isMirrored}
