@@ -13,13 +13,40 @@ import { usePagination } from './hooks/usePagination';
 import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useShare } from './hooks/useShare';
 import './video.scss';
-import { isAndroidBrowser, isSupportOffscreenCanvas, isSupportWebCodecs } from '../../utils/platform';
+import { isSupportWebCodecs } from '../../utils/platform';
 import { isShallowEqual } from '../../utils/util';
 import { useSizeCallback } from '../../hooks/useSizeCallback';
 import { SELF_VIDEO_ID } from './video-constants';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
-const isUseVideoElementToDrawSelfVideo = isAndroidBrowser() || isSupportOffscreenCanvas();
-
+interface SelfViewContainer {
+  id: string;
+  className: string;
+  style?: Record<string, any>;
+  isRenderSelfViewWithVideoElement: boolean;
+}
+function getStyleAttributeNumericalValue(attr: string) {
+  const v = /(\d+)/.exec(attr)?.[1];
+  return v ? Number(v) : 0;
+}
+function SelfViewContainer(props: SelfViewContainer) {
+  const { isRenderSelfViewWithVideoElement, ...restProps } = props;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { style } = restProps;
+  const { mediaStream } = useContext(ZoomMediaContext);
+  useEffect(() => {
+    if (!isRenderSelfViewWithVideoElement && canvasRef.current && style) {
+      const width = getStyleAttributeNumericalValue(style.width);
+      const height = getStyleAttributeNumericalValue(style.height);
+      try {
+        canvasRef.current.width = width;
+        canvasRef.current.height = height;
+      } catch (e) {
+        mediaStream?.updateVideoCanvasDimension(canvasRef.current, width, height);
+      }
+    }
+  }, [isRenderSelfViewWithVideoElement, style, mediaStream]);
+  return isRenderSelfViewWithVideoElement ? <video {...restProps} /> : <canvas ref={canvasRef} {...restProps} />;
+}
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
   const {
@@ -63,7 +90,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     (user) => user.userId === zmClient.getCurrentUserInfo()?.userId
   );
   let selfVideoLayout = null;
-  if (currentUserIndex) {
+  if (currentUserIndex > -1) {
     const item = videoLayout[currentUserIndex];
     if (item && canvasDimension) {
       selfVideoLayout = { ...item, y: canvasDimension.height - item.y - item.height };
@@ -110,7 +137,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           }}
         >
           <canvas className={classnames('share-canvas', { hidden: isStartedShare })} ref={shareRef} />
-          {isSupportWebCodecs() ? (
+          {mediaStream?.isStartShareScreenWithVideoElement() ? (
             <video
               className={classnames('share-canvas', {
                 hidden: isRecieveSharing
@@ -133,24 +160,25 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
-        {isUseVideoElementToDrawSelfVideo && (
-          <video
-            id={SELF_VIDEO_ID}
-            className={classnames('self-video-non-sab')}
-            style={
-              selfVideoLayout
-                ? {
-                    display: 'block',
-                    width: `${selfVideoLayout.width}px`,
-                    height: `${selfVideoLayout.height}px`,
-                    top: `${selfVideoLayout.y}px`,
-                    left: `${selfVideoLayout.x}px`,
-                    pointerEvents: 'none'
-                  }
-                : undefined
-            }
-          />
-        )}
+
+        <SelfViewContainer
+          id={SELF_VIDEO_ID}
+          className={classnames('self-video-non-sab')}
+          isRenderSelfViewWithVideoElement={!!mediaStream?.isRenderSelfViewWithVideoElement()}
+          style={
+            selfVideoLayout
+              ? {
+                  display: 'block',
+                  width: `${selfVideoLayout.width}px`,
+                  height: `${selfVideoLayout.height}px`,
+                  top: `${selfVideoLayout.y}px`,
+                  left: `${selfVideoLayout.x}px`,
+                  pointerEvents: 'none'
+                }
+              : undefined
+          }
+        />
+
         <ul className="avatar-list">
           {visibleParticipants.map((user, index) => {
             if (index > videoLayout.length - 1) {

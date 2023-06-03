@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useState, useCallback, useEffect, MutableRefObject } from 'react';
+import { useState, useCallback, useRef, useEffect, MutableRefObject } from 'react';
 import { useSizeCallback, useMount } from '../../../hooks';
 import { MediaStream } from '../../../index-types';
 export function useCanvasDimension(
@@ -7,15 +7,12 @@ export function useCanvasDimension(
   videoRef: MutableRefObject<HTMLCanvasElement | null>
 ) {
   const [dimension, setDimension] = useState({ width: 0, height: 0 });
+  const debounceRef = useRef(_.debounce(setDimension, 300));
   const onCanvasResize = useCallback(
     ({ width, height }) => {
       if (videoRef) {
-        _.debounce((...args) => {
-          setDimension({
-            width: args[0],
-            height: args[1]
-          });
-        }, 300).call(null, width, height);
+        // eslint-disable-next-line no-useless-call
+        debounceRef.current({ width, height });
       }
     },
     [videoRef]
