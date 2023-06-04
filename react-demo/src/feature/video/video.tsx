@@ -76,7 +76,8 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
 
   const { advancedSwitch, toggleAdjustVolume, toggleFarEndCameraControl } = useAdvancedFeatureSwitch(
     zmClient,
-    mediaStream
+    mediaStream,
+    visibleParticipants
   );
   const networkQuality = useNetworkQuality(zmClient);
 
@@ -135,7 +136,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           }}
         >
           <canvas className={classnames('share-canvas', { hidden: isStartedShare })} ref={shareRef} />
-          {isSupportWebCodecs() ? (
+          {mediaStream?.isStartShareScreenWithVideoElement() ? (
             <video
               className={classnames('share-canvas', {
                 hidden: isRecieveSharing
