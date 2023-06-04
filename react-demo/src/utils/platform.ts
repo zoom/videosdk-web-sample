@@ -43,6 +43,25 @@ export function isAndroidBrowser() {
 export function isAndroidOrIOSBrowser() {
   return isAndroidBrowser() || isIOSMobile();
 }
+class OffscreenCanvasCapability {
+  private value!: boolean;
+  public get isSupported() {
+    if (this.value === undefined) {
+      const isOffscreenCanvas = typeof (window as any).OffscreenCanvas === 'function';
+      if (isOffscreenCanvas) {
+        const canvas = new (window as any).OffscreenCanvas(1, 1);
+        canvas.addEventListener('webglcontextlost', (event: any) => {
+          event.preventDefault();
+        });
+        this.value = !!canvas.getContext('webgl');
+      } else {
+        this.value = false;
+      }
+    }
+    return this.value;
+  }
+}
+const offscreenCanvasCapality = new OffscreenCanvasCapability();
 export function isSupportOffscreenCanvas() {
-  return typeof (window as any).OffscreenCanvas === 'function';
+  return offscreenCanvasCapality.isSupported;
 }

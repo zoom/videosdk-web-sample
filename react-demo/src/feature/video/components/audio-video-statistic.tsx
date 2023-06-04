@@ -159,6 +159,8 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
   const [audioDecodingStatistic, setAudioDecodingStatistic] = useState<AudioQosData>();
   const [videoEncodingStatistic, setVideoEncodingStatistic] = useState<VideoQosData>();
   const [videoDecodingStatistic, setVideoDecodingStatistic] = useState<VideoQosData>();
+  const [shareEncodingStatistic, setShareEncodingStatistic] = useState<VideoQosData>();
+  const [shareDecodingStatistic, setShareDecodingStatistic] = useState<VideoQosData>();
   const videoDecodeTimerRef = useRef(0);
   const audioDecodeTimerRef = useRef(0);
   const onTabChange = (key: string) => {
@@ -208,16 +210,34 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
       }, 2000);
     }
   }, []);
+  const onShareStatisticChange = useCallback((payload) => {
+    const {
+      data: { encoding, ...restProps }
+    } = payload;
+    if (encoding) {
+      setShareEncodingStatistic({ ...restProps });
+    } else {
+      setShareDecodingStatistic({ ...restProps });
+      clearVideoTimer();
+      // Reset video decode data if no data come in over 2 seconds
+      videoDecodeTimerRef.current = window.setTimeout(() => {
+        setShareDecodingStatistic(VideoQosDataShape);
+      }, 2000);
+    }
+  }, []);
   const audioDataSource = getDataSouce(AudioMetrics, audioEncodingStatistic, audioDecodingStatistic);
   const videoDataSource = getDataSouce(VideoMetrics, videoEncodingStatistic, videoDecodingStatistic);
+  const shareDataSource = getDataSouce(VideoMetrics, shareEncodingStatistic, shareDecodingStatistic);
   useEffect(() => {
     zmclient.on('audio-statistic-data-change', onAudioStatisticChange);
     zmclient.on('video-statistic-data-change', onVideoStatisticChange);
+    zmclient.on('share-statistic-data-change', onShareStatisticChange);
     return () => {
       zmclient.off('audio-statistic-data-change', onAudioStatisticChange);
       zmclient.off('video-statistic-data-change', onVideoStatisticChange);
+      zmclient.off('share-statistic-data-change', onShareStatisticChange);
     };
-  }, [zmclient, onAudioStatisticChange, onVideoStatisticChange]);
+  }, [zmclient, onAudioStatisticChange, onVideoStatisticChange, onShareStatisticChange]);
   useEffect(() => {
     if (!isStartedAudio || isMuted) {
       setAudioEncodingStatistic(AudioQosDataShape);
@@ -248,7 +268,13 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
     clearVideoTimer();
   });
   return (
-    <Modal open={visible} onCancel={() => setVisible(false)} destroyOnClose footer={null} title="Audio/Video Statistic">
+    <Modal
+      open={visible}
+      onCancel={() => setVisible(false)}
+      destroyOnClose
+      footer={null}
+      title="Audio/Video/Share Statistic"
+    >
       <div>
         <Tabs onChange={onTabChange} activeKey={tab} type="card" size="large">
           <TabPane tab="Audio" key="audio">
@@ -256,6 +282,9 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
           </TabPane>
           <TabPane tab="Video" key="video">
             <Table dataSource={videoDataSource} columns={columns} pagination={false} />
+          </TabPane>
+          <TabPane tab="Share" key="share">
+            <Table dataSource={shareDataSource} columns={columns} pagination={false} />
           </TabPane>
         </Tabs>
       </div>

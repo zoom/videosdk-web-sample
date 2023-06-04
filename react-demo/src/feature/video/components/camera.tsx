@@ -14,10 +14,17 @@ interface CameraButtonProps {
   onMirrorVideo?: () => void;
   onVideoStatistic?: () => void;
   onBlurBackground?: () => void;
+  onSelectVideoPlayback?: (url: string) => void;
   className?: string;
   cameraList?: MediaDevice[];
   activeCamera?: string;
+  activePlaybackUrl?: string;
 }
+const videoPlaybacks = [
+  { title: 'Video 1', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+  { title: 'Video 2', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
+  { title: 'Video 3', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' }
+];
 const CameraButton = (props: CameraButtonProps) => {
   const {
     isStartedVideo,
@@ -26,11 +33,13 @@ const CameraButton = (props: CameraButtonProps) => {
     activeCamera,
     isMirrored,
     isBlur,
+    activePlaybackUrl,
     onCameraClick,
     onSwitchCamera,
     onMirrorVideo,
     onVideoStatistic,
-    onBlurBackground
+    onBlurBackground,
+    onSelectVideoPlayback
   } = props;
   const { mediaStream } = useContext(ZoomMediaContext);
   const onMenuItemClick = (payload: { key: any }) => {
@@ -40,6 +49,8 @@ const CameraButton = (props: CameraButtonProps) => {
       onVideoStatistic?.();
     } else if (payload.key === 'blur') {
       onBlurBackground?.();
+    } else if (/^https:\/\//.test(payload.key)) {
+      onSelectVideoPlayback?.(payload.key);
     } else {
       onSwitchCamera(payload.key);
     }
@@ -54,6 +65,15 @@ const CameraButton = (props: CameraButtonProps) => {
         undefined,
         cameraList.map((item) =>
           getAntdItem(item.label, item.deviceId, item.deviceId === activeCamera && <CheckOutlined />)
+        ),
+        'group'
+      ),
+      getAntdItem(
+        'Select a Video Playback',
+        'playback',
+        undefined,
+        videoPlaybacks.map((item) =>
+          getAntdItem(item.title, item.url, item.url === activePlaybackUrl && <CheckOutlined />)
         ),
         'group'
       ),
