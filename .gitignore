@@ -5,3 +5,5 @@
 /purejs-demo/package-lock.json
 /react-demo/package-lock.json
 update-version.js
+export.sh
+/export
