@@ -64,7 +64,6 @@ module.exports = {
   devServer: {
     host: '0.0.0.0',
     port: 3000,
-    hot: true,
     https: https
       ? {
           cert: './localhost.crt',
@@ -88,7 +87,6 @@ module.exports = {
     }
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development'),
       'process.env.BABEL_ENV': JSON.stringify('development')
