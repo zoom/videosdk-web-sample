@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useContext } from 'react';
 import { Input, Button } from 'antd';
-import SubsessionContext from '../../../context/subsession-context';
 import './broadcast-panel.scss';
+import ZoomContext from '../../../context/zoom-context';
 const { TextArea } = Input;
 interface BroadcastPanelProps {
   afterBroadcast?: () => void;
@@ -9,7 +9,8 @@ interface BroadcastPanelProps {
 const BroadcastPanel = (props: BroadcastPanelProps) => {
   const { afterBroadcast } = props;
   const [content, setContent] = useState<string>('');
-  const ssClient = useContext(SubsessionContext);
+  const zmClient = useContext(ZoomContext);
+  const ssClient = zmClient.getSubsessionClient();
   const onTextChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(event.target.value);
   }, []);

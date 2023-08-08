@@ -13,7 +13,7 @@
     "crypto-js": "^4.0.0",
     "immer": "^9.0.6",
     "js-base64": "^3.6.0",
-    "jsrsasign": "^10.6.1",
+    "jsrsasign": "^10.5.26",
     "lodash": "^4.17.21",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -26,7 +26,8 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "trace-error": "tsc --traceResolution"
   },
   "eslintConfig": {
     "extends": [
@@ -54,7 +55,7 @@
     "@types/lodash": "^4.14.168",
     "@types/react": "17.0.2",
     "@types/react-dom": "17.0.2",
-    "@types/react-router-dom": "^5.1.7",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "copy-webpack-plugin": "6.2.1",
@@ -63,7 +64,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.6.2",
-    "react-app-rewired": "^2.2.1",
+    "react-app-rewired": "2.2.1",
     "sass": "1.32.8",
     "sass-loader": "10.1.1",
     "typescript": "^4.3.5",
