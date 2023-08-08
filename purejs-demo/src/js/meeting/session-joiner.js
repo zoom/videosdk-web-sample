@@ -1,7 +1,8 @@
+import { v4 as uuidv4 } from 'uuid';
 import sessionConfig from '../config';
 import { generateSessionToken } from '../tool';
 import initClientEventListeners from './session/client-event-listeners';
-import initButtonClickHandlers from "./session/button-click-handlers";
+import initButtonClickHandlers from './session/button-click-handlers';
 import state from './session/simple-state';
 
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -25,10 +26,13 @@ const joinSession = async (zmClient) => {
     sessionConfig.sdkSecret,
     sessionConfig.topic,
     sessionConfig.password,
-    sessionConfig.sessionKey
+    sessionConfig.sessionKey,
+    '',
+    '',
+    uuidv4()
   );
 
-    let mediaStream;
+  let mediaStream;
 
   const initAndJoinSession = async () => {
     await zmClient.init(zmClientInitParams.language, zmClientInitParams.dependentAssets);
@@ -50,32 +54,32 @@ const joinSession = async (zmClient) => {
     }
   };
 
-    const join = async () => {
-        console.log('======= Initializing video session =======');
-        await initAndJoinSession();
-        /**
-         * Note: it is STRONGLY recommended to initialize the client listeners as soon as 
-         * the session is initialized. Once the user joins the session, updates are sent to
-         * the event listeners that help update the session's participant state.
-         * 
-         * If you choose not to do so, you'll have to manually deal with race conditions.
-         * You should be able to call "zmClient.getAllUser()" after the app has reached 
-         * steady state, meaning a sufficiently-long time
-         */
-        console.log('======= Initializing client event handlers =======');
-        initClientEventListeners(zmClient, mediaStream);
-        console.log('======= Starting audio muted =======');
-        if (!isSafari) {
-              await startAudioMuted();
-            }
+  const join = async () => {
+    console.log('======= Initializing video session =======');
+    await initAndJoinSession();
+    /**
+     * Note: it is STRONGLY recommended to initialize the client listeners as soon as
+     * the session is initialized. Once the user joins the session, updates are sent to
+     * the event listeners that help update the session's participant state.
+     *
+     * If you choose not to do so, you'll have to manually deal with race conditions.
+     * You should be able to call "zmClient.getAllUser()" after the app has reached
+     * steady state, meaning a sufficiently-long time
+     */
+    console.log('======= Initializing client event handlers =======');
+    initClientEventListeners(zmClient, mediaStream);
+    console.log('======= Starting audio muted =======');
+    if (!isSafari) {
+      await startAudioMuted();
+    }
 
-        console.log('======= Initializing button click handlers =======');
-        await initButtonClickHandlers(zmClient, mediaStream);
-        console.log('======= Session joined =======');
-    };
+    console.log('======= Initializing button click handlers =======');
+    await initButtonClickHandlers(zmClient, mediaStream);
+    console.log('======= Session joined =======');
+  };
 
-    await join();
-    return zmClient;
+  await join();
+  return zmClient;
 };
 
 export default joinSession;
