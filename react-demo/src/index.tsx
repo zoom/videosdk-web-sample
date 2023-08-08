@@ -65,10 +65,18 @@ if (meetingArgs.web) {
 }
 
 if (!meetingArgs?.cloud_recording_option) {
-  meetingArgs.cloud_recording_option = "0";
+  meetingArgs.cloud_recording_option = '0';
 }
 if (!meetingArgs?.cloud_recording_election) {
   meetingArgs.cloud_recording_election = '';
+}
+
+if (meetingArgs?.telemetry_tracking_id) {
+  try {
+    meetingArgs.telemetry_tracking_id = b64DecodeUnicode(meetingArgs.telemetry_tracking_id);
+  } catch (e) {}
+} else {
+  meetingArgs.telemetry_tracking_id = '';
 }
 
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
@@ -81,7 +89,8 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     meetingArgs.userIdentity,
     parseInt(meetingArgs.role, 10),
     meetingArgs.cloud_recording_option,
-    meetingArgs.cloud_recording_election
+    meetingArgs.cloud_recording_election,
+    meetingArgs.telemetry_tracking_id
   );
   console.log('=====================================');
   console.log('meetingArgs', meetingArgs);
@@ -95,6 +104,7 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     role: meetingArgs.role || 1,
     cloud_recording_option: meetingArgs.cloud_recording_option,
     cloud_recording_election: meetingArgs.cloud_recording_election,
+    telemetry_tracking_id: meetingArgs.telemetry_tracking_id,
     web: '1'
   };
   console.log('use url args');

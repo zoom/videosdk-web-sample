@@ -5,7 +5,6 @@ import { ChatPrivilege } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';
 import { ChatReceiver, ChatRecord } from './chat-types';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
-import ChatContext from '../../context/chat-context';
 import ChatMessageItem from './component/chat-message-item';
 import ChatReceiverContainer from './component/chat-receiver';
 
@@ -14,7 +13,7 @@ import './chat.scss';
 const { TextArea } = Input;
 const ChatContainer = () => {
   const zmClient = useContext(ZoomContext);
-  const chatClient = useContext(ChatContext);
+  const chatClient = zmClient.getChatClient();
   const [chatRecords, setChatRecords] = useState<ChatRecord[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [chatReceivers, setChatReceivers] = useState<ChatReceiver[]>([]);
