@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, useCallback, useReducer, useMemo } from 'react';
+import { useEffect, useContext, useState, useCallback, useReducer, useMemo } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import ZoomVideo, { ConnectionState, ReconnectReason } from '@zoom/videosdk';
 import { message, Modal } from 'antd';
@@ -11,24 +11,13 @@ import VideoNonSAB from './feature/video/video-non-sab';
 import Preview from './feature/preview/preview';
 import ZoomContext from './context/zoom-context';
 import ZoomMediaContext from './context/media-context';
-import ChatContext from './context/chat-context';
-import CommandContext from './context/cmd-context';
-import LiveTranscriptionContext from './context/live-transcription';
-import RecordingContext from './context/recording-context';
 import LoadingLayer from './component/loading-layer';
 import Chat from './feature/chat/chat';
 import Command from './feature/command/command';
 import Subsession from './feature/subsession/subsession';
-import {
-  ChatClient,
-  CommandChannelClient,
-  LiveTranscriptionClient,
-  MediaStream,
-  RecordingClient,
-  SubsessionClient
-} from './index-types';
+import { MediaStream } from './index-types';
 import './App.css';
-import SubsessionContext from './context/subsession-context';
+
 import { isAndroidBrowser } from './utils/platform';
 interface AppProps {
   meetingArgs: {
@@ -39,6 +28,8 @@ interface AppProps {
     password?: string;
     webEndpoint?: string;
     enforceGalleryView?: string;
+    customerJoinId?: string;
+    lang?: string;
   };
 }
 const mediaShape = {
@@ -102,7 +93,17 @@ declare global {
 
 function App(props: AppProps) {
   const {
-    meetingArgs: { sdkKey, topic, signature, name, password, webEndpoint: webEndpointArg, enforceGalleryView }
+    meetingArgs: {
+      sdkKey,
+      topic,
+      signature,
+      name,
+      password,
+      webEndpoint: webEndpointArg,
+      enforceGalleryView,
+      customerJoinId,
+      lang
+    }
   } = props;
   const [loading, setIsLoading] = useState(true);
   const [loadingText, setLoadingText] = useState('');
@@ -110,11 +111,6 @@ function App(props: AppProps) {
   const [status, setStatus] = useState<string>('closed');
   const [mediaState, dispatch] = useReducer(mediaReducer, mediaShape);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [chatClient, setChatClient] = useState<ChatClient | null>(null);
-  const [recordingClient, setRecordingClient] = useState<RecordingClient | null>(null);
-  const [commandClient, setCommandClient] = useState<CommandChannelClient | null>(null);
-  const [subsessionClient, setSubsessionClient] = useState<SubsessionClient | null>(null);
-  const [liveTranscriptionClient, setLiveTranscriptionClient] = useState<LiveTranscriptionClient | null>(null);
   const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(true);
   const zmClient = useContext(ZoomContext);
   let webEndpoint: any;
@@ -130,6 +126,7 @@ function App(props: AppProps) {
       await zmClient.init('en-US', `${window.location.origin}/lib`, {
         webEndpoint,
         enforceMultipleVideos: galleryViewWithoutSAB,
+        enforceVirtualBackground: galleryViewWithoutSAB,
         stayAwake: true
       });
       try {
@@ -139,17 +136,7 @@ function App(props: AppProps) {
         });
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
-        setIsSupportGalleryView(stream.isSupportMultipleVideos() && !isAndroidBrowser());
-        const chatClient = zmClient.getChatClient();
-        const commandClient = zmClient.getCommandClient();
-        const recordingClient = zmClient.getRecordingClient();
-        const ssClient = zmClient.getSubsessionClient();
-        const ltClient = zmClient.getLiveTranscriptionClient();
-        setChatClient(chatClient);
-        setCommandClient(commandClient);
-        setRecordingClient(recordingClient);
-        setSubsessionClient(ssClient);
-        setLiveTranscriptionClient(ltClient);
+        setIsSupportGalleryView(stream.isSupportMultipleVideos());
         setIsLoading(false);
       } catch (e: any) {
         setIsLoading(false);
@@ -160,7 +147,7 @@ function App(props: AppProps) {
     return () => {
       ZoomVideo.destroyClient();
     };
-  }, [sdkKey, signature, zmClient, topic, name, password, webEndpoint, galleryViewWithoutSAB]);
+  }, [sdkKey, signature, zmClient, topic, name, password, webEndpoint, galleryViewWithoutSAB, customerJoinId]);
   const onConnectionChange = useCallback(
     (payload) => {
       if (payload.state === ConnectionState.Reconnecting) {
@@ -237,12 +224,7 @@ function App(props: AppProps) {
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
         <ZoomMediaContext.Provider value={mediaContext}>
-          <ChatContext.Provider value={chatClient}>
-            <RecordingContext.Provider value={recordingClient}>
-              <CommandContext.Provider value={commandClient}>
-                <SubsessionContext.Provider value={subsessionClient}>
-                  <LiveTranscriptionContext.Provider value={liveTranscriptionClient}>
-                    <Router>
+          <Router>
                       <Switch>
                         <Route
                           path="/"
@@ -262,11 +244,6 @@ function App(props: AppProps) {
                         <Route path="/preview" component={Preview} />
                       </Switch>
                     </Router>
-                  </LiveTranscriptionContext.Provider>
-                </SubsessionContext.Provider>
-              </CommandContext.Provider>
-            </RecordingContext.Provider>
-          </ChatContext.Provider>
         </ZoomMediaContext.Provider>
       )}
     </div>

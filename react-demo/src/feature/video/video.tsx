@@ -14,14 +14,13 @@ import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useShare } from './hooks/useShare';
 import { useLocalVolume } from './hooks/useLocalVolume';
 import './video.scss';
-import { isSupportWebCodecs } from '../../utils/platform';
 import { isShallowEqual } from '../../utils/util';
 import { useSizeCallback } from '../../hooks/useSizeCallback';
 import { useAdvancedFeatureSwitch } from './hooks/useAdvancedFeatureSwith';
 import RemoteControlPanel, { RemoteControlIndication } from './components/remote-control';
 import { useCameraControl } from './hooks/useCameraControl';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
-
+import ReportBtn from './components/report-btn';
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
   const {
@@ -204,6 +203,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       )}
       {isInControl && <RemoteControlIndication stopCameraControl={stopControl} />}
       {totalPage > 1 && <Pagination page={page} totalPage={totalPage} setPage={setPage} inSharing={isSharing} />}
+      <ReportBtn />
     </div>
   );
 };

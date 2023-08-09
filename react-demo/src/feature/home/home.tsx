@@ -35,7 +35,7 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
       description: 'Session Command Channel chat'
     },
     {
-      key: 'Subsession',
+      key: 'subsession',
       icon: 'icon-group',
       title: 'Subsession',
       description: 'Open/Close Subsession, Assign/Move Participants into Subsession, Join/Leave Subsession'
