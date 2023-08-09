@@ -81,7 +81,7 @@ const CameraButton = (props: CameraButtonProps) => {
       getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
       mediaStream?.isSupportVirtualBackground()
         ? getAntdItem('Blur My Background', 'blur', isBlur && <CheckOutlined />)
-        : undefined,
+        : getAntdItem('Mask My Background', 'blur'),
       getAntdItem('', 'd2', undefined, undefined, 'divider'),
       getAntdItem('Video Statistic', 'statistic')
     ].filter(Boolean) as MenuItem[]);

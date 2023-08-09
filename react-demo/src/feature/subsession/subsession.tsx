@@ -3,7 +3,6 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Button, Dropdown, Menu } from 'antd';
 import { SubsessionUserStatus, SubsessionStatus } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';
-import SubsessionContext from '../../context/subsession-context';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { IconFont } from '../../component/icon-font';
 import Video from '../video/video';
@@ -25,7 +24,7 @@ import MediaContext from '../../context/media-context';
 import './subsession.scss';
 const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
-  const subsessionClient = useContext(SubsessionContext);
+  const subsessionClient = zmClient.getSubsessionClient();
   const { mediaStream } = useContext(MediaContext);
   const [visible, setVisible] = useState(false);
   const [closingModalVisible, setClosingModalVisible] = useState(false);

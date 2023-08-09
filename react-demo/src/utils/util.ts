@@ -10,7 +10,8 @@ export function generateVideoToken(
   userIdentity = '',
   roleType = 1,
   cloud_recording_option = '',
-  cloud_recording_election = ''
+  cloud_recording_election = '',
+  telemetry_tracking_id = ''
 ) {
   let signature = '';
   try {
@@ -44,6 +45,10 @@ export function generateVideoToken(
     }
     if (userIdentity || userIdentity === '') {
       Object.assign(oPayload, { user_identity: userIdentity });
+    }
+
+    if (telemetry_tracking_id) {
+      Object.assign(oPayload, { telemetry_tracking_id });
     }
     // Sign JWT
     const sHeader = JSON.stringify(oHeader);
@@ -105,4 +110,44 @@ export function b64DecodeUnicode(str: any) {
       })
       .join('')
   );
+}
+
+export function loadExternalResource(url: string, type: 'script' | 'style') {
+  return new Promise((resolve, reject) => {
+    let element: HTMLScriptElement | HTMLLinkElement | undefined;
+    if (type === 'script') {
+      element = document.createElement('script');
+      element.src = url;
+      element.async = true;
+      element.type = 'text/javascript';
+    } else if (type === 'style') {
+      element = document.createElement('link');
+      element.href = `${location.origin}/js/videosdk-ui-toolkit.css`;
+      element.rel = 'stylesheet';
+    }
+    if (element) {
+      if ((element as any).readyState) {
+        (element as any).onreadystatechange = () => {
+          if ((element as any).readyState === 'loaded' || (element as any).readyState === 'complete') {
+            (element as any).onreadystatechange = null;
+            resolve('');
+          }
+        };
+      } else {
+        element.onload = () => {
+          resolve('');
+        };
+        element.onerror = () => {
+          reject(new Error(''));
+        };
+      }
+      if (typeof document.body.append === 'function') {
+        document.getElementsByTagName('head')[0].append(element);
+      } else {
+        document.getElementsByTagName('head')[0].appendChild(element);
+      }
+    } else {
+      reject(new Error(''));
+    }
+  });
 }

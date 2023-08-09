@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useContext, useEffect } from 'react';
 import { Collapse, Button, Popover } from 'antd';
-import SubsessionContext from '../../../context/subsession-context';
 import { SubsessionUserStatus, SubsessionStatus } from '@zoom/videosdk';
 import { Participant } from '../../../index-types';
 import { CurrentSubsession, Subsession } from '../subsession-types';
@@ -37,8 +36,9 @@ const SubsessionManage = (props: SubsessionManageProps) => {
     onAssignUserToSubsession
   } = props;
   const [broadcastVisible, setBroadcastVisible] = useState<boolean>(false);
-  const ssClient = useContext(SubsessionContext);
+
   const zmClient = useContext(ZoomContext);
+  const ssClient = zmClient.getSubsessionClient();
   const closingCountdown = useSubsessionClosingCountdown(zmClient, subsessionStatus);
   const onBroadcastPopoverVisibleChange = useCallback((visible) => {
     setBroadcastVisible(visible);

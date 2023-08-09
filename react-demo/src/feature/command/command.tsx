@@ -4,9 +4,6 @@ import { Input } from 'antd';
 import ZoomContext from '../../context/zoom-context';
 import { CommandReceiver, CommandRecord } from './cmd-types';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
-import CommandContext from '../../context/cmd-context';
-import BreakoutContext from '../../context/subsession-context';
-import RecordingContext from '../../context/recording-context';
 import ChatMessageItem from './component/cmd-message-item';
 import CommandReceiverContainer from './component/cmd-receiver';
 import { useMount } from '../../hooks';
@@ -29,7 +26,7 @@ const oneToAllUser = {
 
 const CommandContainer = () => {
   const zmClient = useContext(ZoomContext);
-  const cmdClient = useContext(CommandContext);
+  const cmdClient = zmClient.getCommandClient();
   const [commandRecords, setCommandRecords] = useState<CommandRecord[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [commandReceivers, setCommandReceivers] = useState<CommandReceiver[]>([]);

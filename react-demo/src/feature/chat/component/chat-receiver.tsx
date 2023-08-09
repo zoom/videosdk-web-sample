@@ -4,8 +4,8 @@ import { CheckOutlined, DownOutlined, DashOutlined } from '@ant-design/icons';
 import { ChatPrivilege } from '@zoom/videosdk';
 import classNames from 'classnames';
 import { ChatReceiver } from '../chat-types';
-import ChatContext from '../../../context/chat-context';
 import './chat-receiver.scss';
+import ZoomContext from '../../../context/zoom-context';
 const { Item: MenuItem, ItemGroup: MenuItemGroup } = Menu;
 interface ChatReceiverProps {
   chatUsers: ChatReceiver[];
@@ -30,7 +30,8 @@ const meetingChatPrivilegeList = [
 ];
 const ChatReceiverContainer = (props: ChatReceiverProps) => {
   const { chatUsers, selectedChatUser, chatPrivilege, isHostOrManager, setChatUser } = props;
-  const chatClient = useContext(ChatContext);
+  const zmClient = useContext(ZoomContext);
+  const chatClient = zmClient.getChatClient();
   const menuItems = chatUsers.map((item) => (
     <MenuItem
       key={item.userId}

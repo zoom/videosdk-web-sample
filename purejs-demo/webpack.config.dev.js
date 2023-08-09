@@ -64,12 +64,13 @@ module.exports = {
   devServer: {
     host: '0.0.0.0',
     port: 3000,
-    https: https
-      ? {
-          cert: './localhost.crt',
-          key: './localhost.key'
-        }
-      : undefined,
+    server: {
+      type: https ? 'https' : 'http',
+      options: {
+        cert: './localhost.crt',
+        key: './localhost.key'
+      }
+    },
     client: {
       overlay: true
     },
