@@ -13,7 +13,7 @@ let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
 // Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
 if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingArgs.signature) {
   meetingArgs = { ...devConfig, ...meetingArgs };
-  meetingArgs.enforceGalleryView = true;
+  meetingArgs.enforceGalleryView = !window?.crossOriginIsolated;
 }
 
 if (meetingArgs.web) {
