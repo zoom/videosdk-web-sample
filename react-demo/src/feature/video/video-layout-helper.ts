@@ -64,7 +64,7 @@ export function getVideoLayout(rootWidth: number, rootHeight: number, count: num
   /**
    * [1,count]
    */
-  if (count > maxCount || count === 0) {
+  if (count > maxCount || count === 0 || rootWidth === 0 || rootHeight === 0) {
     return [];
   }
   let { maxRows, maxColumns } = maxRowsColumns(rootWidth, rootHeight);
