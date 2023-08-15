@@ -25,9 +25,7 @@ export function useRenderVideo(
   useEffect(() => {
     if (videoRef.current && layout && layout.length > 0 && isVideoDecodeReady) {
       const addedSubscribers = renderedVideos.filter((id) => !(previousRenderedVideos || []).includes(id));
-      const removedSubscribers = (previousRenderedVideos || []).filter(
-        (id: number) => !previousRenderedVideos?.includes(id)
-      );
+      const removedSubscribers = (previousRenderedVideos || []).filter((id: number) => !renderedVideos.includes(id));
       const unalteredSubscribers = renderedVideos.filter((id) => (previousRenderedVideos || []).includes(id));
       if (removedSubscribers.length > 0) {
         removedSubscribers.forEach(async (userId: number) => {
@@ -68,14 +66,16 @@ export function useRenderVideo(
                   quality
                 );
               }
-              await mediaStream?.adjustRenderedVideoPosition(
-                videoRef.current as HTMLCanvasElement,
-                userId,
-                width,
-                height,
-                x,
-                y
-              );
+              setTimeout(async () => {
+                await mediaStream?.adjustRenderedVideoPosition(
+                  videoRef.current as HTMLCanvasElement,
+                  userId,
+                  width,
+                  height,
+                  x,
+                  y
+                );
+              }, 0);
             }
           });
         }
