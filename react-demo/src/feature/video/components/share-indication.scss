@@ -1,0 +1,70 @@
+.share-indication-bar {
+  height: 26px;
+  position: absolute;
+  top: 0;
+  left: 30%;
+  display: flex;
+  align-items: center;
+  .share-indication-tip {
+    padding: 0 24px;
+    max-width: 480px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: #23d959;
+    color: #202123;
+    cursor: ew-resize;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border-bottom-left-radius: 6px;
+    .anticon {
+      path {
+        fill:#000;
+      }
+      color: rgba(0,0,0,0.6);
+      margin-right: 3px;
+    }
+    &.share-indication-in-control {
+      background: #ffbf39;
+    }
+  }
+  .share-bar-more {
+    background: #000;
+    height: 100%;
+    width: auto;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+  }
+}
+
+.share-dropdown-menu{
+  min-width: 254px;
+    text-align: left;
+    background: rgba(17, 17, 17, 0.8);
+    max-height: 500px;
+    overflow: auto;
+ 
+  .ant-dropdown-menu-item {
+    padding: 5px 30px;
+    color: #ccc;
+    position: relative;
+    .anticon-check {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+    }
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+  .ant-dropdown-menu-item-group-title {
+    color: #fff;
+    font-weight: 700;
+  }
+  .ant-dropdown-menu-item-active{
+    background:none;
+  }
+}

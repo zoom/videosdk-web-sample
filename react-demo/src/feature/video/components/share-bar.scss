@@ -1,0 +1,51 @@
+.screen-share-control-bar {
+  color: #fff;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  border-radius: 14px;
+  background-color: rgba(100,100,100,0.6);
+  top: 2vh;
+  max-width: 80vw;
+  position: fixed;
+  left: 30%;
+  z-index: 1;
+  .ant-btn-icon-only {
+    width: 26px;
+    height: 26px;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    &:hover {
+      background: #ffffff17;
+    }
+    &:active {
+      background: #ffffff2e;
+    }
+  }
+  .share-bar-move {
+    cursor: move;
+    &:hover,&:active{
+      background:none
+    }
+  }
+  .share-bar-tip {
+    padding: 0 30px;
+  }
+  .share-bar-canvas {
+    width: 47px;
+    height: 28px;
+    border-radius: 5px;
+    border: 1px solid #23d959;
+    margin-right: 10px;
+  }
+  .share-bar-btn{
+    margin-right: 10px;
+  }
+  .share-bar-more {
+    width: auto;
+  }
+}
+.share-bar-hide{
+  display: none;
+}

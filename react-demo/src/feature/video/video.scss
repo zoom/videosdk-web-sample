@@ -7,37 +7,29 @@
   background-color: #000;
   display: flex;
   overflow: hidden;
-  .share-container{
-    display: none;
-    &.in-sharing {
-      display: flex;
-      flex-grow: 1;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-    .share-container-viewport{
-      display: inline-block;
-      max-width: 100%;
-    }
-    .share-canvas {
-      width: 100%;
-      height: 100%;
-      &.hidden{
-        display: none;
-      }
-    }
-  }
   .video-container {
     position: relative;
     width: 100%;
     height: 100%;
-    &.in-sharing{
+
+    &.video-container-in-sharing {
       width: 264px;
       flex-shrink: 0;
-      border-left: 1px solid #333;
     }
-    .video-canvas{
+    &.single-video-container{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .single-video-wrap {
+      width: 100%;
+      aspect-ratio: 16/9;
+      height: auto;
+      position: relative;
+      max-height: 100%;
+    }
+
+    .video-canvas {
       width: 100%;
       height: 100%;
     }
@@ -49,21 +41,20 @@
       right: 30px;
       z-index: 2;
       display: none;
-      &.single-self-video{
+      &.single-self-video {
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
       }
-      &.self-video-show{
+      &.self-video-show {
         display: block;
       }
-
     }
   }
   .avatar-list {
     position: absolute;
-    top:0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
@@ -77,18 +68,18 @@
     left: 0;
     bottom: 0;
   }
-  .avatar-wrap{
+  .avatar-wrap {
     position: absolute;
     pointer-events: auto;
     list-style: none;
-    top:0;
-    left:0;
+    top: 0;
+    left: 0;
   }
-  .avatar-wrap-dragging{
+  .avatar-wrap-dragging {
     z-index: 10;
   }
   .single-view-avatar {
-    top:0;
+    top: 0;
     left: 0;
   }
   .self-video-non-sab {

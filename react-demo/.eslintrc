@@ -13,7 +13,8 @@
   "globals": {
     "React": true,
     "JSX": true,
-    "jsdom": true
+    "jsdom": true,
+    "JsMediaSDK_Instance": true
   },
   "plugins": ["@typescript-eslint", "react-hooks"],
   "env": {
