@@ -18,3 +18,10 @@ export const getPhoneCallStatusDescription = (status?: DialoutState) => {
   }
   return undefined;
 };
+
+export const SHARE_CANVAS_ID = 'ZOOM_WEB_SDK_SHARER_CANVAS';
+
+export enum ShareViewType {
+  FitWindow = 'fit',
+  OriginalSize = 'original'
+}

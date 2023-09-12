@@ -24,11 +24,3 @@ export interface MediaDevice {
   label: string;
   deviceId: string;
 }
-export interface FearureSwitch {
-  toggled: boolean;
-  enabled: boolean;
-}
-export interface AdvancedFeatureSwitch {
-  adjustVolumn: FearureSwitch;
-  farEndCameraControl: FearureSwitch;
-}
