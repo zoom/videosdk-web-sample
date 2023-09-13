@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import { Modal, message } from 'antd';
 import produce from 'immer';
 import { CameraControlCmd } from '@zoom/videosdk';
+import AvatarActionContext from '../context/avatar-context';
 import { ZoomClient, MediaStream } from '../../../index-types';
 export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream | null) {
   const [isInControl, setIsInControl] = useState(false);
   const [controllingUserId, setControllingUserId] = useState(0);
-  const [isControllingFarEnd, setIsControllingFarEnd] = useState(false);
   const [currentControlledUser, setCurrentControlledUser] = useState<{ userId: number; displayName: string }>({
     userId: 0,
     displayName: ''
@@ -17,6 +17,10 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
       ptz: { pan: boolean; tilt: boolean; zoom: boolean };
     }[]
   >([]);
+  const {
+    dispatch,
+    avatarActionState: { isControllingRemoteCamera }
+  } = useContext(AvatarActionContext);
   const onReceiveFarEndControl = useCallback(
     ({ userId, displayName, currentControllingUserId, currentControllingDisplayName }) => {
       let message = `${displayName} request to control your camera?`;
@@ -40,16 +44,19 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     },
     [mediaStream]
   );
-  const onReceiveFarEndControlResponse = useCallback(({ isApproved, userId, displayName }) => {
-    setIsControllingFarEnd(isApproved);
-    if (isApproved) {
-      setCurrentControlledUser({ userId, displayName });
-      message.info(`You can control ${displayName}'s camera now.`);
-    } else {
-      setCurrentControlledUser({ userId: 0, displayName: '' });
-      message.info(`${displayName} rejected your control request.`);
-    }
-  }, []);
+  const onReceiveFarEndControlResponse = useCallback(
+    ({ isApproved, userId, displayName }) => {
+      dispatch({ type: 'set-is-controlling-remote-camera', payload: isApproved });
+      if (isApproved) {
+        setCurrentControlledUser({ userId, displayName });
+        message.info(`You can control ${displayName}'s camera now.`);
+      } else {
+        setCurrentControlledUser({ userId: 0, displayName: '' });
+        message.warn(`${displayName} rejected your control request.`);
+      }
+    },
+    [dispatch]
+  );
 
   const onCameraInControlChange = useCallback(({ isControlled, userId }) => {
     if (isControlled) {
@@ -74,7 +81,7 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
   }, []);
   const turnLeft = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.Left,
           userId: currentControlledUser.userId,
@@ -82,11 +89,11 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const turnRight = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.Right,
           userId: currentControlledUser.userId,
@@ -94,11 +101,11 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const turnUp = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.Up,
           userId: currentControlledUser.userId,
@@ -106,11 +113,11 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const turnDown = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.Down,
           userId: currentControlledUser.userId,
@@ -118,11 +125,11 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const zoomIn = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.ZoomIn,
           userId: currentControlledUser.userId,
@@ -130,11 +137,11 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const zoomOut = useCallback(
     (range = 5) => {
-      if (isControllingFarEnd) {
+      if (isControllingRemoteCamera) {
         mediaStream?.controlFarEndCamera({
           cmd: CameraControlCmd.ZoomOut,
           userId: currentControlledUser.userId,
@@ -142,22 +149,16 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
         });
       }
     },
-    [mediaStream, isControllingFarEnd, currentControlledUser]
+    [mediaStream, isControllingRemoteCamera, currentControlledUser]
   );
   const switchCamera = useCallback(() => {
-    if (isControllingFarEnd) {
+    if (isControllingRemoteCamera) {
       mediaStream?.controlFarEndCamera({
         cmd: CameraControlCmd.SwitchCamera,
         userId: currentControlledUser.userId
       });
     }
-  }, [mediaStream, isControllingFarEnd, currentControlledUser]);
-  const giveUpControl = useCallback(() => {
-    if (isControllingFarEnd) {
-      mediaStream?.giveUpFarEndCameraControl(currentControlledUser.userId);
-      setIsControllingFarEnd(false);
-    }
-  }, [mediaStream, isControllingFarEnd, currentControlledUser]);
+  }, [mediaStream, isControllingRemoteCamera, currentControlledUser]);
   const stopControl = useCallback(() => {
     if (isInControl) {
       mediaStream?.declineFarEndCameraControl(controllingUserId);
@@ -190,11 +191,9 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     zoomIn,
     zoomOut,
     switchCamera,
-    giveUpControl,
     stopControl,
-    cameraCapability,
+    cameraCapability: cameraCapability.find((c) => c.userId === currentControlledUser.userId)?.ptz,
     isInControl,
-    isControllingFarEnd,
     currentControlledUser
   };
 }

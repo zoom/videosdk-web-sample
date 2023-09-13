@@ -22,7 +22,8 @@ import {
   VideoCapturingState,
   SharePrivilege,
   MobileVideoFacingMode,
-  LiveStreamStatus
+  LiveStreamStatus,
+  ShareStatus
 } from '@zoom/videosdk';
 import { LiveTranscriptionButton } from './live-transcription';
 import { LeaveButton } from './leave';
@@ -33,20 +34,19 @@ import { IconFont } from '../../../component/icon-font';
 import { VideoMaskModel } from './video-mask-modal';
 interface VideoFooterProps {
   className?: string;
-  shareRef?: MutableRefObject<HTMLCanvasElement | null>;
+  selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
   sharing?: boolean;
 }
 
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
-  const { className, shareRef, sharing } = props;
+  const { className, selfShareCanvas, sharing } = props;
   const [isStartedAudio, setIsStartedAudio] = useState(false);
   const [isStartedVideo, setIsStartedVideo] = useState(false);
   const [audio, setAudio] = useState('');
   const [isSupportPhone, setIsSupportPhone] = useState(false);
   const [phoneCountryList, setPhoneCountryList] = useState<any[]>([]);
   const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
-  const [isStartedScreenShare, setIsStartedScreenShare] = useState(false);
   const [isStartedLiveTranscription, setIsStartedLiveTranscription] = useState(false);
   const [isDisableCaptions, setIsDisableCaptions] = useState(false);
   const [isMirrored, setIsMirrored] = useState(false);
@@ -216,14 +216,10 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   }, []);
   const onScreenShareClick = useCallback(async () => {
-    if (!isStartedScreenShare && shareRef && shareRef.current) {
-      await mediaStream?.startShareScreen(shareRef.current, { requestReadReceipt: true });
-      setIsStartedScreenShare(true);
-    } else if (isStartedScreenShare) {
-      await mediaStream?.stopShareScreen();
-      setIsStartedScreenShare(false);
+    if (mediaStream?.getShareStatus() === ShareStatus.End && selfShareCanvas) {
+      await mediaStream?.startShareScreen(selfShareCanvas, { requestReadReceipt: true });
     }
-  }, [mediaStream, isStartedScreenShare, shareRef]);
+  }, [mediaStream, selfShareCanvas]);
 
   const onLiveTranscriptionClick = useCallback(async () => {
     if (isDisableCaptions) {
@@ -251,18 +247,15 @@ const VideoFooter = (props: VideoFooterProps) => {
   );
 
   const onLeaveClick = useCallback(async () => {
-    console.log('onLeaveClick');
     await zmClient.leave();
   }, [zmClient]);
 
   const onEndClick = useCallback(async () => {
-    console.log('onEndClick');
     await zmClient.leave(true);
   }, [zmClient]);
 
   const onPassivelyStopShare = useCallback(({ reason }) => {
     console.log('passively stop reason:', reason);
-    setIsStartedScreenShare(false);
   }, []);
   const onDeviceChange = useCallback(() => {
     if (mediaStream) {
@@ -454,9 +447,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     if (isStartedVideo) {
       mediaStream?.stopVideo();
     }
-    if (isStartedScreenShare) {
-      mediaStream?.stopShareScreen();
-    }
+    mediaStream?.stopShareScreen();
   });
   useMount(() => {
     if (mediaStream) {
@@ -528,7 +519,6 @@ const VideoFooter = (props: VideoFooterProps) => {
         <ScreenShareButton
           sharePrivilege={sharePrivilege}
           isHostOrManager={zmClient.isHost() || zmClient.isManager()}
-          isStartedScreenShare={isStartedScreenShare}
           onScreenShareClick={onScreenShareClick}
           onSharePrivilegeClick={async (privilege) => {
             await mediaStream?.setSharePrivilege(privilege);

@@ -1,0 +1,127 @@
+.remote-camera-control-panel {
+  position: absolute;
+  width: 156px;
+  height: 120px;
+  bottom: 10vh;
+  right: 5vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(26, 26, 26, 0.8);
+
+  .control-title {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+    padding: 5px 15px;
+    cursor: move;
+  }
+  .control-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    .zoom-control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      width: 24px;
+      height: 68px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 1px 0;
+      .ant-btn-icon-only {
+        width: 20px;
+        height: 32px;
+        border: none;
+        color: #747487;
+        border-radius: 5px;
+        &:hover {
+          background: #ffffff17;
+          color: #fff;
+        }
+        &:active {
+          background: #ffffff2e;
+          color: #fff;
+        }
+      }
+    }
+    .pan-control {
+      width: 72px;
+      height: 72px;
+      position: relative;
+      .pan-control-btn {
+        width: 24px;
+        height: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 1px;
+        position: absolute;
+      }
+      .turn-up {
+        top: 0;
+        left: 24px;
+        border-radius: 6px 6px 0 0;
+        border-bottom: none;
+      }
+      .turn-left {
+        top: 24px;
+        left: 0;
+        border-radius: 6px 0 0 6px;
+        border-right: none;
+      }
+      .center-button {
+        top: 24px;
+        left: 24px;
+        border: none;
+      }
+      .turn-right {
+        top: 24px;
+        left: 48px;
+        border-radius: 0 6px 6px 0;
+        border-left: none;
+      }
+      .turn-down {
+        top: 48px;
+        left: 24px;
+        border-radius: 0 0 6px 6px;
+        border-top: none;
+      }
+      .ant-btn-icon-only {
+        width: 20px;
+        height: 20px;
+        border: none;
+        color: #747487;
+        border-radius: 5px;
+        &:hover {
+          background: #ffffff17;
+          color: #fff;
+        }
+        &:active {
+          background: #ffffff2e;
+          color: #fff;
+        }
+      }
+    }
+  }
+}
+.remote-control-dropdown {
+  position: absolute;
+  top: 3vh;
+  left: 3vw;
+  width: 30px !important;
+  height: 30px !important;
+  border: none;
+  > * {
+    font-size: 18px !important;
+    color: #439a97;
+  }
+}

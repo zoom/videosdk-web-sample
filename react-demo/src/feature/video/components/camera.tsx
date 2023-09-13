@@ -20,7 +20,6 @@ interface CameraButtonProps {
   activeCamera?: string;
   activePlaybackUrl?: string;
 }
-
 const videoPlaybacks = [
   { title: 'Video 1', url: 'https://source.zoom.us/brand/mp4/Using%20the%20Zoom%20PWA.mp4' },
   { title: 'Video 2', url: 'https://source.zoom.us/brand/mp4/Zoom%20Cares%20Nonprofit%20Impact.mp4' },
