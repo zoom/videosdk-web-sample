@@ -3,13 +3,11 @@ import { Button, Tooltip, Menu, Dropdown } from 'antd';
 import classNames from 'classnames';
 import { IconFont } from '../../../component/icon-font';
 import { LockOutlined, UnlockOutlined, UpOutlined, CheckOutlined } from '@ant-design/icons';
-import './screen-share.scss';
 import { SharePrivilege } from '@zoom/videosdk';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 
 const { Button: DropdownButton } = Dropdown;
 interface ScreenShareButtonProps {
-  isStartedScreenShare: boolean;
   sharePrivilege: SharePrivilege;
   isHostOrManager: boolean;
   onSharePrivilegeClick?: (privilege: SharePrivilege) => void;
@@ -22,7 +20,7 @@ interface ScreenShareLockButtonProps {
 }
 
 const ScreenShareButton = (props: ScreenShareButtonProps) => {
-  const { isStartedScreenShare, sharePrivilege, isHostOrManager, onScreenShareClick, onSharePrivilegeClick } = props;
+  const { sharePrivilege, isHostOrManager, onScreenShareClick, onSharePrivilegeClick } = props;
   const menu = [
     getAntdItem(
       'Lock share',
@@ -61,9 +59,7 @@ const ScreenShareButton = (props: ScreenShareButtonProps) => {
         </DropdownButton>
       ) : (
         <Button
-          className={classNames('screen-share-button', 'vc-button', {
-            'started-share': isStartedScreenShare
-          })}
+          className={classNames('screen-share-button', 'vc-button')}
           icon={<IconFont type="icon-share" />}
           ghost={true}
           shape="circle"

@@ -19,11 +19,15 @@ export const getAntdItem = (
   } as MenuItem;
 };
 
-export const getAntdDropdownMenu = (items: MenuItem[], onClick: (payload: { key: any }) => void): MenuProps => {
+export const getAntdDropdownMenu = (
+  items: MenuItem[],
+  onClick: (payload: { key: any }) => void,
+  clzName?: string
+): MenuProps => {
   return {
     items,
     onClick,
     theme: 'dark',
-    className: 'vc-dropdown-menu'
+    className: clzName ?? 'vc-dropdown-menu'
   };
 };

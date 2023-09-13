@@ -37,6 +37,9 @@ import { ReactComponent as IconNetworkNormal } from './svgs/icon-network-normal.
 import { ReactComponent as IconNetworkBad } from './svgs/icon-network-bad.svg';
 import { ReactComponent as IconLiveStream } from './svgs/icon-live-stream.svg';
 import { ReactComponent as IconLive } from './svgs/icon-live.svg';
+import { ReactComponent as IconMove } from './svgs/icon-move.svg';
+import { ReactComponent as IconAudioOn } from './svgs/icon-audio-on.svg';
+import { ReactComponent as IconAudioOff } from './svgs/icon-audio-off.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -72,7 +75,10 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-network-normal': IconNetworkNormal,
   'icon-network-bad': IconNetworkBad,
   'icon-live-stream': IconLiveStream,
-  'icon-live': IconLive
+  'icon-live': IconLive,
+  'icon-move': IconMove,
+  'icon-audio-on': IconAudioOn,
+  'icon-audio-off': IconAudioOff
 };
 interface IconFontProps {
   type: string;

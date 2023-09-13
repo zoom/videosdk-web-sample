@@ -1,0 +1,27 @@
+.share-view {
+  display: none;
+  &.share-view-in-sharing {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-right: 1px solid #333;
+  }
+  &.share-view-original {
+    display: block;
+  }
+  .share-view-viewport {
+    max-width: 100%;
+    &.share-view-viewport-original {
+      max-width: initial;
+      cursor: move;
+    }
+    &.share-view-viewport-in-control{
+      cursor: default;
+    }
+    .share-view-canvas {
+      height: 100%;
+    }
+  }
+}

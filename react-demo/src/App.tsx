@@ -225,25 +225,23 @@ function App(props: AppProps) {
       {!loading && (
         <ZoomMediaContext.Provider value={mediaContext}>
           <Router>
-                      <Switch>
-                        <Route
-                          path="/"
-                          render={(props) => (
-                            <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />
-                          )}
-                          exact
-                        />
-                        <Route path="/index.html" component={Home} exact />
-                        <Route path="/chat" component={Chat} />
-                        <Route path="/command" component={Command} />
-                        <Route
-                          path="/video"
-                          component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle}
-                        />
-                        <Route path="/subsession" component={Subsession} />
-                        <Route path="/preview" component={Preview} />
-                      </Switch>
-                    </Router>
+            <Switch>
+              <Route
+                path="/"
+                render={(props) => <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
+                exact
+              />
+              <Route path="/index.html" component={Home} exact />
+              <Route path="/chat" component={Chat} />
+              <Route path="/command" component={Command} />
+              <Route
+                path="/video"
+                component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle}
+              />
+              <Route path="/subsession" component={Subsession} />
+              <Route path="/preview" component={Preview} />
+            </Switch>
+          </Router>
         </ZoomMediaContext.Provider>
       )}
     </div>

@@ -4,15 +4,15 @@ interface ResizeObserverEntry {
 }
 type ResizeObserverCallback = (entries: ResizeObserverEntry[]) => void;
 export declare class ResizeObserver {
-  constructor(callback: ResizeObserverCallback);
-  observe(target: Element): void;
-  unobserve(target: Element): void;
-  disconnect(): void;
+  public constructor(callback: ResizeObserverCallback);
+  public observe(target: Element): void;
+  public unobserve(target: Element): void;
+  public disconnect(): void;
 }
 
 export function useSizeCallback(
   target: HTMLElement | null,
-  callback: (payload: { width: number; height: number }) => void,
+  callback: (payload: { width: number; height: number }) => void
 ) {
   useLayoutEffect(() => {
     if (!target) {
@@ -24,7 +24,7 @@ export function useSizeCallback(
       entries.forEach((entry) => {
         callback({
           width: entry.target.clientWidth,
-          height: entry.target.clientHeight,
+          height: entry.target.clientHeight
         });
       });
     });
