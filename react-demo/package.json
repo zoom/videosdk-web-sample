@@ -20,6 +20,7 @@
     "react-draggable": "^4.4.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "5.0.1",
+    "video-canvas-screenshot": "^1.0.2",
     "web-vitals": "1.1.1"
   },
   "scripts": {
