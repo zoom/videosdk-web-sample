@@ -19,6 +19,7 @@ import { useAvatarAction } from './hooks/useAvatarAction';
 import { usePrevious } from '../../hooks';
 import './video.scss';
 import { isShallowEqual } from '../../utils/util';
+import CameraManager from '../camera/component/CameraManager';
 
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
   const zmClient = useContext(ZoomContext);
@@ -35,6 +36,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   const canvasDimension = useCanvasDimension(mediaStream, videoRef);
   const networkQuality = useNetworkQuality(zmClient);
   const previousCanvasDimension = usePrevious(canvasDimension);
+  const [open, setOpen] = useState(false);
 
   useParticipantsChange(zmClient, (payload) => {
     setParticipants(payload);
@@ -103,10 +105,15 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     }
   }, [mediaStream, activeUser, isVideoDecodeReady, canvasDimension, previousCanvasDimension]);
   const avatarActionState = useAvatarAction(zmClient, activeUser ? [activeUser] : []);
+  const handleClickCamera = () => {
+    mediaStream?.switchCamera('environment');
+    setOpen(true);
+  }
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
       <div
+        id="original-parent"
         className={classnames('video-container', 'single-video-container', {
           'video-container-in-sharing': isRecieveSharing
         })}
@@ -146,6 +153,10 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
           </AvatarActionContext.Provider>
         </div>
       </div>
+      <button style={{ position: 'fixed', zIndex: 10, bottom: 30 }} onClick={handleClickCamera}>
+        Camera
+      </button>
+      {open && <CameraManager onClose={() => setOpen(false)} />}
       <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
     </div>
   );

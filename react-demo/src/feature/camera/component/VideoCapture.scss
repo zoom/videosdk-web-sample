@@ -1,0 +1,44 @@
+.VideoCapture {
+  position: relative;
+
+  video, canvas {
+    height: 320px;
+    width: auto;
+  }
+
+  &__inner {
+    position: relative;
+    text-align: center;
+    --b: 2px;   /* thickness of the border */
+    --c: white;   /* color of the border */
+    --w: 20px;  /* width of border */
+
+    border: var(--b) solid #0000; /* space for the border */
+    --_g: #0000 90deg,var(--c) 0;
+    --_p: var(--w) var(--w) border-box no-repeat;
+    background:
+      conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+      conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+      conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p),
+      conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+  }
+
+  button {
+    position: absolute;
+    z-index: 1;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+
+    width: 72px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 8px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
