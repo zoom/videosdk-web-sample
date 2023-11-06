@@ -10,7 +10,7 @@ import ZoomMediaContext from '../../../context/media-context';
 import { useUnmount, useMount } from '../../../hooks';
 import { MediaDevice } from '../video-types';
 import './video-footer.scss';
-import { isAndroidOrIOSBrowser } from '../../../utils/platform';
+import { isAndroidOrIOSBrowser, isIOSMobile } from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
 import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
 import {
@@ -64,6 +64,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
   const [caption, setCaption] = useState({ text: '', isOver: false });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
+  const [isMicrophoneForbidden, setIsMicrophoneForbidden] = useState(false);
 
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
@@ -85,7 +86,8 @@ const VideoFooter = (props: VideoFooterProps) => {
       await mediaStream?.stopVideo();
       setIsStartedVideo(false);
     } else {
-      if (mediaStream?.isRenderSelfViewWithVideoElement()) {
+      const temporaryException = isIOSMobile() && window.crossOriginIsolated; // add ios mobile exception for test backward compatible.
+      if (mediaStream?.isRenderSelfViewWithVideoElement() && !temporaryException) {
         const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
         if (videoElement) {
           await mediaStream?.startVideo({ videoElement });
@@ -123,8 +125,14 @@ const VideoFooter = (props: VideoFooterProps) => {
         setIsMuted(true);
       }
     } else {
-      // await mediaStream?.startAudio({ speakerOnly: true });
-      await mediaStream?.startAudio();
+      try {
+        await mediaStream?.startAudio();
+      } catch (e: any) {
+        if (e.type === 'INSUFFICIENT_PRIVILEGES' && e.reason === 'USER_FORBIDDEN_MICROPHONE') {
+          setIsMicrophoneForbidden(true);
+        }
+        console.warn(e);
+      }
       setIsStartedAudio(true);
     }
   }, [mediaStream, isStartedAudio, isMuted]);
@@ -496,6 +504,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           activeMicrophone={activeMicrophone}
           activeSpeaker={activeSpeaker}
           disabled={isComputerAudioDisabled}
+          isMicrophoneForbidden={isMicrophoneForbidden}
         />
       )}
       <CameraButton
