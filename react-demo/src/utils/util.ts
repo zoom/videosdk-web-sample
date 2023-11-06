@@ -122,7 +122,7 @@ export function loadExternalResource(url: string, type: 'script' | 'style') {
       element.type = 'text/javascript';
     } else if (type === 'style') {
       element = document.createElement('link');
-      element.href = `${location.origin}/js/videosdk-ui-toolkit.css`;
+      element.href = url;
       element.rel = 'stylesheet';
     }
     if (element) {
