@@ -40,6 +40,8 @@ import { ReactComponent as IconLive } from './svgs/icon-live.svg';
 import { ReactComponent as IconMove } from './svgs/icon-move.svg';
 import { ReactComponent as IconAudioOn } from './svgs/icon-audio-on.svg';
 import { ReactComponent as IconAudioOff } from './svgs/icon-audio-off.svg';
+import { ReactComponent as IconAudioWarning } from './svgs/icon-audio-warning.svg';
+import { ReactComponent as IconAudioAnimation } from './svgs/icon-audio-active-animated.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -78,7 +80,9 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-live': IconLive,
   'icon-move': IconMove,
   'icon-audio-on': IconAudioOn,
-  'icon-audio-off': IconAudioOff
+  'icon-audio-off': IconAudioOff,
+  'icon-audio-warning': IconAudioWarning,
+  'icon-audio-animation': IconAudioAnimation
 };
 interface IconFontProps {
   type: string;

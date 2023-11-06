@@ -9,6 +9,7 @@ interface CameraButtonProps {
   isStartedVideo: boolean;
   isMirrored?: boolean;
   isBlur?: boolean;
+  isPreview?: boolean;
   onCameraClick: () => void;
   onSwitchCamera: (deviceId: string) => void;
   onMirrorVideo?: () => void;
@@ -36,6 +37,7 @@ const CameraButton = (props: CameraButtonProps) => {
     activeCamera,
     isMirrored,
     isBlur,
+    isPreview,
     activePlaybackUrl,
     onCameraClick,
     onSwitchCamera,
@@ -71,22 +73,23 @@ const CameraButton = (props: CameraButtonProps) => {
         ),
         'group'
       ),
-      getAntdItem(
-        'Select a Video Playback',
-        'playback',
-        undefined,
-        videoPlaybacks.map((item) =>
-          getAntdItem(item.title, item.url, item.url === activePlaybackUrl && <CheckOutlined />)
+      !isPreview &&
+        getAntdItem(
+          'Select a Video Playback',
+          'playback',
+          undefined,
+          videoPlaybacks.map((item) =>
+            getAntdItem(item.title, item.url, item.url === activePlaybackUrl && <CheckOutlined />)
+          ),
+          'group'
         ),
-        'group'
-      ),
       getAntdItem('', 'd1', undefined, undefined, 'divider'),
-      getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
+      !isPreview && getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
       mediaStream?.isSupportVirtualBackground()
         ? getAntdItem('Blur My Background', 'blur', isBlur && <CheckOutlined />)
         : getAntdItem('Mask My Background', 'blur'),
-      getAntdItem('', 'd2', undefined, undefined, 'divider'),
-      getAntdItem('Video Statistic', 'statistic')
+      !isPreview && getAntdItem('', 'd2', undefined, undefined, 'divider'),
+      !isPreview && getAntdItem('Video Statistic', 'statistic')
     ].filter(Boolean) as MenuItem[]);
   return (
     <div className={classNames('camera-footer', className)}>
