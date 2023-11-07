@@ -1,11 +1,12 @@
-import React, { useCallback, useContext, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import ZoomVideo, { TestMicrophoneReturn, TestSpeakerReturn } from '@zoom/videosdk';
-import { useMount } from '../../hooks';
+import { useMount, useUnmount } from '../../hooks';
 import './preview.scss';
 import MicrophoneButton from '../video/components/microphone';
 import CameraButton from '../video/components/camera';
 import { message, Button, Progress, Select } from 'antd';
 import { MediaDevice } from '../video/video-types';
+import classNames from 'classnames';
 
 // label: string;
 // deviceId: string;
@@ -44,12 +45,6 @@ const mountDevices: () => Promise<{
   };
 };
 
-const AUDIO_MASK = 1;
-const MIC_MASK = 2;
-const VIDEO_MASK = 4;
-
-let PREVIEW_VIDEO: any;
-
 const updateMicFeedbackStyle = () => {
   const newVolumeIntensity = localAudio.getCurrentVolume();
   let newMicFeedbackStyle = '';
@@ -81,23 +76,6 @@ const updateMicFeedbackStyle = () => {
   prevMicFeedbackStyle = newMicFeedbackStyle;
 };
 
-const encodePreviewOptions = (isStartedAudio: boolean, isMuted: boolean, isStartedVideo: boolean) => {
-  let res = 0;
-  res = (res | Number(isStartedVideo)) << 1;
-  res = (res | Number(isMuted)) << 1;
-  res = res | Number(isStartedAudio);
-  return res;
-};
-const decodePreviewOptions = (val: number) => {
-  /*
-      LSB: audio,
-      MSB: video
-   */
-  const isStartedAudio = !!((val & AUDIO_MASK) === AUDIO_MASK);
-  const isMuted = !!((val & MIC_MASK) === MIC_MASK);
-  const isStartedVideo = !!((val & VIDEO_MASK) === VIDEO_MASK);
-  return { isStartedVideo, isMuted, isStartedAudio };
-};
 const { Option } = Select;
 
 const PreviewContainer = () => {
@@ -115,16 +93,24 @@ const PreviewContainer = () => {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  const [isInVBMode, setIsInVBMode] = useState(false);
+  const [isBlur, setIsBlur] = useState(false);
   const speakerTesterRef = useRef<TestSpeakerReturn>();
   const microphoneTesterRef = useRef<TestMicrophoneReturn>();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
       await localVideo?.stop();
       setIsStartedVideo(false);
+      setIsInVBMode(false);
+      setIsBlur(false);
     } else {
-      await localVideo?.start(PREVIEW_VIDEO);
-      setIsStartedVideo(true);
+      if (videoRef.current) {
+        await localVideo?.start(videoRef.current);
+        setIsStartedVideo(true);
+      }
     }
   }, [isStartedVideo]);
   const onMicrophoneClick = useCallback(async () => {
@@ -163,27 +149,31 @@ const PreviewContainer = () => {
   const onSwitchCamera = async (key: string) => {
     if (localVideo) {
       if (activeCamera !== key) {
-        await localVideo.stop();
-        localVideo = ZoomVideo.createLocalVideoTrack(key);
-        localVideo.start(PREVIEW_VIDEO);
-        setActiveCamera(key);
+        await localVideo.switchCamera(key);
       }
     }
   };
-
-  useEffect(() => {
-    const encodeVal = encodePreviewOptions(isStartedAudio, isMuted, isStartedVideo);
-    console.log('preview encode val', encodeVal);
-    const decodeOption = decodePreviewOptions(encodeVal);
-    console.log('preview config', decodePreviewOptions(encodeVal));
-    message.info(JSON.stringify(decodeOption, null, 2));
-    console.log(micList);
-  }, [isStartedAudio, isMuted, isStartedVideo]);
-
+  const onBlurBackground = useCallback(async () => {
+    if (isInVBMode) {
+      if (isBlur) {
+        await localVideo.updateVirtualBackground(undefined);
+      } else {
+        await localVideo.updateVirtualBackground('blur');
+      }
+      setIsBlur(!isBlur);
+    } else {
+      if (!isBlur) {
+        localVideo.stop();
+        if (canvasRef.current) {
+          localVideo.start(canvasRef.current, { imageUrl: 'blur' });
+        }
+        setIsInVBMode(true);
+        setIsBlur(!isBlur);
+      }
+    }
+  }, [isInVBMode, isBlur]);
   useMount(() => {
-    PREVIEW_VIDEO = document.getElementById('js-preview-video');
     mountDevices().then((devices) => {
-      console.log('devicesdevicesdevicesdevices', devices);
       setMicList(devices.mics);
       setCameraList(devices.cameras);
       setSpeakerList(devices.speakers);
@@ -252,6 +242,14 @@ const PreviewContainer = () => {
   } else if (isPlayingRecording) {
     microphoneBtn = 'Playing';
   }
+  useUnmount(() => {
+    if (isStartedAudio) {
+      localAudio.stop();
+    }
+    if (isStartedVideo) {
+      localVideo.stop();
+    }
+  });
 
   return (
     <div className="js-preview-view">
@@ -260,25 +258,38 @@ const PreviewContainer = () => {
           <h1>Audio And Video Preview</h1>
         </span>
         <div className="container video-app">
-          <video id="js-preview-video" className="preview-video" muted={true} data-video="0" />
+          <div className="preview-video">
+            <video className={classNames({ 'preview-video-show': !isInVBMode })} muted={true} ref={videoRef} />
+            <canvas
+              className={classNames({ 'preview-video-show': isInVBMode })}
+              width="1280"
+              height="720"
+              ref={canvasRef}
+            />
+          </div>
           <div className="video-footer video-operations video-operations-preview">
-            <MicrophoneButton
-              isStartedAudio={isStartedAudio}
-              isMuted={isMuted}
-              onMicrophoneClick={onMicrophoneClick}
-              onMicrophoneMenuClick={onMicrophoneMenuClick}
-              microphoneList={micList}
-              speakerList={speakerList}
-              activeMicrophone={activeMicrophone}
-              activeSpeaker={activeSpeaker}
-            />
-            <CameraButton
-              isStartedVideo={isStartedVideo}
-              onCameraClick={onCameraClick}
-              onSwitchCamera={onSwitchCamera}
-              cameraList={cameraList}
-              activeCamera={activeCamera}
-            />
+            <div>
+              <MicrophoneButton
+                isStartedAudio={isStartedAudio}
+                isMuted={isMuted}
+                onMicrophoneClick={onMicrophoneClick}
+                onMicrophoneMenuClick={onMicrophoneMenuClick}
+                microphoneList={micList}
+                speakerList={speakerList}
+                activeMicrophone={activeMicrophone}
+                activeSpeaker={activeSpeaker}
+              />
+              <CameraButton
+                isStartedVideo={isStartedVideo}
+                onCameraClick={onCameraClick}
+                onSwitchCamera={onSwitchCamera}
+                onBlurBackground={onBlurBackground}
+                cameraList={cameraList}
+                activeCamera={activeCamera}
+                isBlur={isBlur}
+                isPreview={true}
+              />
+            </div>
           </div>
         </div>
         <div className="audio-test">

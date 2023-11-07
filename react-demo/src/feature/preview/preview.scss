@@ -4,18 +4,36 @@
   flex-direction: column;
   height: fit-content;
 }
-
+.video-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .preview-video {
+  position: relative;
   width: 800px;
   height: 450px;
   background: rgba(0, 0, 0, 1);
-  margin: 1px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 1);
+  overflow: hidden;
+  &>video, &>canvas {
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+  & > .preview-video-show{
+    display: block;
+  }
 }
 
-.video-operations-preview div {
-  background-color: black !important;
+.video-operations-preview > div{
+  display: flex;
+  padding: 15px 20px;
+  background-color: rgba(0,0,0,0.7);
+  border-radius: 14px;
 }
 .join-button {
   color: rgba(255, 255, 255, 1);
