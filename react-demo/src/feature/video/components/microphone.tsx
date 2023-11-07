@@ -1,17 +1,19 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState, useEffect } from 'react';
-import { Menu, Tooltip, Dropdown, Button, Modal, Select, Input } from 'antd';
+import { useState, useEffect, useMemo } from 'react';
+import { Tooltip, Dropdown, Button } from 'antd';
 import classNames from 'classnames';
 import { AudioOutlined, AudioMutedOutlined, CheckOutlined, UpOutlined } from '@ant-design/icons';
 import { IconFont } from '../../../component/icon-font';
 import { MediaDevice } from '../video-types';
 import CallOutModal from './call-out-modal';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
+import { useCurrentAudioLevel } from '../hooks/useCurrentAudioLevel';
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
   isMuted: boolean;
   isSupportPhone?: boolean;
+  isMicrophoneForbidden?: boolean;
   disabled?: boolean;
   audio?: string;
   phoneCountryList?: any[];
@@ -40,12 +42,14 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     activeSpeaker,
     phoneCallStatus,
     disabled,
+    isMicrophoneForbidden,
     onMicrophoneClick,
     onMicrophoneMenuClick,
     onPhoneCallClick,
     onPhoneCallCancel
   } = props;
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const level = useCurrentAudioLevel();
   const tooltipText = isStartedAudio ? (isMuted ? 'unmute' : 'mute') : 'start audio';
   const menuItems = [];
   if (microphoneList?.length && audio !== 'phone') {
@@ -89,6 +93,37 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
       setIsPhoneModalOpen(true);
     }
   };
+  const audioIcon = useMemo(() => {
+    let iconType = '';
+    if (isStartedAudio) {
+      if (isMuted) {
+        if (audio === 'phone') {
+          iconType = 'icon-phone-off';
+        } else {
+          return <AudioMutedOutlined />;
+        }
+      } else {
+        if (audio === 'phone') {
+          iconType = 'icon-phone';
+        } else {
+          if (level !== 0) {
+            iconType = 'icon-audio-animation';
+          } else {
+            return <AudioOutlined />;
+          }
+        }
+      }
+    } else {
+      if (isMicrophoneForbidden) {
+        iconType = 'icon-audio-warning';
+      } else {
+        iconType = 'icon-headset';
+      }
+    }
+    if (iconType) {
+      return <IconFont type={iconType} />;
+    }
+  }, [level, audio, isMuted, isMicrophoneForbidden, isStartedAudio]);
   useEffect(() => {
     if (isStartedAudio) {
       setIsPhoneModalOpen(false);
@@ -108,17 +143,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
           placement="topRight"
           disabled={disabled}
         >
-          {isMuted ? (
-            audio === 'phone' ? (
-              <IconFont type="icon-phone-off" />
-            ) : (
-              <AudioMutedOutlined />
-            )
-          ) : audio === 'phone' ? (
-            <IconFont type="icon-phone" />
-          ) : (
-            <AudioOutlined />
-          )}
+          {audioIcon}
         </DropdownButton>
       ) : (
         <Tooltip title={tooltipText}>
@@ -133,12 +158,12 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
               icon={<UpOutlined />}
               placement="topRight"
             >
-              <IconFont type="icon-headset" />
+              {audioIcon}
             </DropdownButton>
           ) : (
             <Button
               className="vc-button"
-              icon={<IconFont type="icon-headset" />}
+              icon={audioIcon}
               size="large"
               ghost
               shape="circle"
