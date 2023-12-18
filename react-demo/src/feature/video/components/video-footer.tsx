@@ -41,9 +41,16 @@ interface VideoFooterProps {
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
   const { className, selfShareCanvas, sharing } = props;
-  const [isStartedAudio, setIsStartedAudio] = useState(false);
-  const [isStartedVideo, setIsStartedVideo] = useState(false);
-  const [audio, setAudio] = useState('');
+  const zmClient = useContext(ZoomContext);
+  const { mediaStream } = useContext(ZoomMediaContext);
+  const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
+  const liveStreamClient = zmClient.getLiveStreamClient();
+  const recordingClient = zmClient.getRecordingClient();
+  const [isStartedAudio, setIsStartedAudio] = useState(
+    zmClient.getCurrentUserInfo() && zmClient.getCurrentUserInfo().audio !== ''
+  );
+  const [isStartedVideo, setIsStartedVideo] = useState(zmClient.getCurrentUserInfo()?.bVideoOn);
+  const [audio, setAudio] = useState(zmClient.getCurrentUserInfo()?.audio);
   const [isSupportPhone, setIsSupportPhone] = useState(false);
   const [phoneCountryList, setPhoneCountryList] = useState<any[]>([]);
   const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
@@ -51,13 +58,13 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isDisableCaptions, setIsDisableCaptions] = useState(false);
   const [isMirrored, setIsMirrored] = useState(false);
   const [isBlur, setIsBlur] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [activeMicrophone, setActiveMicrophone] = useState('');
-  const [activeSpeaker, setActiveSpeaker] = useState('');
-  const [activeCamera, setActiveCamera] = useState('');
-  const [micList, setMicList] = useState<MediaDevice[]>([]);
-  const [speakerList, setSpeakerList] = useState<MediaDevice[]>([]);
-  const [cameraList, setCameraList] = useState<MediaDevice[]>([]);
+  const [isMuted, setIsMuted] = useState(!!zmClient.getCurrentUserInfo()?.muted);
+  const [activeMicrophone, setActiveMicrophone] = useState(mediaStream?.getActiveMicrophone());
+  const [activeSpeaker, setActiveSpeaker] = useState(mediaStream?.getActiveSpeaker());
+  const [activeCamera, setActiveCamera] = useState(mediaStream?.getActiveCamera());
+  const [micList, setMicList] = useState<MediaDevice[]>(mediaStream?.getMicList() ?? []);
+  const [speakerList, setSpeakerList] = useState<MediaDevice[]>(mediaStream?.getSpeakerList() ?? []);
+  const [cameraList, setCameraList] = useState<MediaDevice[]>(mediaStream?.getCameraList() ?? []);
   const [statisticVisible, setStatisticVisible] = useState(false);
   const [selecetedStatisticTab, setSelectedStatisticTab] = useState('audio');
   const [isComputerAudioDisabled, setIsComputerAudioDisabled] = useState(false);
@@ -65,13 +72,6 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [caption, setCaption] = useState({ text: '', isOver: false });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
   const [isMicrophoneForbidden, setIsMicrophoneForbidden] = useState(false);
-
-  const zmClient = useContext(ZoomContext);
-  const { mediaStream } = useContext(ZoomMediaContext);
-
-  const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
-  const liveStreamClient = zmClient.getLiveStreamClient();
-  const recordingClient = zmClient.getRecordingClient();
   const [recordingStatus, setRecordingStatus] = useState<'' | RecordingStatus>(
     recordingClient?.getCloudRecordingStatus() || ''
   );
@@ -119,10 +119,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     if (isStartedAudio) {
       if (isMuted) {
         await mediaStream?.unmuteAudio();
-        setIsMuted(false);
       } else {
         await mediaStream?.muteAudio();
-        setIsMuted(true);
       }
     } else {
       try {

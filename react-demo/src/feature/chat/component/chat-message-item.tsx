@@ -3,15 +3,18 @@ import { UserOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import classNames from 'classnames';
 import { ChatRecord } from '../chat-types';
+import ChatFileMessageItem from './chat-file-message-item';
 import './chat-message-item.scss';
 interface ChatMessageItemProps {
   record: ChatRecord;
   currentUserId: number;
   setChatUser: (userId: number) => void;
+  resendFile: (retryToken: string, fileUuid: string) => void;
+  downloadFile: (id: string) => void;
 }
 const ChatMessageItem = (props: ChatMessageItemProps) => {
-  const { record, currentUserId, setChatUser } = props;
-  const { message, sender, receiver, timestamp } = record;
+  const { record, currentUserId, setChatUser, resendFile, downloadFile } = props;
+  const { message, file, sender, receiver, timestamp } = record;
   const { avatar } = sender;
   const isCurrentUser = currentUserId === sender.userId;
   const onAvatarClick = useCallback(() => {
@@ -42,13 +45,23 @@ const ChatMessageItem = (props: ChatMessageItemProps) => {
           </p>
           <p className="chat-message-time">{new Date(timestamp).toLocaleTimeString()}</p>
         </div>
-        <ul className={classNames('chat-message-text-list', { myself: isCurrentUser })}>
-          {chatMessage.map((text, index) => (
-            <li className={classNames('chat-message-text')} key={index}>
-              {text}
-            </li>
-          ))}
-        </ul>
+        {file ? (
+          <ChatFileMessageItem
+            className={classNames({ myself: isCurrentUser })}
+            file={file}
+            id={record.id}
+            resendFile={resendFile}
+            downloadFile={downloadFile}
+          />
+        ) : (
+          <ul className={classNames('chat-message-text-list', { myself: isCurrentUser })}>
+            {chatMessage.map((text, index) => (
+              <li className={classNames('chat-message-text')} key={index}>
+                {text}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
