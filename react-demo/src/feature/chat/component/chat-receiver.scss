@@ -10,20 +10,26 @@
   }
   
 }
-
-.chat-receiver-item{
-  padding-left: 30px;
-  &.selected {
-    padding-left: 10px;
+.chat-receiver-dropdown-menu{
+  .ant-dropdown-menu-item {
+    padding: 10px 30px;
+    position: relative;
+    .anticon-check {
+      position: absolute;
+      left: 10px;
+      top: 15px;
+    }
+  }
+  .ant-dropdown-menu-item-group-title {
+    font-weight: 700;
+    color: #000;
   }
   .chat-receiver-item-affix{
-    color:#999;
+    color:#333;
     margin-left: 5px;
   }
 }
-.chat-privilege-item {
-  padding-left: 25px;
-  &.selected {
-    padding-left: 5px;
-  }
+
+.chat-send-file-input{
+  display: none;
 }

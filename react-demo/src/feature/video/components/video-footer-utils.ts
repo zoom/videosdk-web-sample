@@ -1,5 +1,3 @@
-import { Button, Menu } from 'antd';
-// eslint-disable-next-line no-duplicate-imports
 import type { MenuProps } from 'antd';
 export type MenuItem = Required<MenuProps>['items'][number];
 export const getAntdItem = (
