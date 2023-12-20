@@ -115,10 +115,14 @@ const initPreviewButtons = () => {
 
     const initVideoPreviewButtonClick = () => {
         const webcamButton = document.getElementById('js-preview-webcam-button');
-
+        const webcamIcon = document.getElementById('js-preview-webcam-icon');
         let isButtonAlreadyClicked = false;
 
-        const toggleWebcamButtonStyle = () => webcamButton.classList.toggle('meeting-control-button__off');
+        const toggleWebcamButtonStyle = () => {
+            webcamIcon.classList.toggle('fa-video');
+            webcamIcon.classList.toggle('fa-video-slash');
+            webcamButton.classList.toggle('meeting-control-button__off')
+        };
         const togglePreviewVideo = async () => isWebcamOn ? videoTrack.start(PREVIEW_VIDEO_ELEMENT) : videoTrack.stop();
 
         const onClick = async (event) => {

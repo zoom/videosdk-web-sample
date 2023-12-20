@@ -82,11 +82,16 @@ const initButtonClickHandlers = async (zoomClient, mediaStream) => {
   // At that point, video should be rendered. The reverse is true for stopping video
   const initWebcamClick = () => {
     const webcamButton = document.getElementById('js-webcam-button');
+    const webcamIcon = document.getElementById('js-webcam-icon');
 
     let isWebcamOn = false;
     let isButtonAlreadyClicked = false;
 
-    const toggleWebcamButtonStyle = () => webcamButton.classList.toggle('meeting-control-button__off');
+    const toggleWebcamButtonStyle = () => {
+      webcamIcon.classList.toggle('fa-video');
+      webcamIcon.classList.toggle('fa-video-slash');
+      webcamButton.classList.toggle('meeting-control-button__off');
+    };
 
     const onClick = async (event) => {
       event.preventDefault();

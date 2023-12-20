@@ -27,9 +27,8 @@ const joinSession = async (zmClient) => {
     sessionConfig.topic,
     sessionConfig.password,
     sessionConfig.sessionKey,
-    '',
-    '',
-    uuidv4()
+    sessionConfig.user_identity,
+    sessionConfig.role
   );
 
   let mediaStream;
