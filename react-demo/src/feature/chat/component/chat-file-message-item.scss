@@ -1,0 +1,89 @@
+.chat-file-message-wrap{
+  display: flex;
+  flex-direction: row;
+  &.myself {
+    flex-direction: row-reverse;
+  }
+  
+}
+.chat-file-message-item {
+  width: 320px;
+  height: 60px;
+  border: 1px solid rgba(0, 0, 0, 10%);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 15px;
+  cursor: pointer;
+  flex: 0 1 auto;
+  .chat-file-preview {
+    margin-right: 18px;
+    position: relative;
+    .chat-file-icon{
+      display: inline-block;
+      svg {
+        width: 32px;
+        height: 32px;
+      }
+      
+    }
+    .chat-file-status {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      transform: translate(50%, 50%);
+      border-radius: 50%;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+  .chat-file-desc {
+    overflow: hidden;
+    max-width: 240px;
+    .chat-file-name {
+      color: #232333;
+      font-weight: 700;
+      font-size: 14px;
+      width: 100%;
+      margin: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: left;
+    }
+    .chat-file-subline {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      .chat-file-size {
+        margin-right: 5px;
+        white-space: nowrap;
+      }
+      .ant-progress{
+        width: 150px;
+      }
+      .ant-btn {
+        border: 0;
+      }
+    }
+    .chat-file-action-tip {
+      visibility: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+    }
+  }
+  &:hover {
+    .chat-file-action-tip {
+      visibility: visible;
+    }
+  }
+}

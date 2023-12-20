@@ -17,7 +17,7 @@ interface AvatarProps {
 const networkQualityIcons = ['bad', 'bad', 'normal', 'good', 'good', 'good'];
 const Avatar = (props: AvatarProps) => {
   const { participant, style, isActive, className, networkQuality } = props;
-  const { displayName, audio, muted, bVideoOn, userId } = participant;
+  const { displayName, audio, muted, bVideoOn, userId, isInFailover } = participant;
   const avatarRef = useRef(null);
   const isHover = useHover(avatarRef);
 
@@ -27,7 +27,7 @@ const Avatar = (props: AvatarProps) => {
       style={{ ...style, background: bVideoOn ? 'transparent' : 'rgb(26,26,26)' }}
       ref={avatarRef}
     >
-      {(bVideoOn || (audio === 'computer' && muted)) && (
+      {(bVideoOn || (audio === 'computer' && muted) || isInFailover) && (
         <div className="corner-name">
           {audio === 'computer' && muted && <AudioMutedOutlined style={{ color: '#f00' }} />}
           {bVideoOn && networkQuality !== undefined && (
@@ -39,11 +39,14 @@ const Avatar = (props: AvatarProps) => {
               }`}
             />
           )}
+          {isInFailover && (
+            <IconFont type="icon-reconnect" style={{ color: '#FF9209', animation: 'loading 3s linear infinite' }} />
+          )}
           {bVideoOn && <span>{displayName}</span>}
         </div>
       )}
       {!bVideoOn && <p className="center-name">{displayName}</p>}
-      <AvatarMore userId={participant.userId} isHover={isHover} />
+      {!isInFailover && <AvatarMore userId={userId} isHover={isHover} />}
     </div>
   );
 };
