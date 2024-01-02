@@ -27,6 +27,8 @@ const joinSession = async (zmClient) => {
     sessionConfig.topic,
     sessionConfig.password,
     sessionConfig.sessionKey,
+    sessionConfig.user_identity,
+    parseInt(sessionConfig.role, 10),
     '',
     '',
     uuidv4()
