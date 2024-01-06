@@ -89,6 +89,19 @@ export function isShallowEqual(objA: any, objB: any) {
   return true;
 }
 
+export function isArrayShallowEqual(arrayA: Array<any>, arrayB: Array<any>) {
+  const len = arrayA.length;
+  if (arrayB.length !== len) {
+    return false;
+  }
+  for (let i = 0; i < len; i++) {
+    if (!isShallowEqual(arrayA[i], arrayB[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function b64EncodeUnicode(str: any) {
   // first we use encodeURIComponent to get percent-encoded UTF-8,
   // then we convert the percent encodings into raw bytes which
