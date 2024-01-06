@@ -1,6 +1,6 @@
 import { useEffect, MutableRefObject } from 'react';
 import { usePrevious, usePersistFn } from '../../../hooks';
-import { isShallowEqual } from '../../../utils/util';
+import { isArrayShallowEqual } from '../../../utils/util';
 import { CellLayout } from '../video-types';
 import { MediaStream, Participant } from '../../../index-types';
 /**
@@ -46,10 +46,7 @@ export function useRenderVideo(
       }
       if (unalteredSubscribers.length > 0) {
         // layout changed
-        if (
-          previousLayout &&
-          (layout.length !== previousLayout.length || !isShallowEqual(layout[0], previousLayout[0]))
-        ) {
+        if (previousLayout && !isArrayShallowEqual(layout, previousLayout)) {
           unalteredSubscribers.forEach(async (userId) => {
             const index = participants.findIndex((user) => user.userId === userId);
             const cellDimension = layout[index];
