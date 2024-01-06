@@ -127,7 +127,8 @@ function App(props: AppProps) {
         webEndpoint,
         enforceMultipleVideos: galleryViewWithoutSAB,
         enforceVirtualBackground: galleryViewWithoutSAB,
-        stayAwake: true
+        stayAwake: true,
+        leaveOnPageUnload: true
       });
       try {
         setLoadingText('Joining the session...');

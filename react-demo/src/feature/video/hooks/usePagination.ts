@@ -10,10 +10,7 @@ export function usePagination(zmClient: ZoomClient, dimension: Dimension) {
   const [totalSize, setTotalSize] = useState(0);
   const [pageSize, setPageSize] = useState(MAX_NUMBER_PER_PAGE);
   useEffect(() => {
-    const size = Math.min(
-      MAX_NUMBER_PER_PAGE,
-      maxViewportVideoCounts(dimension.width, dimension.height),
-    );
+    const size = Math.min(MAX_NUMBER_PER_PAGE, maxViewportVideoCounts(dimension.width, dimension.height));
     setPageSize(size);
   }, [dimension]);
   const onParticipantsChange = useCallback(() => {
@@ -37,6 +34,6 @@ export function usePagination(zmClient: ZoomClient, dimension: Dimension) {
     totalPage: Math.ceil(totalSize / pageSize),
     pageSize,
     totalSize,
-    setPage,
+    setPage
   };
 }
