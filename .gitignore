@@ -24,7 +24,7 @@ yarn-error.log*
 dist
 /public/lib
 .eslintcache
-src/config/dev.ts
+
 
 /src/config/zoomdev.ts
 /src/config/zoom.ts
