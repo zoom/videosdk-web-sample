@@ -1,9 +1,35 @@
-/react-demo/src/config/zoomdev.ts
-/react-demo/src/config/zoom.ts
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist
+/public/lib
+.eslintcache
+
+
+/src/config/zoomdev.ts
+/src/config/zoom.ts
 /sample-app-videosdk.zip
-/react-demo/src/config/devep.ts
-/purejs-demo/package-lock.json
-/react-demo/package-lock.json
+/src/config/devep.ts
 update-version.js
 export.sh
 /export
