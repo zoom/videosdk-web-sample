@@ -25,7 +25,6 @@ dist
 /public/lib
 .eslintcache
 
-
 /src/config/zoomdev.ts
 /src/config/zoom.ts
 /sample-app-videosdk.zip
