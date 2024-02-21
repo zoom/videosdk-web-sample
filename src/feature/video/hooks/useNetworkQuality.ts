@@ -5,7 +5,7 @@ import { ZoomClient } from '../../../index-types';
 
 export function useNetworkQuality(zmClient: ZoomClient) {
   const [networkQuality, setNetworkQuality] = useState<Record<string, NetworkQuality>>({});
-  const onNetworkChange = useCallback((payload) => {
+  const onNetworkChange = useCallback((payload: any) => {
     const { userId, type, level } = payload;
     setNetworkQuality(
       produce((draft) => {

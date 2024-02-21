@@ -42,6 +42,14 @@ import { ReactComponent as IconAudioOn } from './svgs/icon-audio-on.svg';
 import { ReactComponent as IconAudioOff } from './svgs/icon-audio-off.svg';
 import { ReactComponent as IconAudioWarning } from './svgs/icon-audio-warning.svg';
 import { ReactComponent as IconAudioAnimation } from './svgs/icon-audio-active-animated.svg';
+import { ReactComponent as IconReconnect } from './svgs/icon-reconnect.svg';
+import { ReactComponent as IconCorrectCircle } from './svgs/icon-correct-circle.svg';
+import { ReactComponent as IconDownload } from './svgs/icon-download.svg';
+import { ReactComponent as IconChatUpload } from './svgs/icon-chat-upload.svg';
+import { ReactComponent as IconPenddingCircle } from './svgs/icon-pending-circle.svg';
+import { ReactComponent as IconWarningCircle } from './svgs/icon-warning-circle.svg';
+import { ReactComponent as IconCorrect } from './svgs/icon-correct.svg';
+import { ReactComponent as IconLoading } from './svgs/icon-loading.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -82,7 +90,15 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-audio-on': IconAudioOn,
   'icon-audio-off': IconAudioOff,
   'icon-audio-warning': IconAudioWarning,
-  'icon-audio-animation': IconAudioAnimation
+  'icon-audio-animation': IconAudioAnimation,
+  'icon-reconnect': IconReconnect,
+  'icon-correct-circle': IconCorrectCircle,
+  'icon-download': IconDownload,
+  'icon-chat-upload': IconChatUpload,
+  'icon-pendding-circle': IconPenddingCircle,
+  'icon-warning-circle': IconWarningCircle,
+  'icon-correct': IconCorrect,
+  'icon-loading': IconLoading
 };
 interface IconFontProps {
   type: string;

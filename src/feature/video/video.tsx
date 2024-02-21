@@ -17,6 +17,7 @@ import { useNetworkQuality } from './hooks/useNetworkQuality';
 import ReportBtn from './components/report-btn';
 import ShareView from './components/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
+import { SELF_VIDEO_ID } from './video-constants';
 
 import './video.scss';
 const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
@@ -44,6 +45,19 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       totalSize
     }
   );
+  /**
+   * position for self video
+   */
+  const currentUserIndex = visibleParticipants.findIndex(
+    (user) => user.userId === zmClient.getCurrentUserInfo()?.userId
+  );
+  let selfVideoLayout = null;
+  if (currentUserIndex > -1) {
+    const item = videoLayout[currentUserIndex];
+    if (item && canvasDimension) {
+      selfVideoLayout = { ...item, y: canvasDimension.height - item.y - item.height };
+    }
+  }
   const avatarActionState = useAvatarAction(zmClient, visibleParticipants);
   const networkQuality = useNetworkQuality(zmClient);
   return (
@@ -55,6 +69,23 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
+        {selfVideoLayout && mediaStream?.isRenderSelfViewWithVideoElement() && (
+          <video
+            id={SELF_VIDEO_ID}
+            className="self-video-tag"
+            playsInline
+            muted
+            autoPlay
+            style={{
+              display: 'block',
+              width: `${selfVideoLayout.width}px`,
+              height: `${selfVideoLayout.height}px`,
+              top: `${selfVideoLayout.y}px`,
+              left: `${selfVideoLayout.x}px`,
+              pointerEvents: 'none'
+            }}
+          />
+        )}
         <AvatarActionContext.Provider value={avatarActionState}>
           <ul className="avatar-list">
             {visibleParticipants.map((user, index) => {

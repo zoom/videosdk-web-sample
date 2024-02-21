@@ -12,12 +12,12 @@ export function useRemoteControl(
   const [controllingUser, setControllingUser] = useState<{ userId: number; displayName: string } | null>(null);
   const isDownloadAppRef = useRef(false);
   const launchModalRef = useRef<any>(null);
-  const onInControllingChange = useCallback((payload) => {
+  const onInControllingChange = useCallback((payload: any) => {
     const { isControlling } = payload;
     setIsControllingUser(isControlling);
   }, []);
   const onControlApproveChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       const { state } = payload;
       if (state === ApprovedState.Approved) {
         if (shareView) {
@@ -33,7 +33,7 @@ export function useRemoteControl(
     [mediaStream, shareView]
   );
   const onReceiveRemoteControlRequest = useCallback(
-    (payload) => {
+    (payload: any) => {
       const { userId, displayName, isSharingEntireScreen } = payload;
       if (isSharingEntireScreen) {
         setControllingUser({ userId, displayName });
@@ -64,7 +64,7 @@ export function useRemoteControl(
     [mediaStream, selfShareView]
   );
   const onRemoteControlAppStatusChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       if (payload === RemoteControlAppStatus.Uninstalled || payload === RemoteControlAppStatus.Unknown) {
         const { displayName, userId } = controllingUser || {};
         launchModalRef.current = Modal.confirm({
@@ -120,7 +120,7 @@ export function useRemoteControl(
     },
     [controllingUser, mediaStream]
   );
-  const onRemoteControlSessionChange = useCallback((payload) => {
+  const onRemoteControlSessionChange = useCallback((payload: any) => {
     if (payload === RemoteControlSessionStatus.Ended) {
       setControllingUser(null);
     } else if (payload === RemoteControlSessionStatus.Started) {

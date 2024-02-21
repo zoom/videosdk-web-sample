@@ -22,7 +22,7 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     avatarActionState: { isControllingRemoteCamera }
   } = useContext(AvatarActionContext);
   const onReceiveFarEndControl = useCallback(
-    ({ userId, displayName, currentControllingUserId, currentControllingDisplayName }) => {
+    ({ userId, displayName, currentControllingUserId, currentControllingDisplayName }: any) => {
       let message = `${displayName} request to control your camera?`;
       if (currentControllingUserId !== undefined) {
         message = `${displayName} want to take over the control of ${currentControllingDisplayName}?`;
@@ -45,7 +45,7 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     [mediaStream]
   );
   const onReceiveFarEndControlResponse = useCallback(
-    ({ isApproved, userId, displayName }) => {
+    ({ isApproved, userId, displayName }: any) => {
       dispatch({ type: 'set-is-controlling-remote-camera', payload: isApproved });
       if (isApproved) {
         setCurrentControlledUser({ userId, displayName });
@@ -58,7 +58,7 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     [dispatch]
   );
 
-  const onCameraInControlChange = useCallback(({ isControlled, userId }) => {
+  const onCameraInControlChange = useCallback(({ isControlled, userId }: any) => {
     if (isControlled) {
       message.info('Your camera is controlled by other one');
     } else {
@@ -67,7 +67,7 @@ export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream 
     setIsInControl(isControlled);
     setControllingUserId(userId);
   }, []);
-  const onCameraCapabilityChange = useCallback(({ userId, ptz }) => {
+  const onCameraCapabilityChange = useCallback(({ userId, ptz }: any) => {
     setCameraCapability(
       produce((draft) => {
         const item = draft.find((i) => i.userId === userId);

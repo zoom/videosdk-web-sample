@@ -9,7 +9,7 @@ export function useCanvasDimension(
   const [dimension, setDimension] = useState({ width: 0, height: 0 });
   const debounceRef = useRef(_.debounce(setDimension, 0));
   const onCanvasResize = useCallback(
-    ({ width, height }) => {
+    ({ width, height }: any) => {
       if (videoRef) {
         // eslint-disable-next-line no-useless-call
         debounceRef.current({ width, height });
