@@ -13,7 +13,6 @@ let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
 // Add enforceGalleryView to turn on the gallery view without SharedAddayBuffer
 if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingArgs.signature) {
   meetingArgs = { ...devConfig, ...meetingArgs };
-  meetingArgs.enforceGalleryView = !window?.crossOriginIsolated;
 }
 
 if (meetingArgs.web && meetingArgs.web !== '0') {
@@ -22,7 +21,7 @@ if (meetingArgs.web && meetingArgs.web !== '0') {
       try {
         meetingArgs[field] = b64DecodeUnicode(meetingArgs[field]);
       } catch (e) {
-        if (!['topic', 'name'].includes(field)) delete meetingArgs[field];
+        console.log('ingore base64 decode', field, meetingArgs[field]);
       }
     }
   });
@@ -37,7 +36,7 @@ if (meetingArgs.web && meetingArgs.web !== '0') {
     try {
       meetingArgs[field] = Number(meetingArgs[field]);
     } catch (e) {
-      delete meetingArgs[field];
+      meetingArgs[field] = 0;
     }
   }
 });
@@ -64,16 +63,18 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   console.log('=====================================');
   console.log('meetingArgs', meetingArgs);
 
-  const urlArgs = {
+  const urlArgs: any = {
     topic: meetingArgs.topic,
     name: meetingArgs.name,
     password: meetingArgs.password,
     sessionKey: meetingArgs.sessionKey,
     userIdentity: meetingArgs.userIdentity,
     role: meetingArgs.role || 1,
-    cloud_recording_option: meetingArgs.cloud_recording_option,
-    cloud_recording_election: meetingArgs.cloud_recording_election,
-    telemetry_tracking_id: meetingArgs.telemetry_tracking_id,
+    cloud_recording_option: meetingArgs.cloud_recording_option || '',
+    cloud_recording_election: meetingArgs.cloud_recording_election || '',
+    telemetry_tracking_id: meetingArgs.telemetry_tracking_id || '',
+    enforceGalleryView: !window?.crossOriginIsolated,
+    enforceVB: 1,
     web: '1'
   };
   console.log('use url args');
