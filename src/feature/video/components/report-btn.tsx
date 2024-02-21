@@ -3,7 +3,7 @@ import { Button, message, Modal, List, Typography } from 'antd';
 import { useState, useContext, useMemo } from 'react';
 import ZoomContext from '../../../context/zoom-context';
 import './report-btn.scss';
-const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.customerJoinId;
+const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.telemetry_tracking_id;
 const { Item: ListItem } = List;
 const ReportBtn = () => {
   const [messageApi, msgContextHolder] = message.useMessage();
@@ -22,7 +22,7 @@ const ReportBtn = () => {
       },
       {
         label: 'Telemetry tracking id',
-        value: trackingId ? window.atob(trackingId) : ''
+        value: trackingId ? trackingId : ''
       }
     ];
     return (
