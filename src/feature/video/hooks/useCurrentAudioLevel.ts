@@ -5,7 +5,7 @@ export function useCurrentAudioLevel() {
   const [level, setLevel] = useState(0);
   const timerRef = useRef<number>();
   const onActiveSpeakerChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       if (!zmClient.getCurrentUserInfo().muted) {
         if (Array.isArray(payload) && payload.length > 0) {
           const isCurrentUserSpeaking = payload.some(

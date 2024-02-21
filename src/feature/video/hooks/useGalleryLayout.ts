@@ -19,7 +19,6 @@ export function useGalleryLayout(
 ) {
   const [visibleParticipants, setVisibleParticipants] = useState<Participant[]>([]);
   const [layout, setLayout] = useState<CellLayout[]>([]);
-  const [currentUser, setCurrentUser] = useState<Participant | undefined>();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [subscribedVideos, setSubscribedVideos] = useState<number[]>([]);
   const { page, pageSize, totalPage, totalSize } = pagination;
@@ -32,31 +31,24 @@ export function useGalleryLayout(
     setLayout(getVideoLayout(dimension.width, dimension.height, size));
   }, [dimension, size]);
 
-  const updateUser = useCallback(() => {
+  useParticipantsChange(zmClient, () => {
     const participants = zmClient.getAllUser();
     setParticipants(participants);
-    const currentUser = zmClient.getCurrentUserInfo();
-    setCurrentUser(currentUser);
-  }, [zmClient]);
-  useEffect(() => {
-    zmClient.on('user-updated', updateUser);
-    zmClient.on('user-added', updateUser);
-    return () => {
-      zmClient.off('user-updated', () => {});
-      zmClient.off('user-added', () => {});
-    };
-  }, [updateUser, zmClient]);
+  });
 
   useEffect(() => {
-    if (currentUser && participants.length > 0) {
+    if (participants.length > 0) {
       let pageParticipants: Participant[] = [];
       if (participants.length === 1) {
         pageParticipants = participants;
       } else {
         pageParticipants = participants
-          .filter((user) => user.userId !== currentUser.userId)
+          .filter((user) => user.userId !== zmClient.getSessionInfo().userId)
           .sort((user1, user2) => Number(user2.bVideoOn) - Number(user1.bVideoOn));
-        pageParticipants.splice(1, 0, currentUser);
+        const currentUser = zmClient.getCurrentUserInfo();
+        if (currentUser) {
+          pageParticipants.splice(1, 0, currentUser);
+        }
         pageParticipants = pageParticipants.filter((_user, index) => Math.floor(index / pageSize) === page);
         if (pageParticipants.length < pageSize) {
           const vacantSize = pageSize - pageParticipants.length;
@@ -70,10 +62,9 @@ export function useGalleryLayout(
       const videoParticipants = pageParticipants.filter((user) => user.bVideoOn).map((user) => user.userId);
       setSubscribedVideos(videoParticipants);
     }
-  }, [zmClient, pageSize, page, totalPage, currentUser, participants]);
+  }, [zmClient, pageSize, page, totalPage, participants]);
   useEffect(() => {
     setParticipants(zmClient.getAllUser());
-    setCurrentUser(zmClient.getCurrentUserInfo());
   }, [zmClient]);
 
   useRenderVideo(
@@ -83,7 +74,7 @@ export function useGalleryLayout(
     layout,
     subscribedVideos,
     visibleParticipants,
-    zmClient.getCurrentUserInfo()?.userId
+    zmClient.getSessionInfo().userId
   );
   return {
     visibleParticipants,

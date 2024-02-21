@@ -27,19 +27,21 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     video: { decode: isVideoDecodeReady }
   } = useContext(ZoomMediaContext);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
+  const selfVideoCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeVideo, setActiveVideo] = useState<number>(mediaStream?.getActiveVideoId() ?? 0);
   const previousActiveUser = useRef<Participant>();
   const canvasDimension = useCanvasDimension(mediaStream, videoRef);
+  const selfCanvasDimension = useCanvasDimension(mediaStream, selfVideoCanvasRef);
   const networkQuality = useNetworkQuality(zmClient);
   const previousCanvasDimension = usePrevious(canvasDimension);
 
   useParticipantsChange(zmClient, (payload) => {
     setParticipants(payload);
   });
-  const onActiveVideoChange = useCallback((payload) => {
+  const onActiveVideoChange = useCallback((payload: any) => {
     const { userId } = payload;
     setActiveVideo(userId);
   }, []);
@@ -49,16 +51,24 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       zmClient.off('video-active-change', onActiveVideoChange);
     };
   }, [zmClient, onActiveVideoChange]);
-
+  // active user = regard as `video-active-change` payload, excluding the case where it is self and the video is turned on.
+  // In this case, the self video is rendered seperately.
   const activeUser = useMemo(
-    () => participants.find((user) => user.userId === activeVideo),
-    [participants, activeVideo]
+    () =>
+      participants.find(
+        (user) => user.userId === activeVideo && !(user.userId === zmClient.getSessionInfo().userId && user.bVideoOn)
+      ),
+    [participants, activeVideo, zmClient]
   );
   const isCurrentUserStartedVideo = zmClient.getCurrentUserInfo()?.bVideoOn;
   useEffect(() => {
-    if (mediaStream && videoRef.current && isVideoDecodeReady) {
+    if (mediaStream && videoRef.current) {
       if (activeUser?.bVideoOn !== previousActiveUser.current?.bVideoOn) {
-        if (activeUser?.bVideoOn) {
+        //
+        if (
+          activeUser?.bVideoOn &&
+          !(activeUser.userId === zmClient.getSessionInfo().userId && isCurrentUserStartedVideo)
+        ) {
           mediaStream.renderVideo(
             videoRef.current,
             activeUser.userId,
@@ -101,7 +111,32 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       }
       previousActiveUser.current = activeUser;
     }
-  }, [mediaStream, activeUser, isVideoDecodeReady, canvasDimension, previousCanvasDimension]);
+  }, [
+    mediaStream,
+    activeUser,
+    isVideoDecodeReady,
+    canvasDimension,
+    previousCanvasDimension,
+    zmClient,
+    isCurrentUserStartedVideo
+  ]);
+  useEffect(() => {
+    if (
+      selfVideoCanvasRef.current &&
+      selfCanvasDimension.width > 0 &&
+      selfCanvasDimension.height > 0 &&
+      isCurrentUserStartedVideo
+    ) {
+      mediaStream?.adjustRenderedVideoPosition(
+        selfVideoCanvasRef.current,
+        zmClient.getSessionInfo().userId,
+        selfCanvasDimension.width,
+        selfCanvasDimension.height,
+        0,
+        0
+      );
+    }
+  }, [selfCanvasDimension, mediaStream, zmClient, isCurrentUserStartedVideo]);
   const avatarActionState = useAvatarAction(zmClient, activeUser ? [activeUser] : []);
   return (
     <div className="viewport">
@@ -114,6 +149,9 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         {mediaStream?.isRenderSelfViewWithVideoElement() ? (
           <video
             id={SELF_VIDEO_ID}
+            autoPlay
+            muted
+            playsInline
             className={classnames('self-video', {
               'single-self-video': participants.length === 1,
               'self-video-show': isCurrentUserStartedVideo
@@ -128,6 +166,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
               'single-self-video': participants.length === 1,
               'self-video-show': isCurrentUserStartedVideo
             })}
+            ref={selfVideoCanvasRef}
           />
         )}
         <div className="single-video-wrap">

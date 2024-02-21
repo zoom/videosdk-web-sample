@@ -1,49 +1,70 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Button, message } from 'antd';
-import { useState, useContext } from 'react';
+import { Button, message, Modal, List, Typography } from 'antd';
+import { useState, useContext, useMemo } from 'react';
 import ZoomContext from '../../../context/zoom-context';
 import './report-btn.scss';
+const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.customerJoinId;
+const { Item: ListItem } = List;
 const ReportBtn = () => {
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, msgContextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
   const zmClient = useContext(ZoomContext);
-  const success = () => {
-    messageApi.open({
-      type: 'success',
-      content: 'Successfully reported the log.'
+
+  const infoList = useMemo(() => {
+    const data = [
+      {
+        label: 'JsMedia version',
+        value: (window as any).JsMediaSDK_Instance?.version
+      },
+      {
+        label: 'Session id(mid)',
+        value: zmClient.getSessionInfo().sessionId
+      },
+      {
+        label: 'Telemetry tracking id',
+        value: trackingId ? window.atob(trackingId) : ''
+      }
+    ];
+    return (
+      <List
+        bordered
+        dataSource={data}
+        renderItem={(item) => (
+          <ListItem>
+            <Typography.Title level={5}>{item.label}:</Typography.Title>
+            <Typography.Text>{item.value}</Typography.Text>
+          </ListItem>
+        )}
+      />
+    );
+  }, [zmClient]);
+  const onInfoClick = async function () {
+    modal.info({
+      title: 'Session info',
+      content: infoList,
+      okText: trackingId ? 'Report log' : 'Ok',
+      onOk: async () => {
+        if (trackingId) {
+          await zmClient.getLoggerClient().reportToGlobalTracing();
+          messageApi.open({
+            type: 'success',
+            content: 'Successfully reported the log.'
+          });
+        }
+      },
+      closable: true,
+      icon: null,
+      width: 520
     });
   };
-  const onReportClick = async function () {
-    try {
-      await zmClient.getLoggerClient().reportToGlobalTracing();
-      success();
-    } catch (e) {
-      console.log(e);
-    }
-  };
   // @ts-ignore
-  const { version } = JsMediaSDK_Instance;
-  const [isTitleVisible, setIsTitleVisible] = useState(false);
-  const mouseEnterHandler = () => {
-    setIsTitleVisible(true);
-  };
-  const mouseLeaveHandler = () => {
-    setIsTitleVisible(false);
-  };
+  let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
   return (
     <>
-      {contextHolder}
+      {msgContextHolder}
+      {modalContextHolder}
       <div>
-        <div id="jsmediaversion">{'jsmedia:' + version}</div>
-        {isTitleVisible && <div id="report-title">Click to report log</div>}
-        <Button
-          type="link"
-          className="report-button"
-          onMouseEnter={mouseEnterHandler}
-          onMouseLeave={mouseLeaveHandler}
-          icon={<InfoCircleOutlined />}
-          size="large"
-          onClick={onReportClick}
-        />
+        <Button type="link" className="info-button" icon={<InfoCircleOutlined />} size="large" onClick={onInfoClick} />
       </div>
     </>
   );

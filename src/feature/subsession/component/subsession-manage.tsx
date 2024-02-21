@@ -40,7 +40,7 @@ const SubsessionManage = (props: SubsessionManageProps) => {
   const zmClient = useContext(ZoomContext);
   const ssClient = zmClient.getSubsessionClient();
   const closingCountdown = useSubsessionClosingCountdown(zmClient, subsessionStatus);
-  const onBroadcastPopoverVisibleChange = useCallback((visible) => {
+  const onBroadcastPopoverVisibleChange = useCallback((visible: boolean) => {
     setBroadcastVisible(visible);
   }, []);
   const closeBroadcastPopover = useCallback(() => {

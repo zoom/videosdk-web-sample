@@ -3,7 +3,7 @@ import { ZoomClient } from '../../../index-types';
 export function useActiveVideo(zmClient: ZoomClient) {
   const [activeVideo, setActiveVideo] = useState<number>(0);
   const [activeSpeaker, setActiveSpeaker] = useState<number>(0);
-  const onVideoActiveChange = useCallback((payload) => {
+  const onVideoActiveChange = useCallback((payload: any) => {
     const { state, userId } = payload;
     if (state === 'Active') {
       setActiveVideo(userId);
@@ -11,7 +11,7 @@ export function useActiveVideo(zmClient: ZoomClient) {
       setActiveVideo(0);
     }
   }, []);
-  const onActiveSpeakerChange = useCallback((payload) => {
+  const onActiveSpeakerChange = useCallback((payload: any) => {
     if (Array.isArray(payload) && payload.length > 0) {
       const { userId } = payload[0];
       setActiveSpeaker(userId);

@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import ZoomVideo from '@zoom/videosdk';
 import './index.css';
 import App from './App';
@@ -16,61 +16,31 @@ if (!meetingArgs.sdkKey || !meetingArgs.topic || !meetingArgs.name || !meetingAr
   meetingArgs.enforceGalleryView = !window?.crossOriginIsolated;
 }
 
-if (meetingArgs.web) {
-  if (meetingArgs.topic) {
-    try {
-      meetingArgs.topic = b64DecodeUnicode(meetingArgs.topic);
-    } catch (e) {}
-  } else {
-    meetingArgs.topic = '';
-  }
-
-  if (meetingArgs.name) {
-    try {
-      meetingArgs.name = b64DecodeUnicode(meetingArgs.name);
-    } catch (e) {}
-  } else {
-    meetingArgs.name = '';
-  }
-
-  if (meetingArgs.password) {
-    try {
-      meetingArgs.password = b64DecodeUnicode(meetingArgs.password);
-    } catch (e) {}
-  } else {
-    meetingArgs.password = '';
-  }
-
-  if (meetingArgs.sessionKey) {
-    try {
-      meetingArgs.sessionKey = b64DecodeUnicode(meetingArgs.sessionKey);
-    } catch (e) {}
-  } else {
-    meetingArgs.sessionKey = '';
-  }
-
-  if (meetingArgs.userIdentity) {
-    try {
-      meetingArgs.userIdentity = b64DecodeUnicode(meetingArgs.userIdentity);
-    } catch (e) {}
-  } else {
-    meetingArgs.userIdentity = '';
-  }
-
+if (meetingArgs.web && meetingArgs.web !== '0') {
+  ['topic', 'name', 'password', 'sessionKey', 'userIdentity'].forEach((field) => {
+    if (Object.hasOwn(meetingArgs, field)) {
+      try {
+        meetingArgs[field] = b64DecodeUnicode(meetingArgs[field]);
+      } catch (e) {
+        if (!['topic', 'name'].includes(field)) delete meetingArgs[field];
+      }
+    }
+  });
   if (meetingArgs.role) {
     meetingArgs.role = parseInt(meetingArgs.role, 10);
   } else {
     meetingArgs.role = 1;
   }
 }
-
-if (!meetingArgs?.cloud_recording_option) {
-  meetingArgs.cloud_recording_option = '0';
-}
-if (!meetingArgs?.cloud_recording_election) {
-  meetingArgs.cloud_recording_election = '';
-}
-
+['enforceGalleryView', 'enforceVB', 'cloud_recording_option', 'cloud_recording_election'].forEach((field) => {
+  if (Object.hasOwn(meetingArgs, field)) {
+    try {
+      meetingArgs[field] = Number(meetingArgs[field]);
+    } catch (e) {
+      delete meetingArgs[field];
+    }
+  }
+});
 if (meetingArgs?.telemetry_tracking_id) {
   try {
     meetingArgs.telemetry_tracking_id = b64DecodeUnicode(meetingArgs.telemetry_tracking_id);
@@ -84,10 +54,9 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     meetingArgs.sdkKey,
     meetingArgs.sdkSecret,
     meetingArgs.topic,
-    meetingArgs.password,
     meetingArgs.sessionKey,
     meetingArgs.userIdentity,
-    parseInt(meetingArgs.role, 10),
+    Number(meetingArgs.role ?? 1),
     meetingArgs.cloud_recording_option,
     meetingArgs.cloud_recording_election,
     meetingArgs.telemetry_tracking_id
@@ -111,13 +80,13 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   console.log(window.location.origin + '/?' + new URLSearchParams(urlArgs).toString());
 }
 const zmClient = ZoomVideo.createClient();
-ReactDOM.render(
+const root = createRoot(document.getElementById('root') as HTMLElement);
+root.render(
   <React.StrictMode>
     <ZoomContext.Provider value={zmClient}>
       <App meetingArgs={meetingArgs as any} />
     </ZoomContext.Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
