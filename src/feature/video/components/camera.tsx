@@ -22,10 +22,10 @@ interface CameraButtonProps {
   activePlaybackUrl?: string;
 }
 const videoPlaybacks = [
-  { title: 'Video 1', url: 'https://source.zoom.us/brand/mp4/Using%20the%20Zoom%20PWA.mp4' },
-  { title: 'Video 2', url: 'https://source.zoom.us/brand/mp4/Zoom%20Cares%20Nonprofit%20Impact.mp4' },
+  { title: 'ZOOM ZWA', url: 'https://source.zoom.us/brand/mp4/Using%20the%20Zoom%20PWA.mp4' },
+  { title: 'ZOOM Cares', url: 'https://source.zoom.us/brand/mp4/Zoom%20Cares%20Nonprofit%20Impact.mp4' },
   {
-    title: 'Video 3',
+    title: 'ZOOM One',
     url: 'https://source.zoom.us/brand/mp4/Zoom%20One%20-%20Team%20Chat%2C%20Phone%2C%20Email%2C%20and%20more.mp4'
   }
 ];

@@ -60,7 +60,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
     : null;
 
   const onMenuItemClick = useCallback(
-    ({ key }) => {
+    ({ key }: any) => {
       const userId = Number(key);
       if (userId !== selectedChatUser?.userId) {
         setChatUser(userId);
@@ -69,7 +69,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
     [selectedChatUser, setChatUser]
   );
   const onMenuItemPrivilegeClick = useCallback(
-    ({ key }) => {
+    ({ key }: any) => {
       const privilege = Number(key);
       if (chatPrivilege !== privilege) {
         chatClient?.setPrivilege(privilege);
@@ -81,7 +81,7 @@ const ChatReceiverContainer = (props: ChatReceiverProps) => {
     fileInputRef.current?.click();
   }, []);
   const onFileChange = useCallback(
-    (event) => {
+    (event: any) => {
       const target = event.target as HTMLInputElement;
       const { files } = target;
       if (files && files?.length > 0) {

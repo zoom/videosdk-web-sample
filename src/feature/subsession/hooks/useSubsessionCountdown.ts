@@ -5,7 +5,7 @@ import { formatCountdown } from '../subsession-utils';
 
 export function useSubsessionCountdown(zmClient: ZoomClient, ssClient: SubsessionClient | null) {
   const [subsessionCountdown, setSubsessionCountdown] = useState(-1);
-  const onSubsessionCountdown = useCallback(({ countdown }) => {
+  const onSubsessionCountdown = useCallback(({ countdown }: any) => {
     setSubsessionCountdown(countdown);
   }, []);
   useEffect(() => {

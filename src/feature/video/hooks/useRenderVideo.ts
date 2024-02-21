@@ -3,10 +3,10 @@ import { usePrevious, usePersistFn } from '../../../hooks';
 import { isArrayShallowEqual } from '../../../utils/util';
 import { CellLayout } from '../video-types';
 import { MediaStream, Participant } from '../../../index-types';
+import { SELF_VIDEO_ID } from '../video-constants';
 /**
  * gallery view without SharedArrayBuffer mode, self video is present by Video Element
  */
-const isSkipSelfVideo = !window.crossOriginIsolated;
 export function useRenderVideo(
   mediaStream: MediaStream | null,
   isVideoDecodeReady: boolean,
@@ -29,7 +29,10 @@ export function useRenderVideo(
       const unalteredSubscribers = renderedVideos.filter((id) => (previousRenderedVideos || []).includes(id));
       if (removedSubscribers.length > 0) {
         removedSubscribers.forEach(async (userId: number) => {
-          if (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId)) {
+          if (mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId) {
+            const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
+            await mediaStream?.stopRenderVideo(videoElement, userId);
+          } else {
             await mediaStream?.stopRenderVideo(videoRef.current as HTMLCanvasElement, userId);
           }
         });
@@ -38,9 +41,13 @@ export function useRenderVideo(
         addedSubscribers.forEach(async (userId) => {
           const index = participants.findIndex((user) => user.userId === userId);
           const cellDimension = layout[index];
-          if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
+          if (cellDimension) {
+            let canvas: HTMLCanvasElement | HTMLVideoElement = videoRef.current as HTMLCanvasElement;
+            if (mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId) {
+              canvas = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
+            }
             const { width, height, x, y, quality } = cellDimension;
-            await mediaStream?.renderVideo(videoRef.current as HTMLCanvasElement, userId, width, height, x, y, quality);
+            await mediaStream?.renderVideo(canvas, userId, width, height, x, y, quality);
           }
         });
       }
@@ -50,29 +57,19 @@ export function useRenderVideo(
           unalteredSubscribers.forEach(async (userId) => {
             const index = participants.findIndex((user) => user.userId === userId);
             const cellDimension = layout[index];
-            if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
+            let canvas: HTMLCanvasElement | HTMLVideoElement = videoRef.current as HTMLCanvasElement;
+            if (mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId) {
+              canvas = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
+            }
+            if (cellDimension) {
               const { width, height, x, y, quality } = cellDimension;
               if (previousLayout?.[index] && previousLayout[index].quality !== quality) {
-                await mediaStream?.renderVideo(
-                  videoRef.current as HTMLCanvasElement,
-                  userId,
-                  width,
-                  height,
-                  x,
-                  y,
-                  quality
-                );
+                await mediaStream?.renderVideo(canvas, userId, width, height, x, y, quality);
               }
-              setTimeout(async () => {
-                await mediaStream?.adjustRenderedVideoPosition(
-                  videoRef.current as HTMLCanvasElement,
-                  userId,
-                  width,
-                  height,
-                  x,
-                  y
-                );
-              }, 0);
+              const isSkip = mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId;
+              if (!isSkip) {
+                await mediaStream?.adjustRenderedVideoPosition(canvas, userId, width, height, x, y);
+              }
             }
           });
         }
@@ -85,7 +82,8 @@ export function useRenderVideo(
             const previousIndex = previousParticipantsIds?.findIndex((id) => id === userId);
             if (index !== previousIndex) {
               const cellDimension = layout[index];
-              if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
+              const isSkip = mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId;
+              if (cellDimension && !isSkip) {
                 const { width, height, x, y } = cellDimension;
                 await mediaStream?.adjustRenderedVideoPosition(
                   videoRef.current as HTMLCanvasElement,
@@ -119,9 +117,13 @@ export function useRenderVideo(
       subscribedVideos.forEach(async (userId) => {
         const index = participants.findIndex((user) => user.userId === userId);
         const cellDimension = layout[index];
-        if (cellDimension && (!isSkipSelfVideo || (isSkipSelfVideo && userId !== currentUserId))) {
+        let canvas: HTMLCanvasElement | HTMLVideoElement = videoRef.current as HTMLCanvasElement;
+        if (mediaStream?.isRenderSelfViewWithVideoElement() && userId === currentUserId) {
+          canvas = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
+        }
+        if (cellDimension) {
           const { width, height, x, y, quality } = cellDimension;
-          await mediaStream?.renderVideo(videoRef.current as HTMLCanvasElement, userId, width, height, x, y, quality);
+          await mediaStream?.renderVideo(canvas, userId, width, height, x, y, quality);
         }
       });
     }

@@ -95,7 +95,7 @@ export function useChat(zmClient: ZoomClient, chatClient: ChatClient) {
     [zmClient]
   );
   const onPrivilegeChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       setPrivilege(payload.chatPrivilege);
       if (chatClient) {
         setReceivers(chatClient.getReceivers());
@@ -104,19 +104,22 @@ export function useChat(zmClient: ZoomClient, chatClient: ChatClient) {
     [chatClient]
   );
   const onFileUploadProgressChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       const { fileName, fileSize, receiverId, progress, status, retryToken } = payload;
       const currentUserId = zmClient.getSessionInfo().userId;
       setRecords(
         produce((records: ChatRecord[]) => {
-          const record = records.find(
-            (item) =>
-              !item.id &&
-              item.file?.name === fileName &&
-              item.file?.size === fileSize &&
-              item.sender.userId === currentUserId &&
-              item.receiver.userId === receiverId
-          );
+          const record = records
+            .slice(0)
+            .reverse()
+            .find(
+              (item) =>
+                !item.id &&
+                item.file?.name === fileName &&
+                item.file?.size === fileSize &&
+                item.sender.userId === currentUserId &&
+                item.receiver.userId === receiverId
+            );
           if (record?.file?.upload) {
             Object.assign(record.file.upload, { progress, status, retryToken });
           }
@@ -125,7 +128,7 @@ export function useChat(zmClient: ZoomClient, chatClient: ChatClient) {
     },
     [zmClient]
   );
-  const onFileDownloadProgressChange = useCallback((payload) => {
+  const onFileDownloadProgressChange = useCallback((payload: any) => {
     const { id, fileName, fileSize, fileUrl, fileBlob, senderId, progress, status } = payload;
     setRecords(
       produce((records: ChatRecord[]) => {
@@ -226,7 +229,7 @@ export function useChat(zmClient: ZoomClient, chatClient: ChatClient) {
     [chatClient, records]
   );
   const setChatUserId = useCallback(
-    (userId) => {
+    (userId: number) => {
       const user = receivers.find((user) => user.userId === userId);
       if (user) {
         setChatUser(user);

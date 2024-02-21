@@ -6,7 +6,7 @@ const { confirm } = Modal;
 export function useAskForHelp(zmClient: ZoomClient, ssClient: SubsessionClient | null) {
   // Host reecived the ask for help request
   const onAskForHelp = useCallback(
-    (payload) => {
+    (payload: any) => {
       const { userId, displayName, subsessionName, subsessionId } = payload;
       confirm({
         title: 'Ask for Help',
@@ -24,7 +24,7 @@ export function useAskForHelp(zmClient: ZoomClient, ssClient: SubsessionClient |
     [ssClient]
   );
   // Attendee received the response of ask for help request
-  const onAskForHelpResponse = useCallback((payload) => {
+  const onAskForHelpResponse = useCallback((payload: any) => {
     const { result } = payload;
     if (result === AskHostHelpResponse.Received) {
       message.success('The host has been invited.');

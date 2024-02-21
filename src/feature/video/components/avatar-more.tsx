@@ -30,13 +30,13 @@ const AvatarMore = (props: AvatarMoreProps) => {
     }
   }
   const onSliderChange = useCallback(
-    (value) => {
+    (value: any) => {
       mediaStream?.adjustUserAudioVolumeLocally(userId, value);
       dispatch({ type: 'update-local-volume', payload: { userId, volume: value } });
     },
     [userId, mediaStream, dispatch]
   );
-  const onDropDownVisibleChange = useCallback((visible) => {
+  const onDropDownVisibleChange = useCallback((visible: boolean) => {
     setIsDropdownVisbile(visible);
   }, []);
   const onMenuItemClick = useCallback(

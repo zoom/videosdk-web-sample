@@ -7,7 +7,7 @@ import produce from 'immer';
 import Home from './feature/home/home';
 import Video from './feature/video/video';
 import VideoSingle from './feature/video/video-single';
-import VideoNonSAB from './feature/video/video-non-sab';
+import VideoAttach from './feature/video/video-attach';
 import Preview from './feature/preview/preview';
 import ZoomContext from './context/zoom-context';
 import ZoomMediaContext from './context/media-context';
@@ -18,7 +18,6 @@ import Subsession from './feature/subsession/subsession';
 import { MediaStream } from './index-types';
 import './App.css';
 
-import { isAndroidBrowser } from './utils/platform';
 interface AppProps {
   meetingArgs: {
     sdkKey: string;
@@ -28,8 +27,11 @@ interface AppProps {
     password?: string;
     webEndpoint?: string;
     enforceGalleryView?: string;
+    enforceVB?: string;
     customerJoinId?: string;
     lang?: string;
+
+    useVideoPlayer?: string;
   };
 }
 const mediaShape = {
@@ -88,6 +90,7 @@ declare global {
     mediaStream: any | undefined;
     crossOriginIsolated: boolean;
     ltClient: any | undefined;
+    logClient: any | undefined;
   }
 }
 
@@ -101,8 +104,10 @@ function App(props: AppProps) {
       password,
       webEndpoint: webEndpointArg,
       enforceGalleryView,
+      enforceVB,
       customerJoinId,
-      lang
+      lang,
+      useVideoPlayer
     }
   } = props;
   const [loading, setIsLoading] = useState(true);
@@ -111,7 +116,7 @@ function App(props: AppProps) {
   const [status, setStatus] = useState<string>('closed');
   const [mediaState, dispatch] = useReducer(mediaReducer, mediaShape);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(true);
+  const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(false);
   const zmClient = useContext(ZoomContext);
   let webEndpoint: any;
   if (webEndpointArg) {
@@ -121,14 +126,17 @@ function App(props: AppProps) {
   }
   const mediaContext = useMemo(() => ({ ...mediaState, mediaStream }), [mediaState, mediaStream]);
   const galleryViewWithoutSAB = Number(enforceGalleryView) === 1 && !window.crossOriginIsolated;
+  const vbWithoutSAB = Number(enforceVB) === 1 && !window.crossOriginIsolated;
+  const galleryViewWithAttach = Number(useVideoPlayer) === 1 && (window.crossOriginIsolated || galleryViewWithoutSAB);
   useEffect(() => {
     const init = async () => {
       await zmClient.init('en-US', `${window.location.origin}/lib`, {
         webEndpoint,
         enforceMultipleVideos: galleryViewWithoutSAB,
-        enforceVirtualBackground: galleryViewWithoutSAB,
+        enforceVirtualBackground: vbWithoutSAB,
         stayAwake: true,
-        leaveOnPageUnload: true
+        patchJsMedia: true,
+        leaveOnPageUnload: false
       });
       try {
         setLoadingText('Joining the session...');
@@ -148,9 +156,21 @@ function App(props: AppProps) {
     return () => {
       ZoomVideo.destroyClient();
     };
-  }, [sdkKey, signature, zmClient, topic, name, password, webEndpoint, galleryViewWithoutSAB, customerJoinId]);
+  }, [
+    sdkKey,
+    signature,
+    zmClient,
+    topic,
+    name,
+    password,
+    webEndpoint,
+    galleryViewWithoutSAB,
+    customerJoinId,
+    lang,
+    vbWithoutSAB
+  ]);
   const onConnectionChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       if (payload.state === ConnectionState.Reconnecting) {
         setIsLoading(true);
         setIsFailover(true);
@@ -185,17 +205,9 @@ function App(props: AppProps) {
     },
     [isFailover, zmClient]
   );
-  const onMediaSDKChange = useCallback((payload) => {
+  const onMediaSDKChange = useCallback((payload: any) => {
     const { action, type, result } = payload;
     dispatch({ type: `${type}-${action}`, payload: result === 'success' });
-  }, []);
-
-  const onDialoutChange = useCallback((payload) => {
-    console.log('onDialoutChange', payload);
-  }, []);
-
-  const onAudioMerged = useCallback((payload) => {
-    console.log('onAudioMerged', payload);
   }, []);
 
   const onLeaveOrJoinSession = useCallback(async () => {
@@ -211,15 +223,11 @@ function App(props: AppProps) {
   useEffect(() => {
     zmClient.on('connection-change', onConnectionChange);
     zmClient.on('media-sdk-change', onMediaSDKChange);
-    zmClient.on('dialout-state-change', onDialoutChange);
-    zmClient.on('merged-audio', onAudioMerged);
     return () => {
       zmClient.off('connection-change', onConnectionChange);
       zmClient.off('media-sdk-change', onMediaSDKChange);
-      zmClient.off('dialout-state-change', onDialoutChange);
-      zmClient.off('merged-audio', onAudioMerged);
     };
-  }, [zmClient, onConnectionChange, onMediaSDKChange, onDialoutChange, onAudioMerged]);
+  }, [zmClient, onConnectionChange, onMediaSDKChange]);
   return (
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
@@ -237,7 +245,7 @@ function App(props: AppProps) {
               <Route path="/command" component={Command} />
               <Route
                 path="/video"
-                component={isSupportGalleryView ? Video : galleryViewWithoutSAB ? VideoNonSAB : VideoSingle}
+                component={isSupportGalleryView ? (galleryViewWithAttach ? VideoAttach : Video) : VideoSingle}
               />
               <Route path="/subsession" component={Subsession} />
               <Route path="/preview" component={Preview} />

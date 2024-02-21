@@ -25,7 +25,7 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
   const previousSubsessions = usePrevious(subsessions);
 
   const onParticipantsChange = useCallback(
-    (_participants, currentUpdates?: ParticipantPropertiesPayload[]) => {
+    (_participants: any, currentUpdates?: ParticipantPropertiesPayload[]) => {
       if (ssClient) {
         if (subsessionStatus !== SubsessionStatus.NotStarted) {
           const subsessionList = ssClient.getSubsessionList();
@@ -42,7 +42,7 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
     [ssClient, subsessionStatus]
   );
   const onSubsessionStateChange = useCallback(
-    ({ status }) => {
+    ({ status }: any) => {
       setSubsessionStatus(status);
       if (ssClient) {
         setUserStatus(ssClient.getUserStatus());
