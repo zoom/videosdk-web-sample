@@ -73,8 +73,8 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     cloud_recording_option: meetingArgs.cloud_recording_option || '',
     cloud_recording_election: meetingArgs.cloud_recording_election || '',
     telemetry_tracking_id: meetingArgs.telemetry_tracking_id || '',
-    enforceGalleryView: !window?.crossOriginIsolated,
-    enforceVB: 1,
+    enforceGalleryView: 0,
+    enforceVB: 0,
     web: '1'
   };
   console.log('use url args');
