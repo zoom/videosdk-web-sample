@@ -86,31 +86,53 @@ const VideoFooter = (props: VideoFooterProps) => {
       await mediaStream?.stopVideo();
       setIsStartedVideo(false);
     } else {
-      const temporaryException = isIOSMobile() && window.crossOriginIsolated; // add ios mobile exception for test backward compatible.
-      if (mediaStream?.isRenderSelfViewWithVideoElement() && !temporaryException) {
-        const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
-        if (videoElement) {
-          await mediaStream?.startVideo({ videoElement });
-        }
-      } else {
-        const startVideoOptions = { hd: true, ptz: mediaStream?.isBrowserSupportPTZ() };
-        if (mediaStream?.isSupportVirtualBackground() && isBlur) {
-          Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
-        }
-        await mediaStream?.startVideo(startVideoOptions);
-        if (!mediaStream?.isSupportMultipleVideos()) {
-          const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
-          mediaStream?.renderVideo(
-            canvasElement,
-            zmClient.getSessionInfo().userId,
-            canvasElement.width,
-            canvasElement.height,
-            0,
-            0,
-            3
-          );
-        }
+      const startVideoOptions = {
+        hd: true,
+        fullHd: true,
+        ptz: mediaStream?.isBrowserSupportPTZ(),
+        originalRatio: true
+      };
+      if (mediaStream?.isSupportVirtualBackground() && isBlur) {
+        Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
       }
+      await mediaStream?.startVideo(startVideoOptions);
+      if (!mediaStream?.isSupportMultipleVideos()) {
+        const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
+        mediaStream?.renderVideo(
+          canvasElement,
+          zmClient.getSessionInfo().userId,
+          canvasElement.width,
+          canvasElement.height,
+          0,
+          0,
+          3
+        );
+      }
+      // const temporaryException = isIOSMobile() && window.crossOriginIsolated; // add ios mobile exception for test backward compatible.
+      // if (mediaStream?.isRenderSelfViewWithVideoElement() && !temporaryException) {
+      //   const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
+      //   if (videoElement) {
+      //     await mediaStream?.startVideo({ videoElement });
+      //   }
+      // } else {
+      //   const startVideoOptions = { hd: true, fullHd: true, ptz: mediaStream?.isBrowserSupportPTZ() };
+      //   if (mediaStream?.isSupportVirtualBackground() && isBlur) {
+      //     Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
+      //   }
+      //   await mediaStream?.startVideo(startVideoOptions);
+      //   if (!mediaStream?.isSupportMultipleVideos()) {
+      //     const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
+      //     mediaStream?.renderVideo(
+      //       canvasElement,
+      //       zmClient.getSessionInfo().userId,
+      //       canvasElement.width,
+      //       canvasElement.height,
+      //       0,
+      //       0,
+      //       3
+      //     );
+      //   }
+      // }
 
       setIsStartedVideo(true);
     }
@@ -131,7 +153,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         }
         console.warn(e);
       }
-      setIsStartedAudio(true);
+      // setIsStartedAudio(true);
     }
   }, [mediaStream, isStartedAudio, isMuted]);
   const onMicrophoneMenuClick = async (key: string) => {
@@ -154,7 +176,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           await mediaStream.hangup();
           setPhoneCallStatus(undefined);
         }
-        setIsStartedAudio(false);
+        // setIsStartedAudio(false);
       } else if (type === 'statistic') {
         setSelectedStatisticTab('audio');
         setStatisticVisible(true);
@@ -202,25 +224,31 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
     return Promise.resolve();
   };
-  const onHostAudioMuted = useCallback((payload) => {
-    const { action, source, type } = payload;
-    if (action === AudioChangeAction.Join) {
-      setIsStartedAudio(true);
-      setAudio(type);
-    } else if (action === AudioChangeAction.Leave) {
-      setIsStartedAudio(false);
-    } else if (action === AudioChangeAction.Muted) {
-      setIsMuted(true);
-      if (source === MutedSource.PassiveByMuteOne) {
-        message.info('Host muted you');
+  const onHostAudioMuted = useCallback(
+    (payload: any) => {
+      const { action, source, type } = payload;
+      if (action === AudioChangeAction.Join) {
+        setIsStartedAudio(true);
+        setAudio(type);
+        setTimeout(() => {
+          setIsMuted(!!zmClient.getCurrentUserInfo()?.muted);
+        }, 1000);
+      } else if (action === AudioChangeAction.Leave) {
+        setIsStartedAudio(false);
+      } else if (action === AudioChangeAction.Muted) {
+        setIsMuted(true);
+        if (source === MutedSource.PassiveByMuteOne) {
+          message.info('Host muted you');
+        }
+      } else if (action === AudioChangeAction.Unmuted) {
+        setIsMuted(false);
+        if (source === 'passive') {
+          message.info('Host unmuted you');
+        }
       }
-    } else if (action === AudioChangeAction.Unmuted) {
-      setIsMuted(false);
-      if (source === 'passive') {
-        message.info('Host unmuted you');
-      }
-    }
-  }, []);
+    },
+    [zmClient]
+  );
   const onScreenShareClick = useCallback(async () => {
     if (mediaStream?.getShareStatus() === ShareStatus.End && selfShareCanvas) {
       await mediaStream?.startShareScreen(selfShareCanvas, { requestReadReceipt: true });
@@ -260,7 +288,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     await zmClient.leave(true);
   }, [zmClient]);
 
-  const onPassivelyStopShare = useCallback(({ reason }) => {
+  const onPassivelyStopShare = useCallback(({ reason }: any) => {
     console.log('passively stop reason:', reason);
   }, []);
   const onDeviceChange = useCallback(() => {
@@ -290,7 +318,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     [zmClient]
   );
 
-  const onDialOutChange = useCallback((payload) => {
+  const onDialOutChange = useCallback((payload: any) => {
     setPhoneCallStatus(payload.code);
   }, []);
 
@@ -320,7 +348,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   };
-  const onVideoCaptureChange = useCallback((payload) => {
+  const onVideoCaptureChange = useCallback((payload: any) => {
     if (payload.state === VideoCapturingState.Started) {
       setIsStartedVideo(true);
     } else {
@@ -328,7 +356,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   }, []);
   const onShareAudioChange = useCallback(
-    (payload) => {
+    (payload: any) => {
       const { state } = payload;
       if (state === 'on') {
         if (!mediaStream?.isSupportMicrophoneAndShareAudioSimultaneously()) {
@@ -340,19 +368,19 @@ const VideoFooter = (props: VideoFooterProps) => {
     },
     [mediaStream]
   );
-  const onHostAskToUnmute = useCallback((payload) => {
+  const onHostAskToUnmute = useCallback((payload: any) => {
     const { reason } = payload;
     console.log(`Host ask to unmute the audio.`, reason);
   }, []);
 
-  const onCaptionStatusChange = useCallback((payload) => {
+  const onCaptionStatusChange = useCallback((payload: any) => {
     const { autoCaption } = payload;
     if (autoCaption) {
       message.info('Auto live transcription enabled!');
     }
   }, []);
 
-  const onCaptionMessage = useCallback((payload) => {
+  const onCaptionMessage = useCallback((payload: any) => {
     const { text, done } = payload;
     setCaption({
       text,
@@ -360,7 +388,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     });
   }, []);
 
-  const onCaptionDisable = useCallback((payload) => {
+  const onCaptionDisable = useCallback((payload: any) => {
     setIsDisableCaptions(payload);
     if (payload) {
       setIsStartedLiveTranscription(false);
@@ -392,7 +420,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       liveStreamClient?.stopLiveStream();
     }
   }, [liveStreamStatus, liveStreamClient]);
-  const onLiveStreamStatusChange = useCallback((status) => {
+  const onLiveStreamStatusChange = useCallback((status: any) => {
     setLiveStreamStatus(status);
     if (status === LiveStreamStatus.Timeout) {
       message.error('Start live streaming timeout');

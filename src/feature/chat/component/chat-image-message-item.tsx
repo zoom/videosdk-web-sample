@@ -47,7 +47,7 @@ const ChatImageMessageItem = (props: ChatImageMessageItemProps) => {
     }
   }, [file]);
   const onImageItemClick = useCallback(
-    (event) => {
+    (event: any) => {
       event.preventDefault();
       if (isUploadError && file.upload) {
         const {

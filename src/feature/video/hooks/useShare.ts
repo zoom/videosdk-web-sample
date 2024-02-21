@@ -15,7 +15,7 @@ export function useShare(
   });
   const [sharUserList, setShareUserId] = useState<Array<Participant> | undefined>(mediaStream?.getShareUserList());
   const onActiveShareChange = useCallback(
-    ({ state, userId }) => {
+    ({ state, userId }: any) => {
       if (!isStartedShare) {
         setActiveSharingId(userId);
         setIsReceiveSharing(state === 'Active');
@@ -23,7 +23,7 @@ export function useShare(
     },
     [isStartedShare]
   );
-  const onSharedContentDimensionChange = useCallback(({ width, height }) => {
+  const onSharedContentDimensionChange = useCallback(({ width, height }: any) => {
     setSharedContentDimension({ width, height });
   }, []);
   const onPeerShareChange = useCallback(() => {
@@ -32,7 +32,7 @@ export function useShare(
     }
   }, [mediaStream]);
   const onCurrentUserUpdate = useCallback(
-    (payload) => {
+    (payload: any) => {
       if (Array.isArray(payload) && payload.length > 0) {
         payload.forEach((item) => {
           if (item.userId === zmClient.getSessionInfo().userId && item.sharerOn !== undefined) {
@@ -46,7 +46,7 @@ export function useShare(
     },
     [zmClient]
   );
-  const onShareContentChange = useCallback((payload) => {
+  const onShareContentChange = useCallback((payload: any) => {
     setActiveSharingId(payload.userId);
   }, []);
   useEffect(() => {

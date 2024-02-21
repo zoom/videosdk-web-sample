@@ -109,7 +109,8 @@ export function getVideoLayout(rootWidth: number, rootHeight: number, count: num
 
   if (actualCount <= 4 && cellBoxHeight >= 510) {
     // GROUP HD
-    quality = VideoQuality.Video_720P;
+    quality = VideoQuality.Video_1080P;
+    // quality = 4 as VideoQuality;
   } else if (actualCount <= 4 && cellHeight >= 270) {
     quality = VideoQuality.Video_360P;
   } else if (actualCount > 4 && cellHeight >= 180) {

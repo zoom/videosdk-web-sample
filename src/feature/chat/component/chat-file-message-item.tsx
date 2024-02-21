@@ -90,7 +90,7 @@ const getFileTip = (file: FileInfo, id?: string) => {
       if (status === ChatFileUploadStatus.Fail) {
         return '- Click to resend';
       } else if (status === ChatFileUploadStatus.Cancel) {
-        return '- Canceled';
+        return '- Canceled, click to resend';
       }
     } else if (id && status === ChatFileUploadStatus.Complete) {
       return '- Click to download';
@@ -125,7 +125,7 @@ const ChatFileMessageItem = (props: ChatFileMessageItem) => {
   const { name, size } = file;
   const [isInProgress, progress] = getFileInProgress(file, id);
   const onCancelButtonClick = useCallback(
-    (event) => {
+    (event: any) => {
       event.stopPropagation();
       if (!id && file.upload?.status === ChatFileUploadStatus.InProgress) {
         const {
@@ -143,7 +143,10 @@ const ChatFileMessageItem = (props: ChatFileMessageItem) => {
   );
   const onFileItemClick = useCallback(() => {
     if (!isInProgress) {
-      if (!id && file.upload?.status === ChatFileUploadStatus.Fail) {
+      if (
+        !id &&
+        (file.upload?.status === ChatFileUploadStatus.Fail || file.upload?.status === ChatFileUploadStatus.Cancel)
+      ) {
         const {
           uuid,
           upload: { retryToken }

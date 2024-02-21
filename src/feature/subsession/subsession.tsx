@@ -91,7 +91,7 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
     subsessionRemainingTitle = `Remaining:${formattedSubsessionCountdown}`;
   }
   const onAttendeeBoMenuClick = useCallback(
-    ({ key }) => {
+    ({ key }: any) => {
       if (key === 'askHelp') {
         subsessionClient?.askForHelp();
       } else if (key === 'leaveRoom') {

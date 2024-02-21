@@ -36,7 +36,7 @@ const DraggableModal = (props: DraggableModalProps) => {
   const onModalMouseOut = useCallback(() => {
     setDisabled(true);
   }, []);
-  const onDragStart = useCallback((event, uiData) => {
+  const onDragStart = useCallback((event: any, uiData: any) => {
     // eslint-disable-next-line no-unsafe-optional-chaining
     const { clientWidth, clientHeight } = window?.document?.documentElement;
     const targetRect = draggleRef?.current?.getBoundingClientRect();

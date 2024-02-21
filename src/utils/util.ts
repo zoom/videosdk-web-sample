@@ -5,7 +5,6 @@ export function generateVideoToken(
   sdkKey: string,
   sdkSecret: string,
   topic: string,
-  passWord = '',
   sessionKey = '',
   userIdentity = '',
   roleType = 1,
@@ -25,7 +24,6 @@ export function generateVideoToken(
       iat,
       exp,
       tpc: topic,
-      pwd: passWord,
       role_type: roleType
     };
     if (cloud_recording_option === '1') {

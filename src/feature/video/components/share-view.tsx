@@ -47,7 +47,7 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
     shareViewRef.current
   );
 
-  const onContainerResize = useCallback(({ width, height }) => {
+  const onContainerResize = useCallback(({ width, height }: any) => {
     if (shareViewContainerRef.current) {
       debounceRef.current({ width, height });
     }
@@ -60,7 +60,7 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
   });
   useSizeCallback(shareViewContainerRef.current, onContainerResize);
   const onShareViewDrag = useCallback(
-    (_event, { x, y }) => {
+    (_event: any, { x, y }: any) => {
       const { width, height } = sharedContentDimension;
       const { width: vWidth, height: vHeight } = shareViewSize;
       setOriginalViewPosition((payload) => {
@@ -113,7 +113,8 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
       (!isShallowEqual(shareViewSize, previousShareViewSize) ||
         (previousViewType !== viewType && viewType === ShareViewType.OriginalSize))
     ) {
-      mediaStream?.updateSharingCanvasDimension(shareViewSize.width, shareViewSize.height);
+      const pixelRatio = window.devicePixelRatio ?? 1;
+      mediaStream?.updateSharingCanvasDimension(shareViewSize.width * pixelRatio, shareViewSize.height * pixelRatio);
     }
   }, [mediaStream, previousShareViewSize, shareViewSize, viewType, previousViewType]);
   useImperativeHandle(

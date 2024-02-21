@@ -19,11 +19,11 @@ const SubsessionCreate = (props: SubsessionCreateProps) => {
       subsessionSize = `${Math.floor(quotient)}-${Math.ceil(quotient)}`;
     }
   }
-  const onRadioChange = useCallback((event) => {
+  const onRadioChange = useCallback((event: any) => {
     setPattern(event.target.value);
   }, []);
 
-  const onInputChange = useCallback((value) => {
+  const onInputChange = useCallback((value: any) => {
     setSubsessionNumber(value);
   }, []);
   const onCreateClick = useCallback(() => {

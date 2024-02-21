@@ -34,7 +34,7 @@ const SubsessionOptions = (props: SubsessionOptionsProps) => {
   } = props;
   const [isEnableCountdown, setIsEnableCountdown] = useState(waitSeconds !== 0);
   const onTimerDurationChange = useCallback(
-    (value) => {
+    (value: any) => {
       if (isTimerEnabled) {
         setTimerDuration(Number(value) * 60);
       }
