@@ -86,8 +86,11 @@ const AudioQosDataShape = {
   jitter: 0,
   max_loss: 0,
   rtt: 0,
-  sample_rate: 0
+  sample_rate: 0,
+  bandwidth: 0,
+  bitrate: 0,
 };
+
 
 const VideoQosDataShape = {
   avg_loss: 0,
@@ -97,7 +100,9 @@ const VideoQosDataShape = {
   max_loss: 0,
   rtt: 0,
   width: 0,
-  sample_rate: 0
+  sample_rate: 0,
+  bandwidth: 0,
+  bitrate: 0,
 };
 const getDataSouce = (
   streamMertics: typeof AudioMetrics | typeof VideoMetrics,
