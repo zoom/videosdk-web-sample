@@ -30,7 +30,6 @@ interface AppProps {
     enforceVB?: string;
     customerJoinId?: string;
     lang?: string;
-
     useVideoPlayer?: string;
   };
 }
@@ -228,6 +227,7 @@ function App(props: AppProps) {
       zmClient.off('media-sdk-change', onMediaSDKChange);
     };
   }, [zmClient, onConnectionChange, onMediaSDKChange]);
+  console.log({ isSupportGalleryView, galleryViewWithAttach });
   return (
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}

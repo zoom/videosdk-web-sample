@@ -31,6 +31,7 @@ if (meetingArgs.web && meetingArgs.web !== '0') {
     meetingArgs.role = 1;
   }
 }
+meetingArgs.useVideoPlayer = 1;
 ['enforceGalleryView', 'enforceVB', 'cloud_recording_option', 'cloud_recording_election'].forEach((field) => {
   if (Object.hasOwn(meetingArgs, field)) {
     try {
