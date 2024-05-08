@@ -27,13 +27,14 @@ const avatarActionReducer = produce((draft, action) => {
     }
     case 'update-avatar-action-enable': {
       const {
-        payload: { user, currentUserId }
+        payload: { user, currentUserId, isUnifiedRender }
       } = action;
       const { userId, audio, bVideoOn, isSpeakerOnly } = user;
       if (Object.hasOwn(draft, `${userId}`)) {
         const element = draft[`${userId}`];
         element.localVolumeAdjust.enabled = audio === 'computer' && !isSpeakerOnly && currentUserId !== userId;
         element.farEndCameraControl.enabled = bVideoOn && currentUserId !== userId;
+        element.videoResolutionAdjust.enabled = isUnifiedRender && bVideoOn && currentUserId !== userId;
       } else {
         const state = {
           localVolumeAdjust: {
@@ -43,6 +44,10 @@ const avatarActionReducer = produce((draft, action) => {
           farEndCameraControl: {
             toggled: false,
             enabled: bVideoOn && currentUserId !== userId
+          },
+          videoResolutionAdjust: {
+            toggled: false,
+            enabled: isUnifiedRender && bVideoOn && currentUserId !== userId
           }
         };
         Object.assign(draft, { [`${userId}`]: state });
@@ -64,20 +69,30 @@ const avatarActionReducer = produce((draft, action) => {
       draft.isControllingRemoteCamera = payload;
       break;
     }
+    case 'toggle-video-resolution-adjust': {
+      const {
+        payload: { userId }
+      } = action;
+      const userItem = draft[`${userId}`];
+      if (userItem !== undefined) {
+        draft[`${userId}`].videoResolutionAdjust.toggled = !draft[`${userId}`].videoResolutionAdjust.toggled;
+      }
+      break;
+    }
     default:
       break;
   }
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 }, {} as AvatarContext);
 
-export const useAvatarAction = (zmClient: ZoomClient, participants: Array<Participant>) => {
+export const useAvatarAction = (zmClient: ZoomClient, participants: Array<Participant>, isUnifiedRender = false) => {
   const [avatarActionState, dispatch] = useReducer(avatarActionReducer, {});
   useEffect(() => {
     const currentUserId = zmClient.getSessionInfo().userId;
     participants.forEach((user) => {
-      dispatch({ type: 'update-avatar-action-enable', payload: { user, currentUserId } });
+      dispatch({ type: 'update-avatar-action-enable', payload: { user, currentUserId, isUnifiedRender } });
     });
-  }, [zmClient, participants]);
+  }, [zmClient, participants, isUnifiedRender]);
   const value = useMemo(
     () => ({
       avatarActionState,

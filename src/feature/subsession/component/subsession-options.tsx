@@ -10,12 +10,16 @@ interface SubsessionOptionsProps {
   isNotify?: boolean;
   isTimerAutoEnabled?: boolean;
   waitSeconds?: number;
+  isSubsessionSelectionEnabled?: boolean;
+  isAutoMoveBackToMainSession?: boolean;
   setIsAutoJoinSubsession: Function;
   setIsBackToMainSessionEnabled: Function;
   setIsTimerEnabled: Function;
   setTimerDuration: Function;
   setIsTimerAutoEnabled: Function;
   setWaitSeconds: Function;
+  setIsSubsessionSelectionEnabled: Function;
+  setIsAutoMoveBackToMainSession: Function;
 }
 const SubsessionOptions = (props: SubsessionOptionsProps) => {
   const {
@@ -25,12 +29,16 @@ const SubsessionOptions = (props: SubsessionOptionsProps) => {
     isTimerEnabled,
     isTimerAutoEnabled,
     waitSeconds,
+    isSubsessionSelectionEnabled,
+    isAutoMoveBackToMainSession,
     setIsAutoJoinSubsession,
     setIsBackToMainSessionEnabled,
     setIsTimerEnabled,
     setTimerDuration,
     setIsTimerAutoEnabled,
-    setWaitSeconds
+    setWaitSeconds,
+    setIsSubsessionSelectionEnabled,
+    setIsAutoMoveBackToMainSession
   } = props;
   const [isEnableCountdown, setIsEnableCountdown] = useState(waitSeconds !== 0);
   const onTimerDurationChange = useCallback(
@@ -44,6 +52,14 @@ const SubsessionOptions = (props: SubsessionOptionsProps) => {
   return (
     <div className="room-options">
       <Menu selectable={false} expandIcon={null}>
+        <MenuItem key="0-1">
+          <Checkbox
+            checked={isSubsessionSelectionEnabled}
+            onChange={(event) => setIsSubsessionSelectionEnabled(event.target.checked)}
+          >
+            Allow participants to choose subsession
+          </Checkbox>
+        </MenuItem>
         <MenuItem key="1">
           <Checkbox
             checked={isBackToMainSessionEnabled}
@@ -55,6 +71,14 @@ const SubsessionOptions = (props: SubsessionOptionsProps) => {
         <MenuItem key="2">
           <Checkbox checked={isAutoJoinSubsession} onChange={(event) => setIsAutoJoinSubsession(event.target.checked)}>
             Automatically move all assigned participants into subsessions
+          </Checkbox>
+        </MenuItem>
+        <MenuItem key="2-1">
+          <Checkbox
+            checked={isAutoMoveBackToMainSession}
+            onChange={(event) => setIsAutoMoveBackToMainSession(event.target.checked)}
+          >
+            Automatically move all selected participants in subsessions to main session
           </Checkbox>
         </MenuItem>
         <Menu.Divider />

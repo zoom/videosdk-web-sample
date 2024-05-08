@@ -52,6 +52,9 @@
         background: #c0392b;
       }
     }
+    &-title{
+      flex-grow: 1;
+    }
     &-avatar {
       max-width: 26px;
       max-height: 26px;
@@ -73,6 +76,16 @@
       &.in-room {
         background-color: #27ae60;
       }
+    }
+    &-media-status{
+      justify-content: end;
+      &>.anticon {
+        margin-left: 5px;
+      }
+    }
+    &-back-btn {
+      margin-left: 8px;
+      color: #f39c12;
     }
   }
 }

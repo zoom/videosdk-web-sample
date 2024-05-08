@@ -1,9 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, message, Modal, List, Typography } from 'antd';
 import { useState, useContext, useMemo } from 'react';
+import ZoomVideo from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import './report-btn.scss';
-const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.telemetry_tracking_id;
+const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.customerJoinId;
 const { Item: ListItem } = List;
 const ReportBtn = () => {
   const [messageApi, msgContextHolder] = message.useMessage();
@@ -13,8 +14,16 @@ const ReportBtn = () => {
   const infoList = useMemo(() => {
     const data = [
       {
+        label: 'Video SDK version',
+        value: ZoomVideo.VERSION
+      },
+      {
         label: 'JsMedia version',
         value: (window as any).JsMediaSDK_Instance?.version
+      },
+      {
+        label: 'SharedArrayBuffer',
+        value: `${window.crossOriginIsolated}`
       },
       {
         label: 'Session id(mid)',
@@ -22,7 +31,7 @@ const ReportBtn = () => {
       },
       {
         label: 'Telemetry tracking id',
-        value: trackingId ? trackingId : ''
+        value: trackingId ? window.atob(trackingId) : ''
       }
     ];
     return (
@@ -32,7 +41,7 @@ const ReportBtn = () => {
         renderItem={(item) => (
           <ListItem>
             <Typography.Title level={5}>{item.label}:</Typography.Title>
-            <Typography.Text>{item.value}</Typography.Text>
+            <Typography.Text style={{ textAlign: 'right' }}>{item.value}</Typography.Text>
           </ListItem>
         )}
       />
@@ -42,15 +51,15 @@ const ReportBtn = () => {
     modal.info({
       title: 'Session info',
       content: infoList,
-      okText: trackingId ? 'Report log' : 'Ok',
+      okText: 'Report log',
       onOk: async () => {
-        if (trackingId) {
-          await zmClient.getLoggerClient().reportToGlobalTracing();
-          messageApi.open({
-            type: 'success',
-            content: 'Successfully reported the log.'
-          });
-        }
+        // if (trackingId) {
+        await zmClient.getLoggerClient().reportToGlobalTracing();
+        messageApi.open({
+          type: 'success',
+          content: 'Successfully reported the log.'
+        });
+        // }
       },
       closable: true,
       icon: null,

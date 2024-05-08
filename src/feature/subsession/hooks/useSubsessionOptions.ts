@@ -7,6 +7,8 @@ export function useSubsessionOptions() {
   const [timerDuration, setTimerDuration] = useState<number>(30 * 60);
   const [isTimerAutoEnabled, setIsTimerAutoEnabled] = useState<boolean>(false);
   const [waitSeconds, setWaitSeconds] = useState<number>(60);
+  const [isAutoMoveBackToMainSession, setIsAutoMoveBackToMainSession] = useState(false);
+  const [isSubsessionSelectionEnabled, setIsSubsessionSelectionEnabled] = useState(false);
   const setRoomOptions = useCallback((option: SubsessionOptions) => {
     setIsAutoJoinSubsession(option.isAutoJoinSubsession);
     setIsBackToMainSessionEnabled(option.isBackToMainSessionEnabled);
@@ -14,6 +16,8 @@ export function useSubsessionOptions() {
     setTimerDuration(option.timerDuration);
     setIsTimerAutoEnabled(option.isTimerAutoEnabled);
     setWaitSeconds(option.waitSeconds);
+    setIsAutoMoveBackToMainSession(option.isAutoMoveBackToMainSession);
+    setIsSubsessionSelectionEnabled(option.isSubsessionSelectionEnabled);
   }, []);
   return [
     {
@@ -22,7 +26,9 @@ export function useSubsessionOptions() {
       isTimerEnabled,
       timerDuration,
       isTimerAutoEnabled,
-      waitSeconds
+      waitSeconds,
+      isAutoMoveBackToMainSession,
+      isSubsessionSelectionEnabled
     },
     {
       setIsAutoJoinSubsession,
@@ -31,6 +37,8 @@ export function useSubsessionOptions() {
       setTimerDuration,
       setIsTimerAutoEnabled,
       setWaitSeconds,
+      setIsAutoMoveBackToMainSession,
+      setIsSubsessionSelectionEnabled,
       setRoomOptions
     }
   ];
