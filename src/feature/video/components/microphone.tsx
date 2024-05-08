@@ -8,6 +8,8 @@ import { MediaDevice } from '../video-types';
 import CallOutModal from './call-out-modal';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import { useCurrentAudioLevel } from '../hooks/useCurrentAudioLevel';
+import CRCCallOutModal from './crc-call-out-modal';
+import { AudoiAnimationIcon } from '../../../component/audio-animation-icon';
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
@@ -27,6 +29,7 @@ interface MicrophoneButtonProps {
   activeMicrophone?: string;
   activeSpeaker?: string;
   phoneCallStatus?: { text: string; type: string };
+  isSecondaryAudioStarted?: boolean;
 }
 const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const {
@@ -43,12 +46,14 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     phoneCallStatus,
     disabled,
     isMicrophoneForbidden,
+    isSecondaryAudioStarted,
     onMicrophoneClick,
     onMicrophoneMenuClick,
     onPhoneCallClick,
     onPhoneCallCancel
   } = props;
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [isCrcModalOpen, setIsCrcModalOpen] = useState(false);
   const level = useCurrentAudioLevel();
   const tooltipText = isStartedAudio ? (isMuted ? 'unmute' : 'mute') : 'start audio';
   const menuItems = [];
@@ -80,6 +85,10 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     );
     menuItems.push(getAntdItem('', 'd2', undefined, undefined, 'divider'));
   }
+  menuItems.push(
+    getAntdItem(isSecondaryAudioStarted ? 'Stop secondary audio' : 'Start secondary audio', 'secondary audio')
+  );
+  menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
   if (audio !== 'phone') {
     menuItems.push(getAntdItem('Audio Statistic', 'statistic'));
   }
@@ -91,8 +100,11 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const onPhoneMenuClick = (payload: { key: any }) => {
     if (payload.key === 'phone') {
       setIsPhoneModalOpen(true);
+    } else if (payload.key === 'crc') {
+      setIsCrcModalOpen(true);
     }
   };
+
   const audioIcon = useMemo(() => {
     let iconType = '';
     if (isStartedAudio) {
@@ -107,7 +119,8 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
           iconType = 'icon-phone';
         } else {
           if (level !== 0) {
-            iconType = 'icon-audio-animation';
+            // iconType = 'icon-audio-animation';
+            return <AudoiAnimationIcon level={level} />;
           } else {
             return <AudioOutlined />;
           }
@@ -147,29 +160,34 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
         </DropdownButton>
       ) : (
         <Tooltip title={tooltipText}>
-          {isSupportPhone ? (
-            <DropdownButton
-              className="vc-dropdown-button"
-              size="large"
-              menu={getAntdDropdownMenu([getAntdItem('Invite by phone', 'phone')], onPhoneMenuClick)}
-              onClick={onMicrophoneClick}
-              trigger={['click']}
-              type="ghost"
-              icon={<UpOutlined />}
-              placement="topRight"
-            >
-              {audioIcon}
-            </DropdownButton>
-          ) : (
-            <Button
-              className="vc-button"
-              icon={audioIcon}
-              size="large"
-              ghost
-              shape="circle"
-              onClick={onMicrophoneClick}
-            />
-          )}
+          <div>
+            {isSupportPhone ? (
+              <DropdownButton
+                className="vc-dropdown-button"
+                size="large"
+                menu={getAntdDropdownMenu(
+                  [getAntdItem('Invite by phone', 'phone'), getAntdItem('Invite H323/SIP Room', 'crc')],
+                  onPhoneMenuClick
+                )}
+                onClick={onMicrophoneClick}
+                trigger={['click']}
+                type="ghost"
+                icon={<UpOutlined />}
+                placement="topRight"
+              >
+                {audioIcon}
+              </DropdownButton>
+            ) : (
+              <Button
+                className="vc-button"
+                icon={audioIcon}
+                size="large"
+                ghost
+                shape="circle"
+                onClick={onMicrophoneClick}
+              />
+            )}
+          </div>
         </Tooltip>
       )}
       <CallOutModal
@@ -180,6 +198,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
         onPhoneCallCancel={onPhoneCallCancel}
         onPhoneCallClick={onPhoneCallClick}
       />
+      <CRCCallOutModal visible={isCrcModalOpen} setVisible={(visible: boolean) => setIsCrcModalOpen(visible)} />
     </div>
   );
 };

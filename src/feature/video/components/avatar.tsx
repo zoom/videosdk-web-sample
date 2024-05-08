@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { AudioMutedOutlined } from '@ant-design/icons';
 import type { NetworkQuality } from '@zoom/videosdk';
 import { IconFont } from '../../../component/icon-font';
@@ -18,8 +18,15 @@ const networkQualityIcons = ['bad', 'bad', 'normal', 'good', 'good', 'good'];
 const Avatar = (props: AvatarProps) => {
   const { participant, style, isActive, className, networkQuality } = props;
   const { displayName, audio, muted, bVideoOn, userId, isInFailover } = participant;
+  const [fontSize, setFontSize] = useState(38);
   const avatarRef = useRef(null);
   const isHover = useHover(avatarRef);
+  useLayoutEffect(() => {
+    if (avatarRef.current) {
+      const { width } = (avatarRef.current as HTMLDivElement).getBoundingClientRect();
+      setFontSize(Math.max(12, Math.min(38, Math.ceil(width / displayName.length))));
+    }
+  }, [displayName]);
 
   return (
     <div
@@ -45,7 +52,11 @@ const Avatar = (props: AvatarProps) => {
           {bVideoOn && <span>{displayName}</span>}
         </div>
       )}
-      {!bVideoOn && <p className="center-name">{displayName}</p>}
+      {!bVideoOn && (
+        <p className="center-name" style={{ fontSize: `${fontSize}px` }}>
+          {displayName}
+        </p>
+      )}
       {!isInFailover && <AvatarMore userId={userId} isHover={isHover} />}
     </div>
   );

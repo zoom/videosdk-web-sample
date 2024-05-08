@@ -5,10 +5,11 @@ import { Participant } from '../../../index-types';
 import { CurrentSubsession, Subsession } from '../subsession-types';
 import SubsessionItem from './subsession-item';
 import SubsessionOptions from './subsession-options';
-import BroadcastPanel from './broadcast-panel';
+import BroadcastMessagePanel from './broadcast-panel';
 import ZoomContext from '../../../context/zoom-context';
 import './subsession-manage.scss';
 import { useSubsessionClosingCountdown } from '../hooks/useSubsessionClosingCountdown';
+import BroadcastVoicePanel from './broadcast-voice-panel';
 const { Panel } = Collapse;
 interface SubsessionManageProps {
   subsessionStatus: SubsessionStatus;
@@ -17,10 +18,12 @@ interface SubsessionManageProps {
   unassignedUserList: Participant[];
   subsessions: Subsession[];
   subsessionOptions: any;
+  showActions?: boolean;
   onAddSubsession: () => void;
   onOpenSubsessions: () => void;
   onMoveUserToSubsession: Function;
   onAssignUserToSubsession: Function;
+  onMoveBackToMainSession: Function;
 }
 const SubsessionManage = (props: SubsessionManageProps) => {
   const {
@@ -33,9 +36,12 @@ const SubsessionManage = (props: SubsessionManageProps) => {
     onAddSubsession,
     onOpenSubsessions,
     onMoveUserToSubsession,
-    onAssignUserToSubsession
+    onAssignUserToSubsession,
+    onMoveBackToMainSession,
+    showActions
   } = props;
   const [broadcastVisible, setBroadcastVisible] = useState<boolean>(false);
+  const [broadcastVoiceVisible, setBroadcastVoiceVisible] = useState<boolean>(false);
 
   const zmClient = useContext(ZoomContext);
   const ssClient = zmClient.getSubsessionClient();
@@ -76,6 +82,7 @@ const SubsessionManage = (props: SubsessionManageProps) => {
                 subsessionStatus={subsessionStatus}
                 onMoveUserToSubsession={onMoveUserToSubsession}
                 onAssignUserToSubsession={onAssignUserToSubsession}
+                onMoveBackToMainSession={onMoveBackToMainSession}
               />
             </Panel>
           )}
@@ -87,7 +94,7 @@ const SubsessionManage = (props: SubsessionManageProps) => {
                 header={subsessionName}
                 extra={
                   subsessionStatus === SubsessionStatus.InProgress ? (
-                    currentSubsession.subsessionId === subsessionId ? (
+                    zmClient.getCurrentUserInfo().subsessionId === subsessionId ? (
                       <span>Joined</span>
                     ) : (
                       <Button
@@ -111,70 +118,91 @@ const SubsessionManage = (props: SubsessionManageProps) => {
                   subsessionStatus={subsessionStatus}
                   onMoveUserToSubsession={onMoveUserToSubsession}
                   onAssignUserToSubsession={onAssignUserToSubsession}
+                  onMoveBackToMainSession={onMoveBackToMainSession}
                 />
               </Panel>
             );
           })}
         </Collapse>
       </div>
-      {subsessionStatus === SubsessionStatus.Closing && closingCountdown >= 0 ? (
-        <div className="room-closing-coutdown">
-          <p className="room-closing-coutdown-tip">All subsessions will close in {closingCountdown} seconds.</p>
-          {userStatus === SubsessionUserStatus.InSubsession && (
-            <>
-              <p>You will be returned to the main session automatically</p>
-              <Button className="room-closing-countdown-leave-btn" onClick={onLeaveSubsessionClick} type="default">
-                Leave Subsession
-              </Button>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="room-actions">
-          {(subsessionStatus === SubsessionStatus.NotStarted || subsessionStatus === SubsessionStatus.Closed) && (
-            <Popover placement="top" trigger="click" content={<SubsessionOptions {...subsessionOptions} />}>
-              <Button type="primary" className="room-options-btn" ghost>
-                Options
-              </Button>
-            </Popover>
-          )}
-          <div className="room-actions-list">
-            {subsessionStatus === SubsessionStatus.InProgress ? (
+      {showActions &&
+        (subsessionStatus === SubsessionStatus.Closing && closingCountdown >= 0 ? (
+          <div className="room-closing-coutdown">
+            <p className="room-closing-coutdown-tip">All subsessions will close in {closingCountdown} seconds.</p>
+            {userStatus === SubsessionUserStatus.InSubsession && (
               <>
-                <Popover
-                  placement="top"
-                  trigger="click"
-                  content={<BroadcastPanel afterBroadcast={closeBroadcastPopover} />}
-                  onVisibleChange={onBroadcastPopoverVisibleChange}
-                  visible={broadcastVisible}
-                >
-                  <Button type="default">Broadcast Message to All</Button>
-                </Popover>
-                {userStatus === SubsessionUserStatus.InSubsession && (
-                  <Button
-                    onClick={() => {
-                      ssClient?.leaveSubsession();
-                    }}
-                  >
-                    Return to main session
-                  </Button>
-                )}
-                <Button onClick={onCloseSubsessionsClick} danger>
-                  Close All Subsessions
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button>Recreate</Button>
-                <Button onClick={onAddSubsession}>Add a Subsession</Button>
-                <Button onClick={onOpenSubsessions} type="primary">
-                  Open All Subsessions
+                <p>You will be returned to the main session automatically</p>
+                <Button className="room-closing-countdown-leave-btn" onClick={onLeaveSubsessionClick} type="default">
+                  Leave Subsession
                 </Button>
               </>
             )}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="room-actions">
+            {(subsessionStatus === SubsessionStatus.NotStarted || subsessionStatus === SubsessionStatus.Closed) && (
+              <Popover placement="top" trigger="click" content={<SubsessionOptions {...subsessionOptions} />}>
+                <Button type="primary" className="room-options-btn" ghost>
+                  Options
+                </Button>
+              </Popover>
+            )}
+            <div className="room-actions-list">
+              {subsessionStatus === SubsessionStatus.InProgress ? (
+                <>
+                  {zmClient.isHost() && userStatus !== SubsessionUserStatus.InSubsession && (
+                    <Popover
+                      placement="top"
+                      trigger="click"
+                      content={
+                        <BroadcastVoicePanel
+                          afterBroadcast={() => {
+                            setBroadcastVoiceVisible(false);
+                          }}
+                        />
+                      }
+                      onOpenChange={(visible) => {
+                        setBroadcastVoiceVisible(visible);
+                      }}
+                      open={broadcastVoiceVisible}
+                    >
+                      <Button type="default">Broadcast Voice</Button>
+                    </Popover>
+                  )}
+                  <Popover
+                    placement="top"
+                    trigger="click"
+                    content={<BroadcastMessagePanel afterBroadcast={closeBroadcastPopover} />}
+                    onOpenChange={onBroadcastPopoverVisibleChange}
+                    open={broadcastVisible}
+                  >
+                    <Button type="default">Broadcast Message</Button>
+                  </Popover>
+                  {userStatus === SubsessionUserStatus.InSubsession && (
+                    <Button
+                      onClick={() => {
+                        ssClient?.leaveSubsession();
+                      }}
+                    >
+                      Return to main session
+                    </Button>
+                  )}
+                  <Button onClick={onCloseSubsessionsClick} danger>
+                    Close All Subsessions
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button>Recreate</Button>
+                  <Button onClick={onAddSubsession}>Add a Subsession</Button>
+                  <Button onClick={onOpenSubsessions} type="primary">
+                    Open All Subsessions
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
     </div>
   );
 };

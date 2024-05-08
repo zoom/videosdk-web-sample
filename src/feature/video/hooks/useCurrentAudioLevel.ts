@@ -6,7 +6,7 @@ export function useCurrentAudioLevel() {
   const timerRef = useRef<number>();
   const onActiveSpeakerChange = useCallback(
     (payload: any) => {
-      if (!zmClient.getCurrentUserInfo().muted) {
+      if (!zmClient.getCurrentUserInfo()?.muted) {
         if (Array.isArray(payload) && payload.length > 0) {
           const isCurrentUserSpeaking = payload.some(
             (item: { userId: number; displayName: string }) => item.userId === zmClient.getSessionInfo().userId

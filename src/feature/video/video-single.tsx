@@ -10,6 +10,7 @@ import Avatar from './components/avatar';
 import VideoFooter from './components/video-footer';
 import ShareView from './components/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
+import ReportBtn from './components/report-btn';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
 import { Participant } from '../../index-types';
@@ -186,6 +187,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
         </div>
       </div>
       <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
+      <ReportBtn />
     </div>
   );
 };
