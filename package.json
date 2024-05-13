@@ -49,6 +49,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/classnames": "^2.2.11",
     "@types/crypto-js": "^4.0.1",
     "@types/jest": "^26.0.21",

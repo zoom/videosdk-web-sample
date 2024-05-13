@@ -62,14 +62,30 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
     }
   }, [ssClient]);
   useParticipantsChange(zmClient, onParticipantsChange);
+  const onSubsessionUserUpdate = useCallback((payload: any) => {
+    const { userId, subsessionId, audio, muted, bVideoOn, sharerOn, bShareAudioOn, isTalking } = payload;
+    setSubsessions(
+      produce((rooms: Subsession[]) => {
+        const room = rooms.find((r: Subsession) => r.subsessionId === subsessionId);
+        if (room) {
+          const user = room.userList.find((u) => u.userId === userId);
+          if (user) {
+            Object.assign(user, { audio, muted, bVideoOn, sharerOn, bShareAudioOn, isTalking });
+          }
+        }
+      })
+    );
+  }, []);
   useEffect(() => {
     zmClient.on('subsession-state-change', onSubsessionStateChange);
     zmClient.on('main-session-user-updated', onMainSessionUserChange);
+    zmClient.on('subsession-user-update', onSubsessionUserUpdate);
     return () => {
       zmClient.off('subsession-state-change', onSubsessionStateChange);
       zmClient.off('main-session-user-updated', onMainSessionUserChange);
+      zmClient.off('subsession-user-update', onSubsessionUserUpdate);
     };
-  }, [zmClient, onMainSessionUserChange, onSubsessionStateChange]);
+  }, [zmClient, onMainSessionUserChange, onSubsessionStateChange, onSubsessionUserUpdate]);
   useEffect(() => {
     if (ssClient && previousSubsessions && previousSubsessions !== subsessions) {
       const assignedUserList = subsessions.reduce((prev: any[], subsession: Subsession) => {
@@ -90,6 +106,10 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
       setSubsessionStatus(subsessionStatus);
       setSubsessions(ssClient.getSubsessionList());
       setCurrentSubsession(ssClient.getCurrentSubsession());
+      const options = ssClient.getSubsessionOptions();
+      if (setOptions && options) {
+        setOptions.setRoomOptions?.(options as any);
+      }
     }
   });
   const createSubsessions = useCallback(
@@ -171,6 +191,14 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
     },
     [subsessionStatus, ssClient]
   );
+  const moveUserBackToMainSession = useCallback(
+    (userId: number) => {
+      if (subsessionStatus === SubsessionStatus.InProgress) {
+        ssClient?.moveBackToMainSession(userId);
+      }
+    },
+    [ssClient, subsessionStatus]
+  );
   return {
     subsessions,
     subsessionStatus,
@@ -183,6 +211,7 @@ export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient |
     openSubsessions,
     assignUserToSubsession,
     moveUserToSubsession,
+    moveUserBackToMainSession,
     setSubsessionOptions: setOptions
   };
 }

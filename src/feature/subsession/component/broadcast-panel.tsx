@@ -6,7 +6,7 @@ const { TextArea } = Input;
 interface BroadcastPanelProps {
   afterBroadcast?: () => void;
 }
-const BroadcastPanel = (props: BroadcastPanelProps) => {
+const BroadcastMessagePanel = (props: BroadcastPanelProps) => {
   const { afterBroadcast } = props;
   const [content, setContent] = useState<string>('');
   const zmClient = useContext(ZoomContext);
@@ -34,4 +34,4 @@ const BroadcastPanel = (props: BroadcastPanelProps) => {
     </div>
   );
 };
-export default BroadcastPanel;
+export default BroadcastMessagePanel;

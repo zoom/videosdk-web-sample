@@ -1,12 +1,13 @@
 import React from 'react';
 
-interface FearureSwitch {
+interface FeatureSwitch {
   toggled: boolean;
   enabled: boolean;
 }
 interface AvatarAction {
-  localVolumeAdjust: FearureSwitch & { volume: number };
-  farEndCameraControl: FearureSwitch;
+  localVolumeAdjust: FeatureSwitch & { volume: number };
+  farEndCameraControl: FeatureSwitch;
+  videoResolutionAdjust: FeatureSwitch;
 }
 interface AvatarSwitch {
   [key: string]: AvatarAction;

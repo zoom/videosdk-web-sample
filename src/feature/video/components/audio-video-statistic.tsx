@@ -4,7 +4,7 @@ import { AudioQosData, VideoQosData } from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import MediaContext from '../../../context/media-context';
 import { useMount, useUnmount } from '../../../hooks';
-interface AudioVideoStatisticModelProps {
+interface AudioVideoStatisticModalProps {
   visible: boolean;
   defaultTab?: string;
   isStartedAudio: boolean;
@@ -12,6 +12,13 @@ interface AudioVideoStatisticModelProps {
   isStartedVideo: boolean;
   setVisible: (visible: boolean) => void;
 }
+interface ExtendedAudioQosData extends AudioQosData {
+  timestamp: number;
+}
+interface ExtendedVideoQosData extends VideoQosData {
+  timestamp: number;
+}
+
 const { TabPane } = Tabs;
 const mult = '\u00D7';
 const AudioMetrics = [
@@ -19,6 +26,11 @@ const AudioMetrics = [
     title: 'Frequency',
     value: 'sample_rate',
     format: (value: number) => `${value} khz`
+  },
+  {
+    title: 'Bitrate',
+    value: ['bitrate'],
+    format: (value: number) => `${(value / 1024).toFixed(1)} kps`
   },
   {
     title: 'Latency',
@@ -54,6 +66,11 @@ const VideoMetrics = [
     format: (value: number) => `${value} ms`
   },
   {
+    title: 'Bandwidth',
+    value: ['bandwidth'],
+    format: (value: number) => `${(value / 1024).toFixed(1)} kb/s`
+  },
+  {
     title: 'Packet Loss - Avg(Max)',
     value: ['avg_loss', 'max_loss'],
     format: (value: number[]) => {
@@ -87,10 +104,10 @@ const AudioQosDataShape = {
   max_loss: 0,
   rtt: 0,
   sample_rate: 0,
+  timestamp: 0,
   bandwidth: 0,
-  bitrate: 0,
+  bitrate: 0
 };
-
 
 const VideoQosDataShape = {
   avg_loss: 0,
@@ -101,13 +118,14 @@ const VideoQosDataShape = {
   rtt: 0,
   width: 0,
   sample_rate: 0,
+  timestamp: 0,
   bandwidth: 0,
-  bitrate: 0,
+  bitrate: 0
 };
 const getDataSouce = (
   streamMertics: typeof AudioMetrics | typeof VideoMetrics,
-  encodingData: AudioQosData | VideoQosData | undefined,
-  decodingData: AudioQosData | VideoQosData | undefined
+  encodingData: ExtendedAudioQosData | ExtendedVideoQosData | undefined,
+  decodingData: ExtendedAudioQosData | ExtendedVideoQosData | undefined
 ) => {
   return streamMertics.map((metrics, index) => {
     let send = '';
@@ -155,34 +173,20 @@ const columns = [
     key: 'receive'
   }
 ];
-const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
+const AudioVideoStatisticModal = (props: AudioVideoStatisticModalProps) => {
   const { visible, defaultTab, isStartedAudio, isStartedVideo, isMuted, setVisible } = props;
   const zmclient = useContext(ZoomContext);
   const { mediaStream } = useContext(MediaContext);
   const [tab, setTab] = useState(defaultTab || 'audio');
-  const [audioEncodingStatistic, setAudioEncodingStatistic] = useState<AudioQosData>();
-  const [audioDecodingStatistic, setAudioDecodingStatistic] = useState<AudioQosData>();
-  const [videoEncodingStatistic, setVideoEncodingStatistic] = useState<VideoQosData>();
-  const [videoDecodingStatistic, setVideoDecodingStatistic] = useState<VideoQosData>();
-  const [shareEncodingStatistic, setShareEncodingStatistic] = useState<VideoQosData>();
-  const [shareDecodingStatistic, setShareDecodingStatistic] = useState<VideoQosData>();
-  const videoDecodeTimerRef = useRef(0);
-  const audioDecodeTimerRef = useRef(0);
+  const [audioEncodingStatistic, setAudioEncodingStatistic] = useState<ExtendedAudioQosData>();
+  const [audioDecodingStatistic, setAudioDecodingStatistic] = useState<ExtendedAudioQosData>();
+  const [videoEncodingStatistic, setVideoEncodingStatistic] = useState<ExtendedVideoQosData>();
+  const [videoDecodingStatistic, setVideoDecodingStatistic] = useState<ExtendedVideoQosData>();
+  const [shareEncodingStatistic, setShareEncodingStatistic] = useState<ExtendedVideoQosData>();
+  const [shareDecodingStatistic, setShareDecodingStatistic] = useState<ExtendedVideoQosData>();
+  const timerRef = useRef(0);
   const onTabChange = (key: string) => {
     setTab(key);
-  };
-  const clearAudioTimer = () => {
-    if (audioDecodeTimerRef.current) {
-      clearTimeout(audioDecodeTimerRef.current);
-      audioDecodeTimerRef.current = 0;
-    }
-  };
-
-  const clearVideoTimer = () => {
-    if (videoDecodeTimerRef.current) {
-      clearTimeout(videoDecodeTimerRef.current);
-      videoDecodeTimerRef.current = 0;
-    }
   };
 
   const onAudioStatisticChange = useCallback((payload: any) => {
@@ -190,14 +194,9 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
       data: { encoding, ...restProps }
     } = payload;
     if (encoding) {
-      setAudioEncodingStatistic({ ...restProps });
+      setAudioEncodingStatistic({ ...restProps, timestamp: Date.now() });
     } else {
-      setAudioDecodingStatistic({ ...restProps });
-      clearAudioTimer();
-      // Reset audio decode data if no data come in over 2 seconds
-      audioDecodeTimerRef.current = window.setTimeout(() => {
-        setAudioDecodingStatistic(AudioQosDataShape);
-      }, 2000);
+      setAudioDecodingStatistic({ ...restProps, timestamp: Date.now() });
     }
   }, []);
   const onVideoStatisticChange = useCallback((payload: any) => {
@@ -205,14 +204,9 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
       data: { encoding, ...restProps }
     } = payload;
     if (encoding) {
-      setVideoEncodingStatistic({ ...restProps });
+      setVideoEncodingStatistic({ ...restProps, timestamp: Date.now() });
     } else {
-      setVideoDecodingStatistic({ ...restProps });
-      clearVideoTimer();
-      // Reset video decode data if no data come in over 2 seconds
-      videoDecodeTimerRef.current = window.setTimeout(() => {
-        setVideoDecodingStatistic(VideoQosDataShape);
-      }, 2000);
+      setVideoDecodingStatistic({ ...restProps, timestamp: Date.now() });
     }
   }, []);
   const onShareStatisticChange = useCallback((payload: any) => {
@@ -220,14 +214,9 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
       data: { encoding, ...restProps }
     } = payload;
     if (encoding) {
-      setShareEncodingStatistic({ ...restProps });
+      setShareEncodingStatistic({ ...restProps, timestamp: Date.now() });
     } else {
-      setShareDecodingStatistic({ ...restProps });
-      clearVideoTimer();
-      // Reset video decode data if no data come in over 2 seconds
-      videoDecodeTimerRef.current = window.setTimeout(() => {
-        setShareDecodingStatistic(VideoQosDataShape);
-      }, 2000);
+      setShareDecodingStatistic({ ...restProps, timestamp: Date.now() });
     }
   }, []);
   const audioDataSource = getDataSouce(AudioMetrics, audioEncodingStatistic, audioDecodingStatistic);
@@ -243,14 +232,29 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
       zmclient.off('share-statistic-data-change', onShareStatisticChange);
     };
   }, [zmclient, onAudioStatisticChange, onVideoStatisticChange, onShareStatisticChange]);
+
+  useEffect(() => {
+    if (visible && mediaStream && zmclient.getSessionInfo().isInMeeting) {
+      mediaStream.subscribeAudioStatisticData();
+      mediaStream.subscribeVideoStatisticData();
+      mediaStream.subscribeShareStatisticData();
+    }
+    return () => {
+      if (zmclient.getSessionInfo().isInMeeting) {
+        mediaStream?.unsubscribeAudioStatisticData();
+        mediaStream?.unsubscribeVideoStatisticData();
+        mediaStream?.unsubscribeShareStatisticData();
+      }
+    };
+  }, [mediaStream, zmclient, visible]);
   useEffect(() => {
     if (!isStartedAudio || isMuted) {
-      setAudioEncodingStatistic(AudioQosDataShape);
+      setAudioEncodingStatistic({ ...AudioQosDataShape, timestamp: Date.now() });
     }
   }, [isStartedAudio, isMuted]);
   useEffect(() => {
     if (!isStartedVideo) {
-      setVideoEncodingStatistic(VideoQosDataShape);
+      setVideoEncodingStatistic({ ...VideoQosDataShape, timestamp: Date.now() });
     }
   }, [isStartedVideo]);
   useEffect(() => {
@@ -262,16 +266,67 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
     if (mediaStream) {
       const { encode: audioEncoding, decode: audioDecoding } = mediaStream.getAudioStatisticData();
       const { encode: videoEncoding, decode: videoDecoding } = mediaStream.getVideoStatisticData();
-      setAudioDecodingStatistic(audioDecoding);
-      setAudioEncodingStatistic(audioEncoding);
-      setVideoDecodingStatistic(videoDecoding);
-      setVideoEncodingStatistic(videoEncoding);
+      setAudioDecodingStatistic({ ...audioDecoding, timestamp: Date.now() });
+      setAudioEncodingStatistic({ ...audioEncoding, timestamp: Date.now() });
+      setVideoDecodingStatistic({ ...videoDecoding, timestamp: Date.now() });
+      setVideoEncodingStatistic({ ...videoEncoding, timestamp: Date.now() });
     }
   });
-  useUnmount(() => {
-    clearAudioTimer();
-    clearVideoTimer();
-  });
+
+  const checkQos = useCallback(() => {
+    const now = Date.now();
+    [
+      audioEncodingStatistic,
+      audioDecodingStatistic,
+      videoEncodingStatistic,
+      videoDecodingStatistic,
+      shareEncodingStatistic,
+      shareDecodingStatistic
+    ].forEach((item, index) => {
+      if (item?.timestamp !== 0 && now - (item?.timestamp as number) > 2000) {
+        switch (index) {
+          case 0:
+            setAudioEncodingStatistic(AudioQosDataShape);
+            break;
+          case 1:
+            setAudioDecodingStatistic(AudioQosDataShape);
+            break;
+          case 2:
+            setVideoEncodingStatistic(VideoQosDataShape);
+            break;
+          case 3:
+            setVideoDecodingStatistic(VideoQosDataShape);
+            break;
+          case 4:
+            setShareEncodingStatistic(VideoQosDataShape);
+            break;
+          default:
+            setShareDecodingStatistic(VideoQosDataShape);
+        }
+      }
+    });
+  }, [
+    audioEncodingStatistic,
+    audioDecodingStatistic,
+    videoEncodingStatistic,
+    videoDecodingStatistic,
+    shareEncodingStatistic,
+    shareDecodingStatistic
+  ]);
+  useEffect(() => {
+    checkQos();
+    clearInterval(timerRef.current);
+    timerRef.current = window.setInterval(checkQos, 3000);
+    return () => clearInterval(timerRef.current);
+  }, [
+    audioEncodingStatistic,
+    audioDecodingStatistic,
+    videoEncodingStatistic,
+    videoDecodingStatistic,
+    shareEncodingStatistic,
+    shareDecodingStatistic,
+    checkQos
+  ]);
   return (
     <Modal
       open={visible}
@@ -297,4 +352,4 @@ const AudioVideoStatisticModel = (props: AudioVideoStatisticModelProps) => {
   );
 };
 
-export default AudioVideoStatisticModel;
+export default AudioVideoStatisticModal;

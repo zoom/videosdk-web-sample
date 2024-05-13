@@ -30,7 +30,6 @@ interface AppProps {
     enforceVB?: string;
     customerJoinId?: string;
     lang?: string;
-
     useVideoPlayer?: string;
   };
 }
@@ -128,6 +127,20 @@ function App(props: AppProps) {
   const galleryViewWithoutSAB = Number(enforceGalleryView) === 1 && !window.crossOriginIsolated;
   const vbWithoutSAB = Number(enforceVB) === 1 && !window.crossOriginIsolated;
   const galleryViewWithAttach = Number(useVideoPlayer) === 1 && (window.crossOriginIsolated || galleryViewWithoutSAB);
+
+  if (galleryViewWithAttach) {
+    console.log({
+      galleryViewWithAttach,
+      use: '<video-player-container> video tag render video',
+      doc: 'https://marketplacefront.zoom.us/sdk/custom/web/modules/Stream.html#attachVideo'
+    });
+  } else {
+    console.log({
+      galleryViewWithAttach,
+      use: '<canvas>',
+      doc: 'https://marketplacefront.zoom.us/sdk/custom/web/modules/Stream.html#startVideo'
+    });
+  }
   useEffect(() => {
     const init = async () => {
       await zmClient.init('en-US', `${window.location.origin}/lib`, {
@@ -228,6 +241,7 @@ function App(props: AppProps) {
       zmClient.off('media-sdk-change', onMediaSDKChange);
     };
   }, [zmClient, onConnectionChange, onMediaSDKChange]);
+  console.log({ isSupportGalleryView, galleryViewWithAttach });
   return (
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
