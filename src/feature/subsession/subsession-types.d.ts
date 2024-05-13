@@ -24,4 +24,6 @@ export interface SubsessionOptions {
   timerDuration: number;
   isTimerAutoEnabled: boolean;
   waitSeconds: number;
+  isAutoMoveBackToMainSession: boolean;
+  isSubsessionSelectionEnabled: boolean;
 }

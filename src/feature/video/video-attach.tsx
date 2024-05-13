@@ -5,7 +5,8 @@ import React, {
   useEffect,
   DOMAttributes,
   HTMLAttributes,
-  DetailedHTMLProps
+  DetailedHTMLProps,
+  useCallback
 } from 'react';
 import classnames from 'classnames';
 import _ from 'lodash';
@@ -23,8 +24,9 @@ import { useAvatarAction } from './hooks/useAvatarAction';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { Participant } from '../../index-types';
-import { usePrevious } from '../../hooks';
+import { useOrientation, usePrevious } from '../../hooks';
 import { useVideoAspect } from './hooks/useVideoAspectRatio';
+import { Radio } from 'antd';
 type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: any }>;
 
 declare global {
@@ -46,10 +48,18 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   const [participants, setParticipants] = useState(zmClient.getAllUser());
   const [subscribers, setSubscribers] = useState<number[]>([]);
   const activeVideo = useActiveVideo(zmClient);
-  const avatarActionState = useAvatarAction(zmClient, participants);
+  const avatarActionState = useAvatarAction(zmClient, participants, true);
   const networkQuality = useNetworkQuality(zmClient);
   const previousSubscribers = usePrevious(subscribers);
   const aspectRatio = useVideoAspect(zmClient);
+  const optionsOfVideoResolution = [
+    { label: '720P', value: VideoQuality.Video_720P },
+    { label: '360P', value: VideoQuality.Video_360P },
+    { label: '180P', value: VideoQuality.Video_180P },
+    { label: '90P', value: VideoQuality.Video_90P }
+  ];
+  const orientation = useOrientation();
+  const maxVideoCellWidth = orientation === 'portrait' ? 'none' : `calc(100vw/${Math.min(participants.length, 4)})`;
   useParticipantsChange(zmClient, (participants) => {
     let pageParticipants: Participant[] = [];
     if (participants.length > 0) {
@@ -85,13 +95,21 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
       addedUsers.forEach((userId) => {
         const attachment = videoPlayerListRef.current[`${userId}`];
         if (attachment) {
-          mediaStream?.attachVideo(userId, VideoQuality.Video_360P, attachment);
+          mediaStream?.attachVideo(userId, VideoQuality.Video_720P, attachment);
         }
       });
     }
   }, [subscribers, previousSubscribers, mediaStream]);
+  const onVideoResolutionChange = useCallback(
+    ({ target: { value } }: any, userId: number) => {
+      const attachment = videoPlayerListRef.current[`${userId}`];
+      mediaStream?.attachVideo(userId, value, attachment);
+    },
+    [videoPlayerListRef, mediaStream]
+  );
+
   return (
-    <div className="viewport">
+    <div className="viewport" style={{ height: 'auto', width: 'auto', minHeight: '100vh' }}>
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
       <div
         className={classnames('video-container', 'video-container-attech', {
@@ -110,13 +128,26 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                       // Bugs in react, aspectRatio doesn't work. https://github.com/facebook/react/issues/21098
                       aspectRatio[`${user.userId}`]
                         ? {
-                            aspectRatio: aspectRatio[`${user.userId}`]
+                            aspectRatio: aspectRatio[`${user.userId}`],
+                            maxWidth: maxVideoCellWidth
                           }
-                        : {}
+                        : { maxWidth: maxVideoCellWidth }
                     }
                   >
+                    {avatarActionState?.avatarActionState[user?.userId]?.videoResolutionAdjust?.toggled && (
+                      <div className="change-video-resolution">
+                        <Radio.Group
+                          options={optionsOfVideoResolution}
+                          onChange={(value) => {
+                            onVideoResolutionChange(value, user.userId);
+                          }}
+                          defaultValue={VideoQuality.Video_720P}
+                          optionType="button"
+                          buttonStyle="solid"
+                        />
+                      </div>
+                    )}
                     {user.bVideoOn && (
-                      // Issues in react-router https://github.com/remix-run/react-router/issues/8834#issuecomment-1118083034
                       <div>
                         <video-player
                           class="video-player"

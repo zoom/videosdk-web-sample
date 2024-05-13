@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useContext, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown, MenuProps } from 'antd';
 import { SubsessionUserStatus, SubsessionStatus } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { IconFont } from '../../component/icon-font';
 import Video from '../video/video';
 import VideoSingle from '../video/video-single';
+import VideoAttach from '../video/video-attach';
 import SubsessionCreate from './component/subsession-create';
 import SubsessionManage from './component/subsession-manage';
 import DraggableModal from './component/draggable-modal';
@@ -28,7 +29,7 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
   const { mediaStream } = useContext(MediaContext);
   const [visible, setVisible] = useState(false);
   const [closingModalVisible, setClosingModalVisible] = useState(false);
-  const [isHost, setIsHost] = useState(false);
+  const [isHostOrManager, setIsHostOrManager] = useState(false);
   const [participantsSize, setParticipantsSize] = useState(0);
 
   const {
@@ -43,23 +44,24 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
     addSubsession,
     openSubsessions,
     assignUserToSubsession,
-    moveUserToSubsession
+    moveUserToSubsession,
+    moveUserBackToMainSession
   } = useSubsession(zmClient, subsessionClient);
   const { invitedToJoin, inviteVisible, setInviteVisible, setInviteAccepted } = useInviteJoinSubsession(zmClient);
   const { formattedSubsessionCountdown } = useSubsessionCountdown(zmClient, subsessionClient);
   useBroadcastMessage(zmClient);
-  useSubsessionTimeUp(zmClient, subsessionClient, isHost, subsessionOptions.timerDuration);
+  useSubsessionTimeUp(zmClient, subsessionClient, isHostOrManager, subsessionOptions.timerDuration);
   useAskForHelp(zmClient, subsessionClient);
   const closingCountdown = useSubsessionClosingCountdown(zmClient, subsessionStatus);
   const previousClosingCountdown = usePrevious(closingCountdown);
   const onParticipantsChange = useCallback(
     (participants: Participant[]) => {
-      const isHost = zmClient.isHost();
-      if (visible && !isHost) {
+      const isHostOrManager = zmClient.isHost() || zmClient.isManager();
+      if (visible && !isHostOrManager) {
         setVisible(false);
       }
       setParticipantsSize(participants.length);
-      setIsHost(isHost);
+      setIsHostOrManager(isHostOrManager);
     },
     [visible, zmClient]
   );
@@ -96,28 +98,54 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
         subsessionClient?.askForHelp();
       } else if (key === 'leaveRoom') {
         subsessionClient?.leaveSubsession();
+      } else if (key === 'selectSubsession') {
+        setVisible(true);
       }
     },
     [subsessionClient]
   );
-  const attendeeBoMenu = (
-    <Menu onClick={onAttendeeBoMenuClick} className="attendee-bo-menu" theme="dark">
-      {subsessionStatus === SubsessionStatus.InProgress && <Menu.Item key="askHelp">Ask for Help </Menu.Item>}
-      <Menu.Item key="leaveRoom">Leave Subsession</Menu.Item>
-    </Menu>
-  );
+  const attendeeBoMenu = {
+    theme: 'dark',
+    className: 'attendee-bo-menu',
+    items: [
+      subsessionOptions.isSubsessionSelectionEnabled && {
+        key: 'selectSubsession',
+        label: 'Choose Subsession'
+      },
+      subsessionStatus === SubsessionStatus.InProgress && {
+        key: 'askHelp',
+        label: 'Ask for Help'
+      },
+      {
+        key: 'leaveRoom',
+        label: 'Leave Subsession'
+      }
+    ].filter(Boolean),
+    onClick: onAttendeeBoMenuClick
+  };
   const isAttendeeReturnToMainSession =
     subsessionStatus === SubsessionStatus.InProgress &&
     currentSubsession.subsessionId &&
     currentSubsession.userStatus === SubsessionUserStatus.Invited;
 
+  const isUseVideoPlayer = new URLSearchParams(props.location.search).get('useVideoPlayer') === '1';
+
   return (
     <div className="breakout-room-viewport">
-      {mediaStream?.isSupportMultipleVideos() ? <Video {...props} /> : <VideoSingle {...props} />}
+      {mediaStream?.isSupportMultipleVideos() ? (
+        isUseVideoPlayer ? (
+          <VideoAttach {...props} />
+        ) : (
+          <Video {...props} />
+        )
+      ) : (
+        <VideoSingle {...props} />
+      )}
       {userStatus === SubsessionUserStatus.InSubsession && (
         <h2 className="room-info">You are in {currentSubsession.subsessionName}.</h2>
       )}
-      {(isHost ||
+      {(isHostOrManager ||
+        subsessionOptions.isSubsessionSelectionEnabled ||
         invitedToJoin || // invite to join
         isAttendeeReturnToMainSession) && ( // return to the main session
         <Button
@@ -125,7 +153,7 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
           shape="circle"
           icon={<IconFont type="icon-group" />}
           onClick={() => {
-            if (isHost) {
+            if (isHostOrManager || subsessionOptions.isSubsessionSelectionEnabled) {
               setVisible(true);
             } else if (isAttendeeReturnToMainSession) {
               subsessionClient?.joinSubsession(currentSubsession.subsessionId);
@@ -139,10 +167,10 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
           }}
         />
       )}
-      {!isHost && userStatus === SubsessionUserStatus.InSubsession && (
+      {!isHostOrManager && userStatus === SubsessionUserStatus.InSubsession && (
         <Dropdown
           className="breakout-room-attendee-dropdown"
-          overlay={attendeeBoMenu}
+          menu={attendeeBoMenu as MenuProps}
           trigger={['click']}
           placement="topLeft"
         >
@@ -150,9 +178,9 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
         </Dropdown>
       )}
 
-      {isHost && (
+      {(isHostOrManager || subsessionOptions.isSubsessionSelectionEnabled) && (
         <DraggableModal title={subsessionModalTitle} visible={visible} onClose={onModalClose}>
-          {subsessions.length === 0 && subsessionStatus === SubsessionStatus.NotStarted ? (
+          {isHostOrManager && subsessions.length === 0 && subsessionStatus === SubsessionStatus.NotStarted ? (
             <SubsessionCreate totalParticipantsSize={participantsSize} onCreateSubsession={createSubsessions} />
           ) : (
             <SubsessionManage
@@ -162,17 +190,19 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
               subsessions={subsessions}
               subsessionOptions={{ ...subsessionOptions, ...setSubsessionOptions }}
               unassignedUserList={unassignedUserList}
+              showActions={isHostOrManager}
               onAddSubsession={addSubsession}
               onOpenSubsessions={openSubsessions}
               onAssignUserToSubsession={assignUserToSubsession}
               onMoveUserToSubsession={moveUserToSubsession}
+              onMoveBackToMainSession={moveUserBackToMainSession}
             />
           )}
         </DraggableModal>
       )}
       {invitedToJoin && (
         <DraggableModal
-          title="Join Subsession"
+          title={invitedToJoin.backMainSession ? 'Back to Main session' : 'Join Subsession'}
           visible={inviteVisible}
           onClose={() => {
             setInviteVisible(false);
@@ -180,7 +210,11 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
           okText="Join"
           cancelText="Not now"
           onOk={() => {
-            subsessionClient?.joinSubsession(invitedToJoin.subsessionId);
+            if (invitedToJoin.backMainSession) {
+              subsessionClient.leaveSubsession();
+            } else {
+              subsessionClient?.joinSubsession(invitedToJoin.subsessionId);
+            }
             setInviteVisible(false);
             setInviteAccepted(true);
           }}
@@ -189,11 +223,13 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
           }}
           width={400}
         >
-          You have been assigned to {invitedToJoin.subsessionName}.
+          {invitedToJoin.backMainSession
+            ? `The host(${invitedToJoin.inviterName}) is inviting you to return to main session`
+            : `You have been assigned to ${invitedToJoin.subsessionName}.`}
         </DraggableModal>
       )}
-      {!isHost && subsessionRemainingTitle && <div className="room-remaining">{subsessionRemainingTitle}</div>}
-      {!isHost && closingCountdown >= 0 && (
+      {!isHostOrManager && subsessionRemainingTitle && <div className="room-remaining">{subsessionRemainingTitle}</div>}
+      {!isHostOrManager && closingCountdown >= 0 && (
         <DraggableModal
           title="Subsessions"
           visible={closingModalVisible}

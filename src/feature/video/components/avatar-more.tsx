@@ -29,6 +29,15 @@ const AvatarMore = (props: AvatarMoreProps) => {
       menu.push(getAntdItem(isControllingRemoteCamera ? 'Give up camera control' : 'Control far end camera', 'farend'));
     }
   }
+  if (actionItem?.videoResolutionAdjust.enabled) {
+    menu.push(
+      getAntdItem(
+        'Subscribe other video resolution',
+        'subscribeVideoQuality',
+        actionItem?.videoResolutionAdjust.toggled && <CheckOutlined />
+      )
+    );
+  }
   const onSliderChange = useCallback(
     (value: any) => {
       mediaStream?.adjustUserAudioVolumeLocally(userId, value);
@@ -52,6 +61,8 @@ const AvatarMore = (props: AvatarMoreProps) => {
           mediaStream?.requestFarEndCameraControl(userId);
         }
         setIsControllingRemoteCamera(!isControllingRemoteCamera);
+      } else if (key === 'subscribeVideoQuality') {
+        dispatch({ type: 'toggle-video-resolution-adjust', payload: { userId } });
       }
       setIsDropdownVisbile(false);
     },

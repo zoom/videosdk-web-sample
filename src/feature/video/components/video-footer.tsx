@@ -1,6 +1,7 @@
 import { useState, useCallback, useContext, useEffect, MutableRefObject } from 'react';
 import classNames from 'classnames';
-import { message } from 'antd';
+import { message, Modal, Form, Select, Checkbox, Tooltip } from 'antd';
+import { SoundOutlined } from '@ant-design/icons';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
 import MicrophoneButton from './microphone';
@@ -81,6 +82,8 @@ const VideoFooter = (props: VideoFooterProps) => {
   // Video Mask
   const [videoMaskVisible, setVideoMaskVisible] = useState(false);
 
+  const [isSecondaryAudioStarted, setIsSecondaryAudioStarted] = useState(false);
+  const [secondaryMicForm] = Form.useForm();
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
       await mediaStream?.stopVideo();
@@ -146,7 +149,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     } else {
       try {
-        await mediaStream?.startAudio();
+        await mediaStream?.startAudio({ highBitrate: true });
       } catch (e: any) {
         if (e.type === 'INSUFFICIENT_PRIVILEGES' && e.reason === 'USER_FORBIDDEN_MICROPHONE') {
           setIsMicrophoneForbidden(true);
@@ -176,10 +179,62 @@ const VideoFooter = (props: VideoFooterProps) => {
           await mediaStream.hangup();
           setPhoneCallStatus(undefined);
         }
-        // setIsStartedAudio(false);
       } else if (type === 'statistic') {
         setSelectedStatisticTab('audio');
         setStatisticVisible(true);
+      } else if (type === 'secondary audio') {
+        if (isSecondaryAudioStarted) {
+          await mediaStream.stopSecondaryAudio();
+          setIsSecondaryAudioStarted(false);
+        } else {
+          Modal.confirm({
+            title: 'Start secondary audio',
+            content: (
+              <Form form={secondaryMicForm}>
+                <Form.Item label="Microphone" name="mic" required>
+                  <Select
+                    options={mediaStream.getMicList().map((item) => ({
+                      value: item.deviceId,
+                      label: item.label,
+                      disabled: item.deviceId === mediaStream.getActiveMicrophone()
+                    }))}
+                  />
+                </Form.Item>
+                <Form.Item label="Contraintes" name="constraints">
+                  <Checkbox.Group
+                    options={[
+                      { label: 'AGC', value: 'autoGainControl' },
+                      {
+                        label: 'ANC',
+                        value: 'noiseSuppression'
+                      },
+                      {
+                        label: 'AEC',
+                        value: 'echoCancellation'
+                      }
+                    ]}
+                  />
+                </Form.Item>
+              </Form>
+            ),
+            onOk: async () => {
+              try {
+                const data = await secondaryMicForm.validateFields();
+                const { mic, constraints } = data;
+                const option = {};
+                if (constraints) {
+                  constraints.forEach((key: string) => {
+                    Object.assign(option, { [`${key}`]: true });
+                  });
+                }
+                await mediaStream.startSecondaryAudio(mic, option);
+                setIsSecondaryAudioStarted(true);
+              } catch (e) {
+                console.warn(e);
+              }
+            }
+          });
+        }
       }
     }
   };
@@ -475,13 +530,15 @@ const VideoFooter = (props: VideoFooterProps) => {
     onLiveStreamStatusChange
   ]);
   useUnmount(() => {
-    if (isStartedAudio) {
-      mediaStream?.stopAudio();
+    if (zmClient.getSessionInfo().isInMeeting) {
+      if (isStartedAudio) {
+        mediaStream?.stopAudio();
+      }
+      if (isStartedVideo) {
+        mediaStream?.stopVideo();
+      }
+      mediaStream?.stopShareScreen();
     }
-    if (isStartedVideo) {
-      mediaStream?.stopVideo();
-    }
-    mediaStream?.stopShareScreen();
   });
   useMount(() => {
     if (mediaStream) {
@@ -496,20 +553,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   });
-  useEffect(() => {
-    if (mediaStream && zmClient.getSessionInfo().isInMeeting) {
-      mediaStream.subscribeAudioStatisticData();
-      mediaStream.subscribeVideoStatisticData();
-      mediaStream.subscribeShareStatisticData();
-    }
-    return () => {
-      if (zmClient.getSessionInfo().isInMeeting) {
-        mediaStream?.unsubscribeAudioStatisticData();
-        mediaStream?.unsubscribeVideoStatisticData();
-        mediaStream?.unsubscribeShareStatisticData();
-      }
-    };
-  }, [mediaStream, zmClient]);
+
   const recordingButtons: RecordButtonProps[] = getRecordingButtons(recordingStatus, zmClient.isHost());
   return (
     <div className={classNames('video-footer', className)}>
@@ -531,6 +575,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           activeSpeaker={activeSpeaker}
           disabled={isComputerAudioDisabled}
           isMicrophoneForbidden={isMicrophoneForbidden}
+          isSecondaryAudioStarted={isSecondaryAudioStarted}
         />
       )}
       <CameraButton
@@ -601,6 +646,11 @@ const VideoFooter = (props: VideoFooterProps) => {
       )}
       {liveStreamStatus === LiveStreamStatus.InProgress && (
         <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />
+      )}
+      {isSecondaryAudioStarted && (
+        <Tooltip title="Secondary audio on">
+          <SoundOutlined style={{ position: 'fixed', top: '45px', left: '10px', color: '#f60', fontSize: '24px' }} />
+        </Tooltip>
       )}
       <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
 
