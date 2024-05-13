@@ -7,3 +7,4 @@ export * from './useHover';
 export * from './useDragDrop';
 export * from './useDebounceFn';
 export * from './useBackHome';
+export * from './useOrientation';

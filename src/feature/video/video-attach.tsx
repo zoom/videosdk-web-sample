@@ -24,7 +24,7 @@ import { useAvatarAction } from './hooks/useAvatarAction';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { Participant } from '../../index-types';
-import { usePrevious } from '../../hooks';
+import { useOrientation, usePrevious } from '../../hooks';
 import { useVideoAspect } from './hooks/useVideoAspectRatio';
 import { Radio } from 'antd';
 type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: any }>;
@@ -58,6 +58,8 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     { label: '180P', value: VideoQuality.Video_180P },
     { label: '90P', value: VideoQuality.Video_90P }
   ];
+  const orientation = useOrientation();
+  const maxVideoCellWidth = orientation === 'portrait' ? 'none' : `calc(100vw/${Math.min(participants.length, 4)})`;
   useParticipantsChange(zmClient, (participants) => {
     let pageParticipants: Participant[] = [];
     if (participants.length > 0) {
@@ -105,6 +107,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     },
     [videoPlayerListRef, mediaStream]
   );
+
   return (
     <div className="viewport" style={{ height: 'auto', width: 'auto', minHeight: '100vh' }}>
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
@@ -126,9 +129,9 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                       aspectRatio[`${user.userId}`]
                         ? {
                             aspectRatio: aspectRatio[`${user.userId}`],
-                            maxWidth: `calc(100vw/${Math.min(participants.length, 4)})`
+                            maxWidth: maxVideoCellWidth
                           }
-                        : { maxWidth: `calc(100vw/${Math.min(participants.length, 4)})` }
+                        : { maxWidth: maxVideoCellWidth }
                     }
                   >
                     {avatarActionState?.avatarActionState[user?.userId]?.videoResolutionAdjust?.toggled && (
@@ -144,7 +147,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                         />
                       </div>
                     )}
-                    {user.bVideoOn ? (
+                    {user.bVideoOn && (
                       <div>
                         <video-player
                           class="video-player"
@@ -153,13 +156,6 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                           }}
                         />
                       </div>
-                    ) : (
-                      <Avatar
-                        participant={user}
-                        key={user.userId}
-                        isActive={activeVideo === user.userId}
-                        networkQuality={networkQuality[`${user.userId}`]}
-                      />
                     )}
                     <Avatar
                       participant={user}
