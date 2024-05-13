@@ -31,7 +31,9 @@ if (meetingArgs.web && meetingArgs.web !== '0') {
     meetingArgs.role = 1;
   }
 }
-meetingArgs.useVideoPlayer = 1;
+// enforce use <video> tag render video
+meetingArgs.useVideoPlayer = 1; // use https://marketplacefront.zoom.us/sdk/custom/web/modules/Stream.html#attachVideo
+
 ['enforceGalleryView', 'enforceVB', 'cloud_recording_option', 'cloud_recording_election'].forEach((field) => {
   if (Object.hasOwn(meetingArgs, field)) {
     try {
