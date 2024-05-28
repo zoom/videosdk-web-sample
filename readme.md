@@ -67,3 +67,15 @@ For the full list of features and event listeners, as well as additional guides,
 ## Need help?
 
 If you're looking for help, try [Developer Support](https://devsupport.zoom.us) or our [Developer Forum](https://devforum.zoom.us). Priority support is also available with [Premier Developer Support](https://explore.zoom.us/docs/en-us/developer-support-plans.html) plans.
+
+
+## Use ZFG(Zoom For Government). you also need apply new sdk key for zfg.
+### option1 change package.json and use zfg specific version
+like "@zoom/videosdk": "1.10.8-zfg",
+### option2 change dev.conf use zfg and set [webEndpoint](https://marketplacefront.zoom.us/sdk/custom/web/interfaces/InitOptions.html) 
+```
+zmClient.init('en-US', `https://source.zoomgov.com/videosdk/1.10.8/lib`, {
+   webEndpoint: "www.zoomgov.com",
+});
+```
+
