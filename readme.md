@@ -64,8 +64,7 @@ To get started, clone the repo:
 
 For the full list of features and event listeners, as well as additional guides, see our [Video SDK docs](https://developers.zoom.us/docs/video-sdk/web/).
 
-## Use ZFG(Zoom For Government).
-1. you also need apply new sdk key for ZFG.
+## Use ZFG(Zoom For Government). You need apply new sdk key for [ZFG](https://marketplace.zoomgov.com/).
 ### option1 change package.json and use zfg specific version
 ```
 "@zoom/videosdk": "1.10.8-zfg",
