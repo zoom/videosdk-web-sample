@@ -72,6 +72,9 @@ If you're looking for help, try [Developer Support](https://devsupport.zoom.us) 
 ## Use ZFG(Zoom For Government). you also need apply new sdk key for zfg.
 ### option1 change package.json and use zfg specific version
 like "@zoom/videosdk": "1.10.8-zfg",
+```
+zmClient.init('en-US', 'Global');
+```
 ### option2 change dev.conf and use ZFG [webEndpoint](https://marketplacefront.zoom.us/sdk/custom/web/interfaces/InitOptions.html) 
 ```
 zmClient.init('en-US', `https://source.zoomgov.com/videosdk/1.10.8/lib`, {
