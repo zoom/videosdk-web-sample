@@ -75,7 +75,7 @@ like "@zoom/videosdk": "1.10.8-zfg",
 ```
 zmClient.init('en-US', 'Global');
 ```
-### option2 change dev.conf and use ZFG [webEndpoint](https://marketplacefront.zoom.us/sdk/custom/web/interfaces/InitOptions.html) 
+### option2 change dev.conf and use ZFG [init](https://marketplacefront.zoom.us/sdk/custom/web/modules/VideoClient.html#init) option [webEndpoint](https://marketplacefront.zoom.us/sdk/custom/web/interfaces/InitOptions.html) 
 ```
 zmClient.init('en-US', `https://source.zoomgov.com/videosdk/1.10.8/lib`, {
    webEndpoint: "www.zoomgov.com",
