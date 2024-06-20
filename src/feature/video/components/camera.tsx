@@ -84,9 +84,7 @@ const CameraButton = (props: CameraButtonProps) => {
           'group'
         ),
       getAntdItem('', 'd1', undefined, undefined, 'divider'),
-      !isPreview &&
-        !mediaStream?.isRenderSelfViewWithVideoElement() &&
-        getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
+      !isPreview && getAntdItem('Mirror My Video', 'mirror', isMirrored && <CheckOutlined />),
       mediaStream?.isSupportVirtualBackground()
         ? getAntdItem('Blur My Background', 'blur', isBlur && <CheckOutlined />)
         : getAntdItem('Mask My Background', 'blur'),

@@ -1,15 +1,13 @@
 import Icon from '@ant-design/icons';
-import { useState, useCallback, useRef } from 'react';
-import { ReactComponent as AudioPlayingStep1 } from './svgs/audio-animate/audio_playing_step1.svg';
-import { ReactComponent as AudioPlayingStep2 } from './svgs/audio-animate/audio_playing_step2.svg';
-import { ReactComponent as AudioPlayingStep3 } from './svgs/audio-animate/audio_playing_step3.svg';
-import { ReactComponent as AudioPlayingStep4 } from './svgs/audio-animate/audio_playing_step4.svg';
-import { ReactComponent as AudioPlayingStep5 } from './svgs/audio-animate/audio_playing_step5.svg';
-import { ReactComponent as AudioPlayingStep6 } from './svgs/audio-animate/audio_playing_step6.svg';
-import { ReactComponent as AudioPlayingStep7 } from './svgs/audio-animate/audio_playing_step7.svg';
-import { ReactComponent as AudioPlayingStep8 } from './svgs/audio-animate/audio_playing_step8.svg';
-import { ReactComponent as AudioPlayingStep9 } from './svgs/audio-animate/audio_playing_step9.svg';
-import { useAnimationFrame } from '../hooks/useAnimationFrame';
+import { ReactComponent as AudioPlayingStep1 } from './svgs/audio/audio-volume-level1.svg';
+import { ReactComponent as AudioPlayingStep2 } from './svgs/audio/audio-volume-level2.svg';
+import { ReactComponent as AudioPlayingStep3 } from './svgs/audio/audio-volume-level3.svg';
+import { ReactComponent as AudioPlayingStep4 } from './svgs/audio/audio-volume-level4.svg';
+import { ReactComponent as AudioPlayingStep5 } from './svgs/audio/audio-volume-level5.svg';
+import { ReactComponent as AudioPlayingStep6 } from './svgs/audio/audio-volume-level6.svg';
+import { ReactComponent as AudioPlayingStep7 } from './svgs/audio/audio-volume-level7.svg';
+import { ReactComponent as AudioPlayingStep8 } from './svgs/audio/audio-volume-level8.svg';
+import { ReactComponent as AudioPlayingStep9 } from './svgs/audio/audio-volume-level9.svg';
 interface IconFontProps {
   className?: string;
   style?: object;
@@ -29,41 +27,16 @@ const audioPlayingStepMap: { [key: string]: React.FC<React.SVGProps<SVGSVGElemen
 };
 export const AudoiAnimationIcon = (props: IconFontProps) => {
   const { className, style, level } = props;
-  const [step, setStep] = useState({ value: 1, ascending: true });
-  const stopRef = useRef(0);
-  const maxStep = level || 9;
-  const rafCallback = useCallback(() => {
-    if (stopRef.current === 0) {
-      setStep((step) => {
-        if (step.value === maxStep) {
-          return {
-            value: step.value - 1,
-            ascending: false
-          };
-        } else if (step.value === 1) {
-          return {
-            value: step.value + 1,
-            ascending: true
-          };
-        } else {
-          return {
-            value: step.ascending ? step.value + 1 : step.value - 1,
-            ascending: step.ascending
-          };
-        }
-      });
-      stopRef.current = 6;
-    } else {
-      stopRef.current = stopRef.current - 1;
-    }
-  }, [maxStep]);
-  useAnimationFrame(rafCallback);
+  const sStyle: React.CSSProperties = { pointerEvents: 'none' };
+  if (style) {
+    Object.assign(sStyle, style);
+  }
   return (
     <Icon
       className={className}
-      component={audioPlayingStepMap[`icon-audio-playing-step${step.value}`]}
+      component={audioPlayingStepMap[`icon-audio-playing-step${level}`]}
       viewBox="0 0 24 24"
-      style={{ ...(style || {}) }}
+      style={sStyle}
     />
   );
 };

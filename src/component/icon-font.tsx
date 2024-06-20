@@ -40,8 +40,6 @@ import { ReactComponent as IconLive } from './svgs/icon-live.svg';
 import { ReactComponent as IconMove } from './svgs/icon-move.svg';
 import { ReactComponent as IconAudioOn } from './svgs/icon-audio-on.svg';
 import { ReactComponent as IconAudioOff } from './svgs/icon-audio-off.svg';
-import { ReactComponent as IconAudioWarning } from './svgs/icon-audio-warning.svg';
-import { ReactComponent as IconAudioAnimation } from './svgs/icon-audio-active-animated.svg';
 import { ReactComponent as IconReconnect } from './svgs/icon-reconnect.svg';
 import { ReactComponent as IconCorrectCircle } from './svgs/icon-correct-circle.svg';
 import { ReactComponent as IconDownload } from './svgs/icon-download.svg';
@@ -58,6 +56,10 @@ import { ReactComponent as IconParticipantSharingDesktopAudio } from './svgs/par
 import { ReactComponent as IconParticipantSharingScreen } from './svgs/participants/sharing-screen.svg';
 import { ReactComponent as IconParticipantVideoOff } from './svgs/participants/video-off.svg';
 import { ReactComponent as IconParticipantVideoOn } from './svgs/participants/video-on.svg';
+import { ReactComponent as IconAudioMuted } from './svgs/audio/audio-muted.svg';
+import { ReactComponent as IconAudioUnmuted } from './svgs/audio/audio-unmuted.svg';
+import { ReactComponent as IconAudioDisallow } from './svgs/audio/audio-disallow.svg';
+import { ReactComponent as IconAudioNoDevices } from './svgs/audio/audio-no-devices.svg';
 
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
@@ -98,8 +100,6 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-move': IconMove,
   'icon-audio-on': IconAudioOn,
   'icon-audio-off': IconAudioOff,
-  'icon-audio-warning': IconAudioWarning,
-  'icon-audio-animation': IconAudioAnimation,
   'icon-reconnect': IconReconnect,
   'icon-correct-circle': IconCorrectCircle,
   'icon-download': IconDownload,
@@ -114,7 +114,11 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-participant-sharing-desktop-audio': IconParticipantSharingDesktopAudio,
   'icon-participant-sharing-screen': IconParticipantSharingScreen,
   'icon-participant-video-off': IconParticipantVideoOff,
-  'icon-participant-video-on': IconParticipantVideoOn
+  'icon-participant-video-on': IconParticipantVideoOn,
+  'icon-audio-muted': IconAudioMuted,
+  'icon-audio-unmuted': IconAudioUnmuted,
+  'icon-audio-disallow': IconAudioDisallow,
+  'icon-audio-no-devices': IconAudioNoDevices
 };
 interface IconFontProps {
   type: string;
