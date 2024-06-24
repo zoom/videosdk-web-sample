@@ -83,7 +83,6 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   );
   return (
     <div className={classNames({ 'share-bar-hide': status === ShareStatus.End })}>
-      (
       <Draggable handle=".share-bar-move" nodeRef={draggableRef}>
         <div className="screen-share-control-bar" ref={draggableRef}>
           <Button className="share-bar-move" ghost icon={<IconFont type="icon-move" />} />
@@ -142,7 +141,6 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
           )}
         </div>
       </Draggable>
-      )
     </div>
   );
 });
