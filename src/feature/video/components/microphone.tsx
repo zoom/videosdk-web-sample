@@ -2,14 +2,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Tooltip, Dropdown, Button } from 'antd';
 import classNames from 'classnames';
-import { AudioOutlined, AudioMutedOutlined, CheckOutlined, UpOutlined } from '@ant-design/icons';
+import { CheckOutlined, UpOutlined } from '@ant-design/icons';
 import { IconFont } from '../../../component/icon-font';
 import { MediaDevice } from '../video-types';
 import CallOutModal from './call-out-modal';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
-import { useCurrentAudioLevel } from '../hooks/useCurrentAudioLevel';
+// import { useCurrentAudioLevel } from '../hooks/useCurrentAudioLevel';
 import CRCCallOutModal from './crc-call-out-modal';
 import { AudoiAnimationIcon } from '../../../component/audio-animation-icon';
+import { useAudioLevel } from '../hooks/useAudioLevel';
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
@@ -54,7 +55,8 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   } = props;
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [isCrcModalOpen, setIsCrcModalOpen] = useState(false);
-  const level = useCurrentAudioLevel();
+  // const level = useCurrentAudioLevel();
+  const level = useAudioLevel();
   const tooltipText = isStartedAudio ? (isMuted ? 'unmute' : 'mute') : 'start audio';
   const menuItems = [];
   if (microphoneList?.length && audio !== 'phone') {
@@ -112,7 +114,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
         if (audio === 'phone') {
           iconType = 'icon-phone-off';
         } else {
-          return <AudioMutedOutlined />;
+          iconType = 'icon-audio-muted';
         }
       } else {
         if (audio === 'phone') {
@@ -122,13 +124,13 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
             // iconType = 'icon-audio-animation';
             return <AudoiAnimationIcon level={level} />;
           } else {
-            return <AudioOutlined />;
+            iconType = 'icon-audio-unmuted';
           }
         }
       }
     } else {
       if (isMicrophoneForbidden) {
-        iconType = 'icon-audio-warning';
+        iconType = 'icon-audio-disallow';
       } else {
         iconType = 'icon-headset';
       }
