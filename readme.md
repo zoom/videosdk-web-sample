@@ -32,7 +32,7 @@ To get started, clone the repo:
    | `sdkSecret`  | Your Video SDK Secret. Required. |
    | `topic`      | Required, a session name of your choice or the name of the session you are joining. |
    | `name`       | Required, a name for the participant. |
-   | `password`   | Required, a session passcode of your choice or the passcode of the session you are joining. |
+   | `password`   | Optional, a session passcode of your choice or the passcode of the session you are joining. |
 
    Example:
 
