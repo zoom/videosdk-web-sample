@@ -32,7 +32,7 @@ if (meetingArgs.web && meetingArgs.web !== '0') {
   }
 }
 // enforce use <video> tag render video, https://marketplacefront.zoom.us/sdk/custom/web/modules/Stream.html#attachVideo
-meetingArgs.useVideoPlayer = 1;
+meetingArgs.useVideoPlayer = 0;
 
 ['enforceGalleryView', 'enforceVB', 'cloud_recording_option', 'cloud_recording_election'].forEach((field) => {
   if (Object.hasOwn(meetingArgs, field)) {

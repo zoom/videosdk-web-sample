@@ -8,6 +8,7 @@ import Home from './feature/home/home';
 import Video from './feature/video/video';
 import VideoSingle from './feature/video/video-single';
 import VideoAttach from './feature/video/video-attach';
+import { PiPContextProvider } from './feature/video/context/PiPContext';
 import Preview from './feature/preview/preview';
 import ZoomContext from './context/zoom-context';
 import ZoomMediaContext from './context/media-context';
@@ -247,24 +248,26 @@ function App(props: AppProps) {
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
         <ZoomMediaContext.Provider value={mediaContext}>
-          <Router>
-            <Switch>
-              <Route
-                path="/"
-                render={(props) => <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
-                exact
-              />
-              <Route path="/index.html" component={Home} exact />
-              <Route path="/chat" component={Chat} />
-              <Route path="/command" component={Command} />
-              <Route
-                path="/video"
-                component={isSupportGalleryView ? (galleryViewWithAttach ? VideoAttach : Video) : VideoSingle}
-              />
-              <Route path="/subsession" component={Subsession} />
-              <Route path="/preview" component={Preview} />
-            </Switch>
-          </Router>
+          <PiPContextProvider>
+            <Router>
+              <Switch>
+                <Route
+                  path="/"
+                  render={(props) => <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
+                  exact
+                />
+                <Route path="/index.html" component={Home} exact />
+                <Route path="/chat" component={Chat} />
+                <Route path="/command" component={Command} />
+                <Route
+                  path="/video"
+                  component={isSupportGalleryView ? (galleryViewWithAttach ? VideoAttach : Video) : VideoSingle}
+                />
+                <Route path="/subsession" component={Subsession} />
+                <Route path="/preview" component={Preview} />
+              </Switch>
+            </Router>
+          </PiPContextProvider>
         </ZoomMediaContext.Provider>
       )}
     </div>

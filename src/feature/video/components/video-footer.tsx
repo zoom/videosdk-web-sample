@@ -33,6 +33,8 @@ import IsoRecordingModal from './recording-ask-modal';
 import { LiveStreamButton, LiveStreamModal } from './live-stream';
 import { IconFont } from '../../../component/icon-font';
 import { VideoMaskModel } from './video-mask-modal';
+import { usePiPContext } from '../context/PiPContext';
+import { useCurrentParticipantChange } from '../hooks/onCurrentParticipantChange';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
@@ -44,6 +46,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const { className, selfShareCanvas, sharing } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
+  const { enablePipWindow, disablePipWindow } = usePiPContext();
   const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
   const liveStreamClient = zmClient.getLiveStreamClient();
   const recordingClient = zmClient.getRecordingClient();
@@ -306,9 +309,15 @@ const VideoFooter = (props: VideoFooterProps) => {
   );
   const onScreenShareClick = useCallback(async () => {
     if (mediaStream?.getShareStatus() === ShareStatus.End && selfShareCanvas) {
-      await mediaStream?.startShareScreen(selfShareCanvas, { requestReadReceipt: true });
+      enablePipWindow();
+      try {
+        await mediaStream?.startShareScreen(selfShareCanvas, { requestReadReceipt: true });
+      } catch (error) {
+        disablePipWindow();
+        console.error(error);
+      }
     }
-  }, [mediaStream, selfShareCanvas]);
+  }, [mediaStream, selfShareCanvas, enablePipWindow, disablePipWindow]);
 
   const onLiveTranscriptionClick = useCallback(async () => {
     if (isDisableCaptions) {
@@ -551,6 +560,12 @@ const VideoFooter = (props: VideoFooterProps) => {
           { deviceId: MobileVideoFacingMode.Environment, label: 'Rear-facing' }
         ]);
       }
+    }
+  });
+
+  useCurrentParticipantChange(zmClient, (currentParticipant) => {
+    if (!currentParticipant) {
+      disablePipWindow();
     }
   });
 
