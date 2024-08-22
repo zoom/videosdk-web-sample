@@ -4,24 +4,25 @@ import { useSizeCallback, useMount } from '../../../hooks';
 import { MediaStream } from '../../../index-types';
 export function useCanvasDimension(
   mediaStream: MediaStream | null,
-  videoWrapperRef: MutableRefObject<HTMLDivElement | null>,
+  videoWrapperRef: MutableRefObject<HTMLDivElement | null> | null,
   videoRef: MutableRefObject<HTMLCanvasElement | null>
 ) {
   const [dimension, setDimension] = useState({ width: 0, height: 0 });
   const debounceRef = useRef(_.debounce(setDimension, 0));
+  const trackSizeElementRef = videoWrapperRef ?? videoRef;
   const onCanvasResize = useCallback(
     ({ width, height }: any) => {
-      if (videoWrapperRef) {
+      if (trackSizeElementRef) {
         // eslint-disable-next-line no-useless-call
         debounceRef.current({ width, height });
       }
     },
-    [videoWrapperRef]
+    [trackSizeElementRef]
   );
-  useSizeCallback(videoWrapperRef.current, onCanvasResize);
+  useSizeCallback(trackSizeElementRef.current, onCanvasResize);
   useMount(() => {
-    if (videoWrapperRef.current) {
-      const { width, height } = videoWrapperRef.current.getBoundingClientRect();
+    if (trackSizeElementRef.current) {
+      const { width, height } = trackSizeElementRef.current.getBoundingClientRect();
       setDimension({ width, height });
     }
   });

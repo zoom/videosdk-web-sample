@@ -28,6 +28,7 @@ interface AppProps {
     password?: string;
     webEndpoint?: string;
     enforceGalleryView?: string;
+    disableMultipleVideos?: string;
     enforceVB?: string;
     customerJoinId?: string;
     lang?: string;
@@ -104,6 +105,7 @@ function App(props: AppProps) {
       password,
       webEndpoint: webEndpointArg,
       enforceGalleryView,
+      disableMultipleVideos,
       enforceVB,
       customerJoinId,
       lang,
@@ -159,7 +161,7 @@ function App(props: AppProps) {
         });
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
-        setIsSupportGalleryView(stream.isSupportMultipleVideos());
+        setIsSupportGalleryView(Number(disableMultipleVideos) === 1 ? false : stream.isSupportMultipleVideos());
         setIsLoading(false);
       } catch (e: any) {
         setIsLoading(false);
@@ -261,7 +263,17 @@ function App(props: AppProps) {
                 <Route path="/command" component={Command} />
                 <Route
                   path="/video"
-                  component={isSupportGalleryView ? (galleryViewWithAttach ? VideoAttach : Video) : VideoSingle}
+                  render={(props) =>
+                    isSupportGalleryView ? (
+                      galleryViewWithAttach ? (
+                        <VideoAttach {...props} />
+                      ) : (
+                        <Video {...props} disableMultipleVideos={Number(disableMultipleVideos) === 1} />
+                      )
+                    ) : (
+                      <VideoSingle {...props} disableMultipleVideos={Number(disableMultipleVideos) === 1} />
+                    )
+                  }
                 />
                 <Route path="/subsession" component={Subsession} />
                 <Route path="/preview" component={Preview} />

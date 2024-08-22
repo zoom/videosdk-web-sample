@@ -29,7 +29,7 @@ interface Props {
   isRecieveSharing: boolean;
 }
 
-export const GalleryView = ({ videoWrapperRef, videoRef, isRecieveSharing }: Props) => {
+export const VideoView = ({ videoWrapperRef, videoRef, isRecieveSharing }: Props) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,

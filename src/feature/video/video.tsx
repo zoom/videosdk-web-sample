@@ -22,9 +22,14 @@ import { SELF_VIDEO_ID } from './video-constants';
 
 import { CanvasContainer } from './CanvasContainer';
 import './video.scss';
-import { GalleryView } from './GalleryView';
+import { VideoView } from './VideoView';
 import { VideoPiP } from './VideoPiP';
-const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+
+interface Props extends RouteComponentProps {
+  disableMultipleVideos?: boolean;
+}
+
+const VideoContainer = ({ disableMultipleVideos }: Props) => {
   const videoWrapperRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
@@ -35,10 +40,15 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
       {!hasPiPOpened && (
-        <GalleryView videoWrapperRef={videoWrapperRef} videoRef={videoRef} isRecieveSharing={isRecieveSharing} />
+        <VideoView videoWrapperRef={videoWrapperRef} videoRef={videoRef} isRecieveSharing={isRecieveSharing} />
       )}
       <VideoPiP />
-      <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
+      <VideoFooter
+        className="video-operations"
+        sharing
+        selfShareCanvas={shareViewRef.current?.selfShareRef}
+        disableMultipleVideos={disableMultipleVideos}
+      />
     </div>
   );
 };

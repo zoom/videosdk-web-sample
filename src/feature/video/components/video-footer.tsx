@@ -39,11 +39,12 @@ interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
   sharing?: boolean;
+  disableMultipleVideos?: boolean;
 }
 
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
-  const { className, selfShareCanvas, sharing } = props;
+  const { className, selfShareCanvas, sharing, disableMultipleVideos } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const { enablePipWindow, disablePipWindow } = usePiPContext();
@@ -102,7 +103,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
       }
       await mediaStream?.startVideo(startVideoOptions);
-      if (!mediaStream?.isSupportMultipleVideos()) {
+      if (disableMultipleVideos || !mediaStream?.isSupportMultipleVideos()) {
         const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
         mediaStream?.renderVideo(
           canvasElement,
