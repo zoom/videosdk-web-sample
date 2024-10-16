@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ZoomClient, MediaStream } from '../../../index-types';
 import { ApprovedState, RemoteControlAppStatus, RemoteControlSessionStatus } from '@zoom/videosdk';
-import { message, Modal } from 'antd';
+import { message, Modal, Checkbox } from 'antd';
 export function useRemoteControl(
   zmClient: ZoomClient,
   mediaStream: MediaStream | null,
@@ -12,6 +12,7 @@ export function useRemoteControl(
   const [controllingUser, setControllingUser] = useState<{ userId: number; displayName: string } | null>(null);
   const isDownloadAppRef = useRef(false);
   const launchModalRef = useRef<any>(null);
+  const runAsAdminRef = useRef<any>(null);
   const onInControllingChange = useCallback((payload: any) => {
     const { isControlling } = payload;
     setIsControllingUser(isControlling);
@@ -40,14 +41,26 @@ export function useRemoteControl(
       }
       Modal.confirm({
         title: `${displayName} is requesting remote control of your screen`,
-        content: isSharingEntireScreen
-          ? 'In order to control your screen, you must install Zoom Remote Control app with a size of 4 MB to continue. You can regain control at any time by clicking on your screen.'
-          : 'To be controlled, you must share your entire screen instead of a tab or window. After sharing the entire screen, you’ll be requested again.',
+        content: isSharingEntireScreen ? (
+          <>
+            <div>
+              In order to control your screen, you must install Zoom Remote Control app with a size of 4 MB to continue.
+              You can regain control at any time by clicking on your screen.
+            </div>
+            {navigator.platform?.startsWith('Win') && (
+              <div style={{ color: '#999', marginTop: '20px' }}>
+                <Checkbox ref={runAsAdminRef}>Enable the RemoteControl App to control of all applications</Checkbox>
+              </div>
+            )}
+          </>
+        ) : (
+          'To be controlled, you must share your entire screen instead of a tab or window. After sharing the entire screen, you’ll be requested again.'
+        ),
         okText: isSharingEntireScreen ? 'Approve' : 'Select Entire Screen',
         cancelText: 'Decline',
         onOk: async () => {
           if (isSharingEntireScreen) {
-            mediaStream?.approveRemoteControl(userId);
+            mediaStream?.approveRemoteControl(userId, !!runAsAdminRef.current?.input?.checked);
           } else {
             await mediaStream?.stopShareScreen();
             if (selfShareView) {

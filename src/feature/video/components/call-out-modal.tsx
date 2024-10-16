@@ -1,5 +1,7 @@
 import { Modal, Select, Input, Checkbox, Form } from 'antd';
+import { useContext } from 'react';
 import classNames from 'classnames';
+import ZoomContext from '../../../context/zoom-context';
 import './call-out-modal.scss';
 interface CallOutModalProps {
   visible: boolean;
@@ -13,6 +15,7 @@ interface CallOutModalProps {
 const CallOutModal = (props: CallOutModalProps) => {
   const { visible, phoneCountryList, phoneCallStatus, onPhoneCallClick, onPhoneCallCancel, setVisible } = props;
   const [form] = Form.useForm();
+  const zmClient = useContext(ZoomContext);
   return (
     <Modal
       open={visible}
@@ -31,7 +34,7 @@ const CallOutModal = (props: CallOutModalProps) => {
           } = data;
           const [, code] = countryCode.split('&&');
           if (callme) {
-            onPhoneCallClick?.(code, phoneNumber, '', { callMe: true });
+            onPhoneCallClick?.(code, phoneNumber, zmClient.getCurrentUserInfo().displayName, { callMe: true });
           } else {
             onPhoneCallClick?.(code, phoneNumber, name, {
               callMe: false,

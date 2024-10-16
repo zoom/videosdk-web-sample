@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, MutableRefObject } from 'react';
 import { useMount, usePrevious, useUnmount } from '../../../hooks';
 import { ZoomClient, MediaStream, Participant } from '../../../index-types';
+import { Modal } from 'antd';
 export function useShare(
   zmClient: ZoomClient,
   mediaStream: MediaStream | null,
@@ -49,18 +50,30 @@ export function useShare(
   const onShareContentChange = useCallback((payload: any) => {
     setActiveSharingId(payload.userId);
   }, []);
+  const onActiveMediaFailed = useCallback(()=>{
+    Modal.error({
+      title:'Active media failed',
+      content:'Something went wrong. An unexpected interruption in media capture or insufficient memory occurred. Try refreshing the page to recover.',
+      okText:'Refresh',
+      onOk:()=>{
+        window.location.reload();
+      }
+    })
+  },[])
   useEffect(() => {
     zmClient.on('active-share-change', onActiveShareChange);
     zmClient.on('share-content-dimension-change', onSharedContentDimensionChange);
     zmClient.on('user-updated', onCurrentUserUpdate);
     zmClient.on('peer-share-state-change', onPeerShareChange);
     zmClient.on('share-content-change', onShareContentChange);
+    zmClient.on('active-media-failed',onActiveMediaFailed)
     return () => {
       zmClient.off('active-share-change', onActiveShareChange);
       zmClient.off('share-content-dimension-change', onSharedContentDimensionChange);
       zmClient.off('user-updated', onCurrentUserUpdate);
       zmClient.off('peer-share-state-change', onPeerShareChange);
       zmClient.off('share-content-change', onShareContentChange);
+      zmClient.off('active-media-failed',onActiveMediaFailed)
     };
   }, [
     zmClient,
@@ -68,7 +81,8 @@ export function useShare(
     onSharedContentDimensionChange,
     onCurrentUserUpdate,
     onPeerShareChange,
-    onShareContentChange
+    onShareContentChange,
+    onActiveMediaFailed
   ]);
   const previousIsRecieveSharing = usePrevious(isRecieveSharing);
   useEffect(() => {
