@@ -16,7 +16,7 @@
       align-items: center;
     }
     &.video-container-in-sharing {
-      width: 264px;
+      width: min(20vw, 264px);
       flex-shrink: 0;
     }
     &.single-video-container {
@@ -74,6 +74,9 @@
         position: relative;
         flex: 1;
         margin: 12px;
+        &.video-cell-spotlight{
+          min-width: 50vw;
+        }
         .change-video-resolution {
           position: absolute;
         }
