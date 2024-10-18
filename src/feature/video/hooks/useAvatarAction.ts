@@ -69,6 +69,11 @@ const avatarActionReducer = produce((draft, action) => {
       draft.isControllingRemoteCamera = payload;
       break;
     }
+    case 'set-spotlighted-videos': {
+      const { payload } = action;
+      draft.spotlightedUserList = payload;
+      break;
+    }
     case 'toggle-video-resolution-adjust': {
       const {
         payload: { userId }
