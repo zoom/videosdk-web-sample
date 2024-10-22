@@ -1,13 +1,13 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "1.12.5",
+  "version": "1.12.10",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "4.7.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
-    "@zoom/videosdk": "^1.12.5",
+    "@zoom/videosdk": "^1.12.10",
     "antd": "4.24.3",
     "classnames": "^2.2.6",
     "crypto-js": "^4.0.0",
