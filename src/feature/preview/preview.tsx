@@ -259,7 +259,12 @@ const PreviewContainer = () => {
         </span>
         <div className="container video-app">
           <div className="preview-video">
-            <video className={classNames({ 'preview-video-show': !isInVBMode })} muted={true} ref={videoRef} />
+            <video
+              className={classNames({ 'preview-video-show': !isInVBMode })}
+              muted={true}
+              playsInline
+              ref={videoRef}
+            />
             <canvas
               className={classNames({ 'preview-video-show': isInVBMode })}
               width="1280"

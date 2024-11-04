@@ -29,6 +29,7 @@ import { useOrientation, usePrevious } from '../../hooks';
 import { useVideoAspect } from './hooks/useVideoAspectRatio';
 import { Radio } from 'antd';
 import { useSpotlightVideo } from './hooks/useSpotlightVideo';
+import RemoteCameraControlPanel from './components/remote-camera-control';
 type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: any }>;
 
 declare global {
@@ -194,6 +195,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
                 );
               })}
             </ul>
+            <RemoteCameraControlPanel />
           </AvatarActionContext.Provider>
         </video-player-container>
       </div>
