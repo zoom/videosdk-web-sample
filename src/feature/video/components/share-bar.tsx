@@ -33,9 +33,13 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   const onShareAudioClick = useCallback(() => {
     if (shareAudioStatus?.isShareAudioEnabled) {
       if (shareAudioStatus.isShareAudioMuted) {
-        mediaStream?.unmuteShareAudio();
+        mediaStream?.unmuteShareAudio().then(() => {
+          setShareAudioStatus(mediaStream.getShareAudioStatus());
+        });
       } else {
-        mediaStream?.muteShareAudio();
+        mediaStream?.muteShareAudio().then(() => {
+          setShareAudioStatus(mediaStream.getShareAudioStatus());
+        });
       }
     }
   }, [mediaStream, shareAudioStatus]);

@@ -149,7 +149,11 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     } else {
       try {
-        await mediaStream?.startAudio({ highBitrate: true });
+        if (activePlaybackUrl) {
+          await mediaStream?.startAudio({ mediaFile: { url: activePlaybackUrl, loop: true } });
+        } else {
+          await mediaStream?.startAudio({ highBitrate: true });
+        }
       } catch (e: any) {
         if (e.type === 'INSUFFICIENT_PRIVILEGES' && e.reason === 'USER_FORBIDDEN_MICROPHONE') {
           setIsMicrophoneForbidden(true);
@@ -606,17 +610,18 @@ const VideoFooter = (props: VideoFooterProps) => {
           }}
         />
       )}
-      {recordingButtons.map((button: RecordButtonProps) => {
-        return (
-          <RecordingButton
-            key={button.text}
-            onClick={() => {
-              onRecordingClick(button.text);
-            }}
-            {...button}
-          />
-        );
-      })}
+      {!zmClient?.getCurrentUserInfo()?.subsessionId &&
+        recordingButtons.map((button: RecordButtonProps) => {
+          return (
+            <RecordingButton
+              key={button.text}
+              onClick={() => {
+                onRecordingClick(button.text);
+              }}
+              {...button}
+            />
+          );
+        })}
       {liveTranscriptionClient?.getLiveTranscriptionStatus().isLiveTranscriptionEnabled && (
         <>
           <LiveTranscriptionButton
