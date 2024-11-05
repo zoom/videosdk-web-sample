@@ -32,7 +32,7 @@ import { TranscriptionSubtitle } from './transcription-subtitle';
 import IsoRecordingModal from './recording-ask-modal';
 import { LiveStreamButton, LiveStreamModal } from './live-stream';
 import { IconFont } from '../../../component/icon-font';
-import { VideoMaskModel } from './video-mask-modal';
+import { VideoMaskModel } from './video-mask-modalNew';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
