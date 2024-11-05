@@ -41,39 +41,43 @@ export function useShare(
             if (item.sharerOn) {
               setIsReceiveSharing(false);
             }
+            if (mediaStream) {
+              setShareUserId(mediaStream.getShareUserList());
+            }
           }
         });
       }
     },
-    [zmClient]
+    [zmClient, mediaStream]
   );
   const onShareContentChange = useCallback((payload: any) => {
     setActiveSharingId(payload.userId);
   }, []);
-  const onActiveMediaFailed = useCallback(()=>{
+  const onActiveMediaFailed = useCallback(() => {
     Modal.error({
-      title:'Active media failed',
-      content:'Something went wrong. An unexpected interruption in media capture or insufficient memory occurred. Try refreshing the page to recover.',
-      okText:'Refresh',
-      onOk:()=>{
+      title: 'Active media failed',
+      content:
+        'Something went wrong. An unexpected interruption in media capture or insufficient memory occurred. Try refreshing the page to recover.',
+      okText: 'Refresh',
+      onOk: () => {
         window.location.reload();
       }
-    })
-  },[])
+    });
+  }, []);
   useEffect(() => {
     zmClient.on('active-share-change', onActiveShareChange);
     zmClient.on('share-content-dimension-change', onSharedContentDimensionChange);
     zmClient.on('user-updated', onCurrentUserUpdate);
     zmClient.on('peer-share-state-change', onPeerShareChange);
     zmClient.on('share-content-change', onShareContentChange);
-    zmClient.on('active-media-failed',onActiveMediaFailed)
+    zmClient.on('active-media-failed', onActiveMediaFailed);
     return () => {
       zmClient.off('active-share-change', onActiveShareChange);
       zmClient.off('share-content-dimension-change', onSharedContentDimensionChange);
       zmClient.off('user-updated', onCurrentUserUpdate);
       zmClient.off('peer-share-state-change', onPeerShareChange);
       zmClient.off('share-content-change', onShareContentChange);
-      zmClient.off('active-media-failed',onActiveMediaFailed)
+      zmClient.off('active-media-failed', onActiveMediaFailed);
     };
   }, [
     zmClient,
