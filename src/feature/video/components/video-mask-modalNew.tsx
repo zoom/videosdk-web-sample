@@ -85,8 +85,8 @@ class FaceDetectionMask {
         // Push measurements to results array
         if (boundingBox?.width && boundingBox?.height) {
           res.push({
-            x: centerFace.x * this.video.width,
-            y: centerFace.y * this.video.height,
+            x: centerFace.x * 640,
+            y: centerFace.y * 320,
             rx: boundingBox?.width / 2,
             ry: boundingBox?.height / 1.5,
             angle: angle * (180 / Math.PI) // Convert radians to degrees
@@ -101,7 +101,12 @@ class FaceDetectionMask {
   private calculateMaskClips(faces: any): MaskClip[] {
     const clips: MaskClip[] = [];
     for (let face of faces) {
-      const { x: dX, y: dY, rx: dRx, ry: dRy, angle } = face;
+      const { x: tmpX, y: tmpY, rx, ry, angle } = face;
+      const scale = 1280 / 640;
+      const dX = tmpX * scale;
+      const dY = tmpY * scale;
+      const dRx = rx * scale;
+      const dRy = ry * scale;
       let start = Date.now();
 
       // Calculate maximum radius to accommodate rotated ellipse
@@ -135,8 +140,8 @@ class FaceDetectionMask {
 
       clips.push({
         type: 'svg',
-        x: -x,
-        y: -y,
+        x,
+        y,
         width: maxRadius * 2,
         height: maxRadius * 2,
         svg: ellipseURL
@@ -152,6 +157,8 @@ class FaceDetectionMask {
 
   public async processVideoFrame() {
     // Detect faces in the current video frame
+    // video 640*320
+    // canvas 1280*720
     const faces = await this.detectFaces(this.video);
 
     if (faces && faces.length > 0) {
@@ -162,8 +169,6 @@ class FaceDetectionMask {
       // Prepare mask options
       const maskOption: MaskOption = {
         imageUrl: this.background,
-        // rootWidth: this.video.videoWidth,
-        // rootHeight: this.video.videoHeight,
         rootWidth: 1280,
         rootHeight: 720,
         cropped: true,
@@ -178,7 +183,7 @@ class FaceDetectionMask {
     }
   }
 
-  public startProcessing(frameRate = 10) {
+  public startProcessing(frameRate = 20) {
     // Process video frames at specified frame rate
     setInterval(() => {
       this.processVideoFrame();
