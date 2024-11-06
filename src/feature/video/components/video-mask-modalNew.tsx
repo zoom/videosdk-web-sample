@@ -44,29 +44,106 @@ class FaceDetectionMask {
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
     );
 
-    this.detector = await FaceDetector.createFromModelPath(
-      vision,
-      'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite'
-    );
+    const runningMode = 'IMAGE';
+    this.detector = await FaceDetector.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`,
+        delegate: 'GPU'
+      },
+      runningMode
+    });
   }
 
   private async detectFaces(video: HTMLVideoElement) {
     if (!this.detector) return null;
-    const detections = await this.detector.detect(this.video);
+    const detections = await this.detector.detect(this.video).detections;
+    const res: any[] = [];
+    if (detections.length <= 2) {
+      for (let detection of detections) {
+        // Destructure keypoints from detection
+        // left eye, right eye, nose tip, mouth, left eye tragion, and right eye tragion.
+        const [leftEye, rightEye, noseTip, mouth, leftEyeTragion, rightEyeTragion] = detection.keypoints;
+        const { boundingBox } = detection;
 
-    return detections;
+        // console.log('boundingBox', boundingBox);
+
+        // // Calculate the center point between the eyes
+        const centerEyes = {
+          x: (rightEye.x + leftEye.x) / 2,
+          y: (rightEye.y + leftEye.y) / 2
+        };
+
+        // Calculate the angle of the line between the eyes relative to horizontal
+        const angle = Math.atan2(centerEyes.y - rightEye.y, centerEyes.x - rightEye.x);
+
+        // Calculate the center of the face using eyes and nose
+        const centerFace = {
+          x: (centerEyes.x + noseTip.x) / 2,
+          y: (centerEyes.y + noseTip.y) / 2
+        };
+
+        // Push measurements to results array
+        if (boundingBox?.width && boundingBox?.height) {
+          res.push({
+            x: centerFace.x * this.video.width,
+            y: centerFace.y * this.video.height,
+            rx: boundingBox?.width / 2,
+            ry: boundingBox?.height / 1.5,
+            angle: angle * (180 / Math.PI) // Convert radians to degrees
+          });
+        }
+      }
+    }
+
+    return res;
   }
 
   private calculateMaskClips(faces: any): MaskClip[] {
-    return faces.detections.map((face: any) => {
-      const bbox = face.boundingBox;
-      return {
-        x: bbox.originX,
-        y: bbox.originY,
-        width: bbox.width,
-        height: bbox.height
-      };
-    });
+    const clips: MaskClip[] = [];
+    for (let face of faces) {
+      const { x: dX, y: dY, rx: dRx, ry: dRy, angle } = face;
+      let start = Date.now();
+
+      // Calculate maximum radius to accommodate rotated ellipse
+      const maxRadius = Math.max(dRx, dRy);
+
+      // Create SVG string with template literals
+      const ellipseSVG = `
+<svg width="${maxRadius * 2}" height="${maxRadius * 2}" xmlns="http://www.w3.org/2000/svg">
+  <ellipse 
+    rx="${dRx}" 
+    ry="${dRy}" 
+    cx="${maxRadius}" 
+    cy="${maxRadius}" 
+    fill="red" 
+    transform="rotate(${angle} ${maxRadius} ${maxRadius})" 
+  />
+</svg>`;
+
+      // Create blob and URL
+      const blob = new Blob([ellipseSVG], {
+        type: 'image/svg+xml'
+      });
+      const ellipseURL = URL.createObjectURL(blob);
+
+      // Calculate position
+      const x = dX - maxRadius;
+      const y = dY - maxRadius;
+
+      let end = Date.now();
+      console.log(`ZoomService: Prepare SVG execution time: ${end - start} ms`);
+
+      clips.push({
+        type: 'svg',
+        x,
+        y,
+        width: maxRadius * 2,
+        height: maxRadius * 2,
+        svg: ellipseURL
+      } as any);
+    }
+
+    return clips;
   }
 
   public updateBackground(background: string) {
@@ -76,67 +153,10 @@ class FaceDetectionMask {
   public async processVideoFrame() {
     // Detect faces in the current video frame
     const faces = await this.detectFaces(this.video);
-    const facesTemplateData = {
-      detections: [
-        {
-          categories: [
-            {
-              score: 0.9358954429626465,
-              index: 0,
-              categoryName: '',
-              displayName: ''
-            }
-          ],
-          keypoints: [
-            {
-              x: 0.44195789098739624,
-              y: 0.616001307964325,
-              score: 0,
-              label: ''
-            },
-            {
-              x: 0.5032268762588501,
-              y: 0.6369319558143616,
-              score: 0,
-              label: ''
-            },
-            {
-              x: 0.5135393142700195,
-              y: 0.6818786263465881,
-              score: 0,
-              label: ''
-            },
-            {
-              x: 0.48947715759277344,
-              y: 0.7754283547401428,
-              score: 0,
-              label: ''
-            },
-            {
-              x: 0.31704455614089966,
-              y: 0.6831821799278259,
-              score: 0,
-              label: ''
-            },
-            {
-              x: 0.4669908583164215,
-              y: 0.7047871947288513,
-              score: 0,
-              label: ''
-            }
-          ],
-          boundingBox: {
-            originX: 204,
-            originY: 199,
-            width: 125,
-            height: 125,
-            angle: 0
-          }
-        }
-      ]
-    };
-    if (faces && faces.detections.length > 0) {
+
+    if (faces && faces.length > 0) {
       // Calculate mask clips based on detected faces
+      console.log(faces);
       const clips: MaskClip[] = this.calculateMaskClips(faces);
 
       // Prepare mask options
