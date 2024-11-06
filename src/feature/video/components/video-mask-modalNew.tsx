@@ -135,8 +135,8 @@ class FaceDetectionMask {
 
       clips.push({
         type: 'svg',
-        x,
-        y,
+        x: -x,
+        y: -y,
         width: maxRadius * 2,
         height: maxRadius * 2,
         svg: ellipseURL
@@ -178,7 +178,7 @@ class FaceDetectionMask {
     }
   }
 
-  public startProcessing(frameRate = 30) {
+  public startProcessing(frameRate = 10) {
     // Process video frames at specified frame rate
     setInterval(() => {
       this.processVideoFrame();
