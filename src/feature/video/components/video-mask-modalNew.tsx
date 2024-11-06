@@ -170,10 +170,11 @@ class FaceDetectionMask {
         clip: clips
       };
 
-      // Update video mask using Zoom Video SDK
-      // console.log('faces', faces.detections[0].boundingBox);
       console.log('maskOption', maskOption);
+      let start = Date.now();
       await this.stream.updateVideoMask(maskOption as any);
+      let end = Date.now();
+      console.log(`ZoomService: Update mask execution time: ${end - start} ms`);
     }
   }
 
