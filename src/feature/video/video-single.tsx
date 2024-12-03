@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useContext, useRef, useState, useCallback, useEffect, useMemo } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { VideoQuality } from '@zoom/videosdk';
 import classnames from 'classnames';
 import _ from 'lodash';
@@ -13,7 +13,7 @@ import RemoteCameraControlPanel from './components/remote-camera-control';
 import ReportBtn from './components/report-btn';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
-import { Participant } from '../../index-types';
+import type { Participant } from '../../index-types';
 import { SELF_VIDEO_ID } from './video-constants';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import { useAvatarAction } from './hooks/useAvatarAction';
@@ -21,7 +21,7 @@ import { usePrevious } from '../../hooks';
 import './video.scss';
 import { isShallowEqual } from '../../utils/util';
 
-const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
@@ -29,6 +29,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   } = useContext(ZoomMediaContext);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const selfVideoCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const selfVideoRef = useRef<HTMLVideoElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -46,12 +47,28 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
     const { userId } = payload;
     setActiveVideo(userId);
   }, []);
+  const onCurrentVideoChange = useCallback(
+    (payload: any) => {
+      const { state } = payload;
+      const element = (
+        mediaStream?.isRenderSelfViewWithVideoElement() ? selfVideoRef.current : selfVideoCanvasRef.current
+      ) as HTMLVideoElement | HTMLCanvasElement;
+      if (state === 'Started') {
+        mediaStream?.renderVideo(element, zmClient.getSessionInfo().userId, element?.width, element?.height, 0, 0, 3);
+      } else {
+        mediaStream?.stopRenderVideo(element, zmClient.getSessionInfo().userId);
+      }
+    },
+    [mediaStream, zmClient]
+  );
   useEffect(() => {
     zmClient.on('video-active-change', onActiveVideoChange);
+    zmClient.on('video-capturing-change', onCurrentVideoChange);
     return () => {
       zmClient.off('video-active-change', onActiveVideoChange);
+      zmClient.off('video-capturing-change', onCurrentVideoChange);
     };
-  }, [zmClient, onActiveVideoChange]);
+  }, [zmClient, onActiveVideoChange, onCurrentVideoChange]);
   // active user = regard as `video-active-change` payload, excluding the case where it is self and the video is turned on.
   // In this case, the self video is rendered seperately.
   const activeUser = useMemo(
@@ -65,11 +82,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   useEffect(() => {
     if (mediaStream && videoRef.current) {
       if (activeUser?.bVideoOn !== previousActiveUser.current?.bVideoOn) {
-        //
-        if (
-          activeUser?.bVideoOn &&
-          !(activeUser.userId === zmClient.getSessionInfo().userId && isCurrentUserStartedVideo)
-        ) {
+        if (activeUser?.bVideoOn) {
           mediaStream.renderVideo(
             videoRef.current,
             activeUser.userId,
@@ -157,6 +170,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
               'single-self-video': participants.length === 1,
               'self-video-show': isCurrentUserStartedVideo
             })}
+            ref={selfVideoRef}
           />
         ) : (
           <canvas
