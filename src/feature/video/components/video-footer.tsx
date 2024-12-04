@@ -99,47 +99,10 @@ const VideoFooter = (props: VideoFooterProps) => {
         Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
       }
       await mediaStream?.startVideo(startVideoOptions);
-      if (!mediaStream?.isSupportMultipleVideos()) {
-        const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
-        mediaStream?.renderVideo(
-          canvasElement,
-          zmClient.getSessionInfo().userId,
-          canvasElement.width,
-          canvasElement.height,
-          0,
-          0,
-          3
-        );
-      }
-      // const temporaryException = isIOSMobile() && window.crossOriginIsolated; // add ios mobile exception for test backward compatible.
-      // if (mediaStream?.isRenderSelfViewWithVideoElement() && !temporaryException) {
-      //   const videoElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLVideoElement;
-      //   if (videoElement) {
-      //     await mediaStream?.startVideo({ videoElement });
-      //   }
-      // } else {
-      //   const startVideoOptions = { hd: true, fullHd: true, ptz: mediaStream?.isBrowserSupportPTZ() };
-      //   if (mediaStream?.isSupportVirtualBackground() && isBlur) {
-      //     Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
-      //   }
-      //   await mediaStream?.startVideo(startVideoOptions);
-      //   if (!mediaStream?.isSupportMultipleVideos()) {
-      //     const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
-      //     mediaStream?.renderVideo(
-      //       canvasElement,
-      //       zmClient.getSessionInfo().userId,
-      //       canvasElement.width,
-      //       canvasElement.height,
-      //       0,
-      //       0,
-      //       3
-      //     );
-      //   }
-      // }
 
       setIsStartedVideo(true);
     }
-  }, [mediaStream, isStartedVideo, zmClient, isBlur]);
+  }, [mediaStream, isStartedVideo, isBlur]);
   const onMicrophoneClick = useCallback(async () => {
     if (isStartedAudio) {
       if (isMuted) {
