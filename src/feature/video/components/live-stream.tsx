@@ -1,4 +1,4 @@
-import { Button, Tooltip, Modal, Input, Form } from 'antd';
+import { Button, Modal, Input, Form } from 'antd';
 import classNames from 'classnames';
 import { IconFont } from '../../../component/icon-font';
 interface LiveStreamButtonProps {

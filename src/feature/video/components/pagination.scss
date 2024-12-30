@@ -1,6 +1,6 @@
 .pagination {
   position: absolute;
-  top:50%;
+  top: 50%;
   left: 0;
   transform: translateY(-50%);
   height: 100px;
@@ -9,7 +9,8 @@
   justify-content: space-between;
   pointer-events: none;
   z-index: 2;
-  .previous-page-button,.next-page-button{
+  .previous-page-button,
+  .next-page-button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,24 +20,27 @@
     pointer-events: auto;
     border: 0;
     background: #000;
-    > .anticon{
+    > .anticon {
       font-size: 56px !important;
     }
   }
-  &.in-sharing{
+  &.in-sharing {
     top: 0;
-    right:0;
+    right: 0;
     left: auto;
     width: 264px;
     flex-direction: column;
     transform: none;
     height: 100%;
     align-items: center;
-    .previous-page-button,.next-page-button{
+    .previous-page-button,
+    .next-page-button {
       .anticon {
         transform: rotate(90deg);
       }
     }
-
+    .next-page-button {
+      margin-bottom: 10vh;
+    }
   }
 }

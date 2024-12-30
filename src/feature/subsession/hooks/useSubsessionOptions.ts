@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SubsessionOptions } from '../subsession-types';
+import type { SubsessionOptions } from '../subsession-types';
 export function useSubsessionOptions() {
   const [isAutoJoinSubsession, setIsAutoJoinSubsession] = useState<boolean>(false);
   const [isBackToMainSessionEnabled, setIsBackToMainSessionEnabled] = useState<boolean>(true);

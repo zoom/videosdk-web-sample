@@ -1,14 +1,16 @@
-import React, { useCallback, useContext, useEffect, useState, useRef } from 'react';
+import type React from 'react';
+// eslint-disable-next-line no-duplicate-imports
+import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import produce from 'immer';
 import { Input } from 'antd';
 import ZoomContext from '../../context/zoom-context';
-import { CommandReceiver, CommandRecord } from './cmd-types';
+import type { CommandReceiver, CommandRecord } from './cmd-types';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import ChatMessageItem from './component/cmd-message-item';
 import CommandReceiverContainer from './component/cmd-receiver';
 import { useMount } from '../../hooks';
 import './command.scss';
-import { CommandChannelMsg } from '@zoom/videosdk';
+import type { CommandChannelMsg } from '@zoom/videosdk';
 const { TextArea } = Input;
 
 const oneToAllUser = {
@@ -140,7 +142,7 @@ const CommandContainer = () => {
     setCurrentUserId(zmClient.getSessionInfo().userId);
   });
   return (
-    <div className="chat-container">
+    <div className="cmd-container">
       <div className="chat-wrap">
         <h2>Command Channel Chat</h2>
         <div className="chat-message-wrap" ref={chatWrapRef}>

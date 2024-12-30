@@ -117,15 +117,11 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
       mediaStream?.updateSharingCanvasDimension(shareViewSize.width * pixelRatio, shareViewSize.height * pixelRatio);
     }
   }, [mediaStream, previousShareViewSize, shareViewSize, viewType, previousViewType]);
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        selfShareRef: selfShareViewRef.current
-      };
-    },
-    []
-  );
+  useImperativeHandle(ref, () => {
+    return {
+      selfShareRef: selfShareViewRef.current
+    };
+  }, []);
   useEffect(() => {
     onRecieveSharingChange(isRecieveSharing);
   }, [isRecieveSharing, onRecieveSharingChange]);

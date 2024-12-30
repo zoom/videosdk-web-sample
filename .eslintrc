@@ -45,7 +45,7 @@
     "no-unused-vars": 0,
     "no-unreachable": 2,
     "no-duplicate-imports": 2,
-    "max-params":["error", 8],
+    "max-params": ["error", 8],
     "react/display-name": 0,
     "react-hooks/rules-of-hooks": 2,
     "react-hooks/exhaustive-deps": 1,
@@ -53,11 +53,24 @@
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
     "complexity": "off",
+    "prefer-object-has-own": "off",
     "prettier/prettier": [
       "error",
       {
         "endOfLine": "auto"
       }
-    ]
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "none",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+      },
+    ],
   }
 }

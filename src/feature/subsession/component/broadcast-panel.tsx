@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useContext } from 'react';
+import type React from 'react';
+// eslint-disable-next-line no-duplicate-imports
+import { useState, useCallback, useContext } from 'react';
 import { Input, Button } from 'antd';
 import './broadcast-panel.scss';
 import ZoomContext from '../../../context/zoom-context';

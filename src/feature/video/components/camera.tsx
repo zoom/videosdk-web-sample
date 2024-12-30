@@ -1,10 +1,10 @@
 import { useContext } from 'react';
-import { Button, Tooltip, Menu, Dropdown } from 'antd';
+import { Button, Tooltip, Dropdown } from 'antd';
 import { CheckOutlined, UpOutlined, VideoCameraAddOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import ZoomMediaContext from '../../../context/media-context';
 import classNames from 'classnames';
-import { MediaDevice } from '../video-types';
-import { getAntdDropdownMenu, getAntdItem, MenuItem } from './video-footer-utils';
+import type { MediaDevice } from '../video-types';
+import { type MenuItem, getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 interface CameraButtonProps {
   isStartedVideo: boolean;
   isMirrored?: boolean;

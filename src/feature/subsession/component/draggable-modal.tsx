@@ -1,4 +1,6 @@
-import React, { useState, useRef, useCallback } from 'react';
+import type React from 'react';
+// eslint-disable-next-line no-duplicate-imports
+import { useState, useRef, useCallback } from 'react';
 import Draggable from 'react-draggable';
 import { Modal } from 'antd';
 interface DraggableModalProps {
