@@ -1,14 +1,14 @@
 import {
+  type ParticipantPropertiesPayload,
   SubsessionAllocationPattern,
   SubsessionUserStatus,
-  SubsessionStatus,
-  ParticipantPropertiesPayload
+  SubsessionStatus
 } from '@zoom/videosdk';
 import produce from 'immer';
 import { useState, useEffect, useCallback } from 'react';
 import { useMount, usePrevious } from '../../../hooks';
-import { SubsessionClient, Participant, ZoomClient } from '../../../index-types';
-import { CurrentSubsession, Subsession } from '../subsession-types';
+import type { SubsessionClient, Participant, ZoomClient } from '../../../index-types';
+import type { CurrentSubsession, Subsession } from '../subsession-types';
 import { useParticipantsChange } from './useParticipantsChange';
 import { useSubsessionOptions } from './useSubsessionOptions';
 export function useSubsession(zmClient: ZoomClient, ssClient: SubsessionClient | null) {

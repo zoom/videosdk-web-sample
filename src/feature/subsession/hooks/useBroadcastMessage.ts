@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { notification, message } from 'antd';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 const broadcastNotificationKey = 'BoNotification';
 export function useBroadcastMessage(zmClient: ZoomClient) {
   const onBroadcastMessage = useCallback(

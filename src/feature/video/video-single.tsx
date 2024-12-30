@@ -69,6 +69,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
       zmClient.off('video-capturing-change', onCurrentVideoChange);
     };
   }, [zmClient, onActiveVideoChange, onCurrentVideoChange]);
+
   // active user = regard as `video-active-change` payload, excluding the case where it is self and the video is turned on.
   // In this case, the self video is rendered seperately.
   const activeUser = useMemo(
@@ -78,11 +79,13 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
       ),
     [participants, activeVideo, zmClient]
   );
+
   const isCurrentUserStartedVideo = zmClient.getCurrentUserInfo()?.bVideoOn;
   useEffect(() => {
     if (mediaStream && videoRef.current) {
       if (activeUser?.bVideoOn !== previousActiveUser.current?.bVideoOn) {
         if (activeUser?.bVideoOn) {
+          mediaStream.stopRenderVideo(videoRef.current, activeUser.userId);
           mediaStream.renderVideo(
             videoRef.current,
             activeUser.userId,
@@ -196,7 +199,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
                 networkQuality={networkQuality[`${activeUser.userId}`]}
               />
             )}
-            <RemoteCameraControlPanel />
+            {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
           </AvatarActionContext.Provider>
         </div>
       </div>

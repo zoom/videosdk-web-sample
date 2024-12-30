@@ -4,10 +4,9 @@ import { Tooltip, Dropdown, Button } from 'antd';
 import classNames from 'classnames';
 import { CheckOutlined, UpOutlined } from '@ant-design/icons';
 import { IconFont } from '../../../component/icon-font';
-import { MediaDevice } from '../video-types';
+import type { MediaDevice } from '../video-types';
 import CallOutModal from './call-out-modal';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
-// import { useCurrentAudioLevel } from '../hooks/useCurrentAudioLevel';
 import CRCCallOutModal from './crc-call-out-modal';
 import { AudoiAnimationIcon } from '../../../component/audio-animation-icon';
 import { useAudioLevel } from '../hooks/useAudioLevel';
@@ -31,6 +30,7 @@ interface MicrophoneButtonProps {
   activeSpeaker?: string;
   phoneCallStatus?: { text: string; type: string };
   isSecondaryAudioStarted?: boolean;
+  isPreview?: boolean;
 }
 const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const {
@@ -48,6 +48,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     disabled,
     isMicrophoneForbidden,
     isSecondaryAudioStarted,
+    isPreview,
     onMicrophoneClick,
     onMicrophoneMenuClick,
     onPhoneCallClick,
@@ -87,13 +88,19 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     );
     menuItems.push(getAntdItem('', 'd2', undefined, undefined, 'divider'));
   }
-  menuItems.push(
-    getAntdItem(isSecondaryAudioStarted ? 'Stop secondary audio' : 'Start secondary audio', 'secondary audio')
-  );
-  menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
-  if (audio !== 'phone') {
-    menuItems.push(getAntdItem('Audio Statistic', 'statistic'));
+  if (!isPreview) {
+    menuItems.push(
+      getAntdItem(isSecondaryAudioStarted ? 'Stop secondary audio' : 'Start secondary audio', 'secondary audio')
+    );
   }
+
+  menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
+  if (!isPreview) {
+    if (audio !== 'phone') {
+      menuItems.push(getAntdItem('Audio Statistic', 'statistic'));
+    }
+  }
+
   menuItems.push(getAntdItem(audio === 'phone' ? 'Hang Up' : 'Leave Audio', 'leave audio'));
 
   const onMenuItemClick = (payload: { key: any }) => {

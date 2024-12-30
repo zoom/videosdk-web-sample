@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useEffect, MutableRefObject } from 'react';
+import { useState, useCallback, useContext, useEffect } from 'react';
 import classNames from 'classnames';
 import { message, Modal, Form, Select, Checkbox, Tooltip } from 'antd';
 import { SoundOutlined } from '@ant-design/icons';
@@ -9,17 +9,17 @@ import { ScreenShareButton } from './screen-share';
 import AudioVideoStatisticModal from './audio-video-statistic';
 import ZoomMediaContext from '../../../context/media-context';
 import { useUnmount, useMount } from '../../../hooks';
-import { MediaDevice } from '../video-types';
+import type { MediaDevice } from '../video-types';
 import './video-footer.scss';
-import { isAndroidOrIOSBrowser, isIOSMobile } from '../../../utils/platform';
+import { isAndroidOrIOSBrowser } from '../../../utils/platform';
 import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
-import { getRecordingButtons, RecordButtonProps, RecordingButton } from './recording';
+import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './recording';
 import {
+  type DialOutOption,
   DialoutState,
   RecordingStatus,
   MutedSource,
   AudioChangeAction,
-  DialOutOption,
   VideoCapturingState,
   SharePrivilege,
   MobileVideoFacingMode,
@@ -33,6 +33,7 @@ import IsoRecordingModal from './recording-ask-modal';
 import { LiveStreamButton, LiveStreamModal } from './live-stream';
 import { IconFont } from '../../../component/icon-font';
 import { VideoMaskModel } from './video-mask-modal';
+import { useParticipantsChange } from '../hooks/useParticipantsChange';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
@@ -58,7 +59,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isStartedLiveTranscription, setIsStartedLiveTranscription] = useState(false);
   const [isDisableCaptions, setIsDisableCaptions] = useState(false);
   const [isMirrored, setIsMirrored] = useState(false);
-  const [isBlur, setIsBlur] = useState(false);
+  const [isBlur, setIsBlur] = useState(mediaStream?.getVirtualbackgroundStatus().imageSrc === 'blur');
   const [isMuted, setIsMuted] = useState(!!zmClient.getCurrentUserInfo()?.muted);
   const [activeMicrophone, setActiveMicrophone] = useState(mediaStream?.getActiveMicrophone());
   const [activeSpeaker, setActiveSpeaker] = useState(mediaStream?.getActiveSpeaker());
@@ -84,10 +85,18 @@ const VideoFooter = (props: VideoFooterProps) => {
 
   const [isSecondaryAudioStarted, setIsSecondaryAudioStarted] = useState(false);
   const [secondaryMicForm] = Form.useForm();
+  useParticipantsChange(zmClient, () => {
+    setIsMuted(!!zmClient.getCurrentUserInfo()?.muted);
+  });
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
       await mediaStream?.stopVideo();
       setIsStartedVideo(false);
+      if (activePlaybackUrl) {
+        await mediaStream?.switchMicrophone('default');
+        setActiveMicrophone(mediaStream?.getActiveMicrophone());
+        setActivePlaybackUrl('');
+      }
     } else {
       const startVideoOptions = {
         hd: true,
@@ -99,10 +108,22 @@ const VideoFooter = (props: VideoFooterProps) => {
         Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
       }
       await mediaStream?.startVideo(startVideoOptions);
+      if (!mediaStream?.isSupportMultipleVideos()) {
+        const canvasElement = document.querySelector(`#${SELF_VIDEO_ID}`) as HTMLCanvasElement;
+        mediaStream?.renderVideo(
+          canvasElement,
+          zmClient.getSessionInfo().userId,
+          canvasElement.width,
+          canvasElement.height,
+          0,
+          0,
+          3
+        );
+      }
 
       setIsStartedVideo(true);
     }
-  }, [mediaStream, isStartedVideo, isBlur]);
+  }, [mediaStream, isStartedVideo, zmClient, isBlur, activePlaybackUrl]);
   const onMicrophoneClick = useCallback(async () => {
     if (isStartedAudio) {
       if (isMuted) {
@@ -117,6 +138,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         } else {
           await mediaStream?.startAudio({ highBitrate: true });
         }
+        setActiveMicrophone(mediaStream?.getActiveMicrophone());
       } catch (e: any) {
         if (e.type === 'INSUFFICIENT_PRIVILEGES' && e.reason === 'USER_FORBIDDEN_MICROPHONE') {
           setIsMicrophoneForbidden(true);
@@ -125,7 +147,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
       // setIsStartedAudio(true);
     }
-  }, [mediaStream, isStartedAudio, isMuted]);
+  }, [mediaStream, isStartedAudio, isMuted, activePlaybackUrl]);
   const onMicrophoneMenuClick = async (key: string) => {
     if (mediaStream) {
       const [type, deviceId] = key.split('|');
@@ -142,6 +164,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       } else if (type === 'leave audio') {
         if (audio === 'computer') {
           await mediaStream.stopAudio();
+          setIsMicrophoneForbidden(false);
         } else if (audio === 'phone') {
           await mediaStream.hangup();
           setPhoneCallStatus(undefined);
@@ -154,6 +177,10 @@ const VideoFooter = (props: VideoFooterProps) => {
           await mediaStream.stopSecondaryAudio();
           setIsSecondaryAudioStarted(false);
         } else {
+          const selectedMic = secondaryMicForm.getFieldValue('mic');
+          if (!mediaStream.getMicList().some((item) => item.deviceId === selectedMic)) {
+            secondaryMicForm.setFieldValue('mic', undefined);
+          }
           Modal.confirm({
             title: 'Start secondary audio',
             content: (
@@ -163,7 +190,11 @@ const VideoFooter = (props: VideoFooterProps) => {
                     options={mediaStream.getMicList().map((item) => ({
                       value: item.deviceId,
                       label: item.label,
-                      disabled: item.deviceId === mediaStream.getActiveMicrophone()
+                      disabled:
+                        item.deviceId === mediaStream.getActiveMicrophone() ||
+                        item.label ===
+                          mediaStream.getMicList()?.find((item) => item.deviceId === mediaStream.getActiveMicrophone())
+                            ?.label
                     }))}
                   />
                 </Form.Item>
@@ -188,7 +219,7 @@ const VideoFooter = (props: VideoFooterProps) => {
               try {
                 const data = await secondaryMicForm.validateFields();
                 const { mic, constraints } = data;
-                const option = {};
+                const option = { autoGainControl: false, noiseSuppression: false, echoCancellation: false };
                 if (constraints) {
                   constraints.forEach((key: string) => {
                     Object.assign(option, { [`${key}`]: true });
@@ -210,7 +241,11 @@ const VideoFooter = (props: VideoFooterProps) => {
       if (activeCamera !== key) {
         await mediaStream.switchCamera(key);
         setActiveCamera(mediaStream.getActiveCamera());
-        setActivePlaybackUrl('');
+        if (activePlaybackUrl) {
+          await mediaStream.switchMicrophone('default');
+          setActiveMicrophone(mediaStream.getActiveMicrophone());
+          setActivePlaybackUrl('');
+        }
       }
     }
   };
@@ -249,21 +284,19 @@ const VideoFooter = (props: VideoFooterProps) => {
   const onHostAudioMuted = useCallback(
     (payload: any) => {
       const { action, source, type } = payload;
+      const currentUser = zmClient.getCurrentUserInfo();
+      setIsStartedAudio(currentUser.audio === 'computer' || currentUser.audio === 'phone');
+      setAudio(currentUser.audio);
       if (action === AudioChangeAction.Join) {
         setIsStartedAudio(true);
         setAudio(type);
-        setTimeout(() => {
-          setIsMuted(!!zmClient.getCurrentUserInfo()?.muted);
-        }, 1000);
       } else if (action === AudioChangeAction.Leave) {
         setIsStartedAudio(false);
       } else if (action === AudioChangeAction.Muted) {
-        setIsMuted(true);
         if (source === MutedSource.PassiveByMuteOne) {
           message.info('Host muted you');
         }
       } else if (action === AudioChangeAction.Unmuted) {
-        setIsMuted(false);
         if (source === 'passive') {
           message.info('Host unmuted you');
         }
@@ -390,10 +423,22 @@ const VideoFooter = (props: VideoFooterProps) => {
     },
     [mediaStream]
   );
-  const onHostAskToUnmute = useCallback((payload: any) => {
-    const { reason } = payload;
-    console.log(`Host ask to unmute the audio.`, reason);
-  }, []);
+  const onHostAskToUnmute = useCallback(
+    (payload: any) => {
+      const { reason } = payload;
+      Modal.confirm({
+        title: 'Unmute audio',
+        content: `Host ask to unmute audio, reason: ${reason}`,
+        onOk: async () => {
+          await mediaStream?.unmuteAudio();
+        },
+        onCancel() {
+          console.log('cancel');
+        }
+      });
+    },
+    [mediaStream]
+  );
 
   const onCaptionStatusChange = useCallback((payload: any) => {
     const { autoCaption } = payload;
@@ -520,7 +565,20 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   });
-
+  useEffect(() => {
+    if (mediaStream && zmClient.getSessionInfo().isInMeeting && statisticVisible) {
+      mediaStream.subscribeAudioStatisticData();
+      mediaStream.subscribeVideoStatisticData();
+      mediaStream.subscribeShareStatisticData();
+    }
+    return () => {
+      if (zmClient.getSessionInfo().isInMeeting) {
+        mediaStream?.unsubscribeAudioStatisticData();
+        mediaStream?.unsubscribeVideoStatisticData();
+        mediaStream?.unsubscribeShareStatisticData();
+      }
+    };
+  }, [mediaStream, zmClient, statisticVisible]);
   const recordingButtons: RecordButtonProps[] = getRecordingButtons(recordingStatus, zmClient.isHost());
   return (
     <div className={classNames('video-footer', className)}>

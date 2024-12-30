@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-boolean-value */
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import classnames from 'classnames';

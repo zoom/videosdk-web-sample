@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { Modal, Table, Tabs } from 'antd';
-import { AudioQosData, VideoQosData } from '@zoom/videosdk';
+import type { AudioQosData, VideoQosData } from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import MediaContext from '../../../context/media-context';
-import { useMount, useUnmount } from '../../../hooks';
+import { useMount } from '../../../hooks';
 interface AudioVideoStatisticModalProps {
   visible: boolean;
   defaultTab?: string;
@@ -30,7 +30,7 @@ const AudioMetrics = [
   {
     title: 'Bitrate',
     value: ['bitrate'],
-    format: (value: number) => `${(value / 1024).toFixed(1)} kps`
+    format: (value: number) => `${(value / 1024).toFixed(1)} kb/s`
   },
   {
     title: 'Latency',

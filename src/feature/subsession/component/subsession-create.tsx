@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { InputNumber, Radio, Button } from 'antd';
 import { SubsessionAllocationPattern } from '@zoom/videosdk';
 import './subsession-create.scss';
