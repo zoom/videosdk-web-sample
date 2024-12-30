@@ -15,8 +15,6 @@ function Draggable({ children, className, customstyle }: WrapperProps) {
   let xOffset = 0;
   let yOffset = 0;
   function touchStart(e: TouchEvent) {
-    // e.preventDefault();
-    // 获取触摸开始时的位置
     initialX = e.touches[0].clientX - xOffset;
     initialY = e.touches[0].clientY - yOffset;
     active = true;
@@ -28,13 +26,10 @@ function Draggable({ children, className, customstyle }: WrapperProps) {
   }
   function touchMove(e: TouchEvent) {
     if (active) {
-      //   e.preventDefault();
-      // 获取触摸移动时的位置
       currentX = e.touches[0].clientX - initialX;
       currentY = e.touches[0].clientY - initialY;
       xOffset = currentX;
       yOffset = currentY;
-      // 设置元素新位置
       if (selfViewRef.current) {
         selfViewRef.current.style.transform = 'translate3d(' + currentX + 'px, ' + currentY + 'px, 0)';
       }
@@ -57,13 +52,10 @@ function Draggable({ children, className, customstyle }: WrapperProps) {
 
   function drag(e: MouseEvent) {
     if (active) {
-      // e.preventDefault();
-      // 计算元素新位置
       currentX = e.clientX - initialX;
       currentY = e.clientY - initialY;
       xOffset = currentX;
       yOffset = currentY;
-      // 设置元素新位置
       if (selfViewRef.current) {
         selfViewRef.current.style.transform = 'translate3d(' + currentX + 'px, ' + currentY + 'px, 0)';
       }
@@ -72,22 +64,16 @@ function Draggable({ children, className, customstyle }: WrapperProps) {
   useEffect(() => {
     let tempRef = selfViewRef.current;
     if (isAndroidOrIOSBrowser()) {
-      // 触摸开始时触发的事件
       if (tempRef) {
         tempRef.addEventListener('touchstart', touchStart, false);
       }
-      // 触摸移动时触发的事件
       window.addEventListener('touchmove', touchMove, false);
-      // 触摸结束时触发的事件
       window.addEventListener('touchend', touchEnd, false);
     } else {
       if (tempRef) {
-        // 鼠标按下时触发的事件
         tempRef.addEventListener('mousedown', dragStart, false);
       }
-      // 鼠标释放时触发的事件
       window.addEventListener('mouseup', dragEnd, false);
-      // 鼠标移动时触发的事件
       window.addEventListener('mousemove', drag, false);
     }
 
@@ -96,9 +82,7 @@ function Draggable({ children, className, customstyle }: WrapperProps) {
         if (tempRef) {
           tempRef.removeEventListener('touchstart', touchStart);
         }
-        // 触摸移动时触发的事件
         window.removeEventListener('touchmove', touchMove);
-        // 触摸结束时触发的事件
         window.removeEventListener('touchend', touchEnd);
       } else {
         if (tempRef) {
