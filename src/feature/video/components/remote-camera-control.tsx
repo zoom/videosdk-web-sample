@@ -17,7 +17,6 @@ import './remote-camera-control.scss';
 import { IconFont } from '../../../component/icon-font';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import classNames from 'classnames';
-import { PTZCameraCapability } from '@zoom/videosdk';
 import { useCameraControl } from '../hooks/useCameraControl';
 import AvatarContext from '../context/avatar-context';
 

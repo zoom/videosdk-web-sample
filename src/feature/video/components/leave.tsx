@@ -1,11 +1,9 @@
-import React from 'react';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown } from 'antd';
 import classNames from 'classnames';
 import { UpOutlined } from '@ant-design/icons';
 import { IconFont } from '../../../component/icon-font';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 const { Button: DropdownButton } = Dropdown;
-const { Item: MenuItem } = Menu;
 interface LeaveButtonProps {
   onLeaveClick: () => void;
   onEndClick: () => void;

@@ -1,4 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState, useRef, useLayoutEffect } from 'react';
+import type React from 'react';
+// eslint-disable-next-line no-duplicate-imports
+import { useCallback, useContext, useState, useRef, useLayoutEffect } from 'react';
 import { Input } from 'antd';
 import { ChatPrivilege } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';

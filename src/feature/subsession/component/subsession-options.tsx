@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Checkbox, InputNumber, Menu } from 'antd';
 import './subsession-options.scss';
 const { Item: MenuItem } = Menu;

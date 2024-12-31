@@ -16,23 +16,30 @@
   background: rgba(0, 0, 0, 1);
   border-radius: 14px;
   overflow: hidden;
-  &>video, &>canvas {
+  & > video,
+  .video-player-container {
     position: absolute;
-    top:0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     display: none;
   }
-  & > .preview-video-show{
+  & .video-player {
+    height: 100%;
+  }
+  .preview-video-show {
+    z-index: 1;
     display: block;
+    width: 100%;
+    height: 100%;
   }
 }
 
-.video-operations-preview > div{
+.video-operations-preview > div {
   display: flex;
   padding: 15px 20px;
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0, 0, 0, 0.7);
   border-radius: 14px;
 }
 .join-button {
@@ -91,7 +98,7 @@
   width: 800px;
   margin: 0 auto;
   text-align: left;
-  h3{
+  h3 {
     margin-top: 30px;
   }
   .speaker-action {

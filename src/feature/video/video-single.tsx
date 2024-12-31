@@ -196,7 +196,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
                 networkQuality={networkQuality[`${activeUser.userId}`]}
               />
             )}
-            <RemoteCameraControlPanel />
+          {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
           </AvatarActionContext.Provider>
         </div>
       </div>

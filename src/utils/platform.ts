@@ -27,8 +27,8 @@ export function getExploreName() {
 export function isSupportWebCodecs() {
   return typeof (window as any).MediaStreamTrackProcessor === 'function';
 }
-const isIPad = () => {
-  return /MacIntel/i.test(navigator.platform) && navigator?.maxTouchPoints > 2;
+export const isIPad = () => {
+  return /iPad/i.test(navigator.userAgent) || (/MacIntel/i.test(navigator.platform) && navigator?.maxTouchPoints > 2);
 };
 export const isIOSMobile = () => {
   const { userAgent } = navigator;

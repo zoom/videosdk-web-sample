@@ -10,7 +10,6 @@ import { ShareStatus } from '@zoom/videosdk';
 import { SHARE_CANVAS_ID } from '../video-constants';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import './share-bar.scss';
-import { Participant } from '../../../index-types';
 
 const { Button: DropdownButton } = Dropdown;
 interface ShareBarProps {
@@ -34,11 +33,11 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
     if (shareAudioStatus?.isShareAudioEnabled) {
       if (shareAudioStatus.isShareAudioMuted) {
         mediaStream?.unmuteShareAudio().then(() => {
-          setShareAudioStatus(mediaStream.getShareAudioStatus());
+          setShareAudioStatus(mediaStream?.getShareAudioStatus());
         });
       } else {
         mediaStream?.muteShareAudio().then(() => {
-          setShareAudioStatus(mediaStream.getShareAudioStatus());
+          setShareAudioStatus(mediaStream?.getShareAudioStatus());
         });
       }
     }
@@ -87,6 +86,7 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   );
   return (
     <div className={classNames({ 'share-bar-hide': status === ShareStatus.End })}>
+      (
       <Draggable handle=".share-bar-move" nodeRef={draggableRef}>
         <div className="screen-share-control-bar" ref={draggableRef}>
           <Button className="share-bar-move" ghost icon={<IconFont type="icon-move" />} />
@@ -145,6 +145,7 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
           )}
         </div>
       </Draggable>
+      )
     </div>
   );
 });

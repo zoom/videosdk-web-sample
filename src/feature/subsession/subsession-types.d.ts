@@ -1,4 +1,4 @@
-import { SubsessionUserStatus, Participant } from '@zoom/videosdk';
+import type { SubsessionUserStatus } from '@zoom/videosdk';
 interface SubsessionParticipant {
   isInSubsession?: boolean;
   userId: number;

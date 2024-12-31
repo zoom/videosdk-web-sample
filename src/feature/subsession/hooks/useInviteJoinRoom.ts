@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 interface SubsessionInvite {
   subsessionId: string;
   subsessionName: string;

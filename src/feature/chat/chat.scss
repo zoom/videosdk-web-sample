@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   .chat-wrap {
-    width: 60vw;
+    width: max(340px,60vw);
     max-width: 800px;
     height: 80vh;
     background: #fff;
