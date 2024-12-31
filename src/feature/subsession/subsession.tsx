@@ -129,7 +129,6 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
     currentSubsession.userStatus === SubsessionUserStatus.Invited;
 
   const isUseVideoPlayer = new URLSearchParams(props.location.search).get('useVideoPlayer') === '1';
-
   return (
     <div className="breakout-room-viewport">
       {mediaStream?.isSupportMultipleVideos() ? (

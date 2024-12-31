@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useContext, useEffect } from 'react';
+import { useState, useCallback, useContext } from 'react';
 import { Collapse, Button, Popover } from 'antd';
 import { SubsessionUserStatus, SubsessionStatus } from '@zoom/videosdk';
-import { Participant } from '../../../index-types';
-import { CurrentSubsession, Subsession } from '../subsession-types';
+import type { Participant } from '../../../index-types';
+import type { CurrentSubsession, Subsession } from '../subsession-types';
 import SubsessionItem from './subsession-item';
 import SubsessionOptions from './subsession-options';
 import BroadcastMessagePanel from './broadcast-panel';

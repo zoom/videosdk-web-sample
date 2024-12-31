@@ -1,6 +1,6 @@
 import { SubsessionStatus } from '@zoom/videosdk';
 import { useState, useEffect, useCallback } from 'react';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 
 export function useSubsessionClosingCountdown(zmClient: ZoomClient, subsessionStatus: SubsessionStatus) {
   const [closingCountdown, setClosingCountdown] = useState(-1);

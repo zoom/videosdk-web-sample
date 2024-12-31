@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { Modal } from 'antd';
-import { SubsessionClient, ZoomClient } from '../../../index-types';
+import type { SubsessionClient, ZoomClient } from '../../../index-types';
 const { confirm } = Modal;
 export function useSubsessionTimeUp(
   zmClient: ZoomClient,

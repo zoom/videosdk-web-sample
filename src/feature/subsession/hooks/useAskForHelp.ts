@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { Modal, message } from 'antd';
-import { SubsessionClient, ZoomClient } from '../../../index-types';
+import type { SubsessionClient, ZoomClient } from '../../../index-types';
 import { AskHostHelpResponse } from '@zoom/videosdk';
 const { confirm } = Modal;
 export function useAskForHelp(zmClient: ZoomClient, ssClient: SubsessionClient | null) {

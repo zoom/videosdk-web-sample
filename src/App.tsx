@@ -1,6 +1,21 @@
-import { useEffect, useContext, useState, useCallback, useReducer, useMemo } from 'react';
+import {
+  type HTMLAttributes,
+  type DetailedHTMLProps,
+  type DOMAttributes,
+  useEffect,
+  useContext,
+  useState,
+  useCallback,
+  useReducer,
+  useMemo
+} from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import ZoomVideo, { ConnectionState, ReconnectReason } from '@zoom/videosdk';
+import ZoomVideo, {
+  type VideoPlayerContainer,
+  type VideoPlayer,
+  ConnectionState,
+  ReconnectReason
+} from '@zoom/videosdk';
 import { message, Modal } from 'antd';
 import 'antd/dist/antd.min.css';
 import produce from 'immer';
@@ -15,8 +30,9 @@ import LoadingLayer from './component/loading-layer';
 import Chat from './feature/chat/chat';
 import Command from './feature/command/command';
 import Subsession from './feature/subsession/subsession';
-import { MediaStream } from './index-types';
+import type { MediaStream } from './index-types';
 import './App.css';
+type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: any }>;
 
 interface AppProps {
   meetingArgs: {
@@ -90,6 +106,12 @@ declare global {
     crossOriginIsolated: boolean;
     ltClient: any | undefined;
     logClient: any | undefined;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      ['video-player']: DetailedHTMLProps<HTMLAttributes<VideoPlayer>, VideoPlayer> & { class?: string };
+      ['video-player-container']: CustomElement<VideoPlayerContainer> & { class?: string };
+    }
   }
 }
 
@@ -167,7 +189,9 @@ function App(props: AppProps) {
     };
     init();
     return () => {
-      ZoomVideo.destroyClient();
+      if (zmClient.getSessionInfo()?.isInMeeting) {
+        ZoomVideo.destroyClient();
+      }
     };
   }, [
     sdkKey,
@@ -205,9 +229,15 @@ function App(props: AppProps) {
         window.mediaStream = zmClient.getMediaStream();
 
         console.log('getSessionInfo', zmClient.getSessionInfo());
-      } else if (payload.state === ConnectionState.Closed) {
+      } else if (payload.state === ConnectionState.Closed || payload.state === ConnectionState.Fail) {
         setStatus('closed');
         dispatch({ type: 'reset-media' });
+        if (payload.state === ConnectionState.Fail) {
+          Modal.error({
+            title: 'Join meeting failed',
+            content: `Join meeting failed. reason:${payload.reason ?? ''}`
+          });
+        }
         if (payload.reason === 'ended by host') {
           Modal.warning({
             title: 'Meeting ended',

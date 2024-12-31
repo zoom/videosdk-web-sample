@@ -1,5 +1,4 @@
-import React from 'react';
-import { Button, Tooltip, Dropdown } from 'antd';
+import { Button, Dropdown } from 'antd';
 import classNames from 'classnames';
 import { IconFont } from '../../../component/icon-font';
 import { UpOutlined } from '@ant-design/icons';

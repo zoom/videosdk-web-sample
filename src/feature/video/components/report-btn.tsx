@@ -1,6 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, message, Modal, List, Typography } from 'antd';
-import { useState, useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import ZoomVideo from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import './report-btn.scss';
@@ -66,8 +66,6 @@ const ReportBtn = () => {
       width: 520
     });
   };
-  // @ts-ignore
-  let meetingArgs: any = Object.fromEntries(new URLSearchParams(location.search));
   return (
     <>
       {msgContextHolder}

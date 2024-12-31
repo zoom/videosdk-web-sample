@@ -1,12 +1,15 @@
-import React, { useCallback, useState, useRef } from 'react';
-import ZoomVideo, { TestMicrophoneReturn, TestSpeakerReturn } from '@zoom/videosdk';
+import { useCallback, useState, useRef, useContext } from 'react';
+import type { TestMicrophoneReturn, TestSpeakerReturn, VideoPlayer } from '@zoom/videosdk';
+// eslint-disable-next-line no-duplicate-imports
+import ZoomVideo from '@zoom/videosdk';
 import { useMount, useUnmount } from '../../hooks';
 import './preview.scss';
 import MicrophoneButton from '../video/components/microphone';
 import CameraButton from '../video/components/camera';
-import { message, Button, Progress, Select } from 'antd';
-import { MediaDevice } from '../video/video-types';
+import { Button, Progress, Select } from 'antd';
+import type { MediaDevice } from '../video/video-types';
 import classNames from 'classnames';
+import ZoomContext from '../../context/zoom-context';
 
 // label: string;
 // deviceId: string;
@@ -16,6 +19,10 @@ let micFeedBackInteval: any = '';
 let localAudio = ZoomVideo.createLocalAudioTrack();
 let localVideo = ZoomVideo.createLocalVideoTrack();
 let allDevices;
+
+interface AppProps {
+  useVideoPlayer?: string;
+}
 
 const mountDevices: () => Promise<{
   mics: MediaDevice[];
@@ -78,7 +85,8 @@ const updateMicFeedbackStyle = () => {
 
 const { Option } = Select;
 
-const PreviewContainer = () => {
+const PreviewContainer = (props: AppProps) => {
+  const isUseVideoPlayer = props.useVideoPlayer === '1';
   const [isStartedAudio, setIsStartedAudio] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isStartedVideo, setIsStartedVideo] = useState<boolean>(false);
@@ -99,6 +107,11 @@ const PreviewContainer = () => {
   const microphoneTesterRef = useRef<TestMicrophoneReturn>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const videoPlayerRef = useRef<VideoPlayer | null>(null);
+  const zmClient = useContext(ZoomContext);
+  // useEffect(() => {
+  //   zmClient.leave();
+  // }, []);
 
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
@@ -150,7 +163,28 @@ const PreviewContainer = () => {
     if (localVideo) {
       if (activeCamera !== key) {
         await localVideo.switchCamera(key);
+        setActiveCamera(key);
       }
+    }
+  };
+  const onSwitchMicrophone = (key: string) => {
+    setActiveMicrophone(key);
+    if (speakerTesterRef.current) {
+      speakerTesterRef.current.destroy();
+      speakerTesterRef.current = undefined;
+    }
+    if (isRecordingVoice || isPlayingRecording) {
+      microphoneTesterRef.current?.stop();
+      setIsRecordingVoice(false);
+      setIsPlayingRecording(false);
+    }
+  };
+  const onSwitchSpeaker = (key: string) => {
+    setActiveSpeaker(key);
+    if (isPlayingAudio) {
+      speakerTesterRef.current?.stop();
+      setIsPlayingAudio(false);
+      setOutputLevel(0);
     }
   };
   const onBlurBackground = useCallback(async () => {
@@ -164,9 +198,16 @@ const PreviewContainer = () => {
     } else {
       if (!isBlur) {
         localVideo.stop();
-        if (canvasRef.current) {
-          localVideo.start(canvasRef.current, { imageUrl: 'blur' });
+        if (isUseVideoPlayer) {
+          if (videoPlayerRef.current) {
+            localVideo.start(videoPlayerRef.current, { imageUrl: 'blur' });
+          }
+        } else {
+          if (canvasRef.current) {
+            localVideo.start(canvasRef.current, { imageUrl: 'blur' });
+          }
         }
+
         setIsInVBMode(true);
         setIsBlur(!isBlur);
       }
@@ -189,6 +230,8 @@ const PreviewContainer = () => {
     if (microphoneTesterRef.current) {
       microphoneTesterRef.current.destroy();
       microphoneTesterRef.current = undefined;
+      setIsRecordingVoice(false);
+      setIsPlayingRecording(false);
     }
     if (isPlayingAudio) {
       speakerTesterRef.current?.stop();
@@ -208,6 +251,7 @@ const PreviewContainer = () => {
     if (speakerTesterRef.current) {
       speakerTesterRef.current.destroy();
       speakerTesterRef.current = undefined;
+      setIsPlayingAudio(false);
     }
     if (!isPlayingRecording && !isRecordingVoice) {
       microphoneTesterRef.current = localAudio.testMicrophone({
@@ -265,12 +309,22 @@ const PreviewContainer = () => {
               playsInline
               ref={videoRef}
             />
-            <canvas
-              className={classNames({ 'preview-video-show': isInVBMode })}
-              width="1280"
-              height="720"
-              ref={canvasRef}
-            />
+            {isUseVideoPlayer ? (
+              <video-player-container class="video-player-container">
+                <video-player
+                  ref={videoPlayerRef}
+                  class="video-player"
+                  className={classNames({ 'preview-video-show': isInVBMode })}
+                />
+              </video-player-container>
+            ) : (
+              <canvas
+                className={classNames({ 'preview-video-show': isInVBMode })}
+                width="1280"
+                height="720"
+                ref={canvasRef}
+              />
+            )}
           </div>
           <div className="video-footer video-operations video-operations-preview">
             <div>
@@ -279,8 +333,8 @@ const PreviewContainer = () => {
                 isMuted={isMuted}
                 onMicrophoneClick={onMicrophoneClick}
                 onMicrophoneMenuClick={onMicrophoneMenuClick}
-                microphoneList={micList}
-                speakerList={speakerList}
+                // microphoneList={micList}
+                // speakerList={speakerList}
                 activeMicrophone={activeMicrophone}
                 activeSpeaker={activeSpeaker}
               />
@@ -306,7 +360,7 @@ const PreviewContainer = () => {
               </Button>
               <Select
                 onChange={(value) => {
-                  setActiveSpeaker(value);
+                  onSwitchSpeaker(value);
                 }}
                 value={activeSpeaker}
                 className="speaker-list"
@@ -333,7 +387,7 @@ const PreviewContainer = () => {
               </Button>
               <Select
                 onChange={(value) => {
-                  setActiveMicrophone(value);
+                  onSwitchMicrophone(value);
                 }}
                 value={activeMicrophone}
                 className="speaker-list"

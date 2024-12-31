@@ -6,7 +6,7 @@ import ZoomContext from '../../../context/zoom-context';
 interface BroadcastPanelProps {
   afterBroadcast?: () => void;
 }
-const BroadcastVoicePanel = (props: BroadcastPanelProps) => {
+const BroadcastVoicePanel = (_props: BroadcastPanelProps) => {
   const [isStarted, setIsStarted] = useState(false);
   const buttonRef = useRef<HTMLElement | null>(null);
   const isHover = useHover(buttonRef);
