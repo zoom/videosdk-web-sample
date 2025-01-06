@@ -212,7 +212,7 @@ const PreviewContainer = (props: AppProps) => {
         setIsBlur(!isBlur);
       }
     }
-  }, [isInVBMode, isBlur]);
+  }, [isInVBMode, isBlur, isUseVideoPlayer]);
   useMount(() => {
     mountDevices().then((devices) => {
       setMicList(devices.mics);
@@ -254,6 +254,10 @@ const PreviewContainer = (props: AppProps) => {
       setIsPlayingAudio(false);
     }
     if (!isPlayingRecording && !isRecordingVoice) {
+      if (microphoneTesterRef.current && microphoneTesterRef.current?.stop) {
+        microphoneTesterRef.current.stop();
+        microphoneTesterRef.current.destroy();
+      }
       microphoneTesterRef.current = localAudio.testMicrophone({
         microphoneId: activeMicrophone,
         speakerId: activeSpeaker,
