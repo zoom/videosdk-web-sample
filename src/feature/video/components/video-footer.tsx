@@ -12,15 +12,15 @@ import { useUnmount, useMount } from '../../../hooks';
 import type { MediaDevice } from '../video-types';
 import './video-footer.scss';
 import { isAndroidOrIOSBrowser } from '../../../utils/platform';
-import { getPhoneCallStatusDescription, SELF_VIDEO_ID } from '../video-constants';
+import { getPhoneCallStatusDescription } from '../video-constants';
 import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './recording';
 import {
   type DialOutOption,
+  type Processor,
   DialoutState,
   RecordingStatus,
   MutedSource,
   AudioChangeAction,
-  VideoCapturingState,
   SharePrivilege,
   MobileVideoFacingMode,
   LiveStreamStatus,
@@ -73,7 +73,9 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
   const [caption, setCaption] = useState({ text: '', isOver: false });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
+  const [activeProcessor, setActiveProcessor] = useState<Processor | undefined>();
   const [isMicrophoneForbidden, setIsMicrophoneForbidden] = useState(false);
+  const [createdProcessorList, setCreatedProcessorList] = useState<Processor[]>([]);
   const [recordingStatus, setRecordingStatus] = useState<'' | RecordingStatus>(
     recordingClient?.getCloudRecordingStatus() || ''
   );
@@ -86,12 +88,13 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isSecondaryAudioStarted, setIsSecondaryAudioStarted] = useState(false);
   const [secondaryMicForm] = Form.useForm();
   useParticipantsChange(zmClient, () => {
-    setIsMuted(!!zmClient.getCurrentUserInfo()?.muted);
+    const currentUser = zmClient.getCurrentUserInfo();
+    setIsMuted(!!currentUser?.muted);
+    setIsStartedVideo(!!currentUser?.bVideoOn);
   });
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
       await mediaStream?.stopVideo();
-      setIsStartedVideo(false);
       if (activePlaybackUrl) {
         await mediaStream?.switchMicrophone('default');
         setActiveMicrophone(mediaStream?.getActiveMicrophone());
@@ -108,9 +111,8 @@ const VideoFooter = (props: VideoFooterProps) => {
         Object.assign(startVideoOptions, { virtualBackground: { imageUrl: 'blur' } });
       }
       await mediaStream?.startVideo(startVideoOptions);
-      setIsStartedVideo(true);
     }
-  }, [mediaStream, isStartedVideo, zmClient, isBlur, activePlaybackUrl]);
+  }, [mediaStream, isStartedVideo, isBlur, activePlaybackUrl]);
   const onMicrophoneClick = useCallback(async () => {
     if (isStartedAudio) {
       if (isMuted) {
@@ -390,13 +392,6 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   };
-  const onVideoCaptureChange = useCallback((payload: any) => {
-    if (payload.state === VideoCapturingState.Started) {
-      setIsStartedVideo(true);
-    } else {
-      setIsStartedVideo(false);
-    }
-  }, []);
   const onShareAudioChange = useCallback(
     (payload: any) => {
       const { state } = payload;
@@ -480,6 +475,56 @@ const VideoFooter = (props: VideoFooterProps) => {
       message.error('Start live streaming timeout');
     }
   }, []);
+  const updateWatermarkImage = useCallback((processor: Processor, imageUrl: string) => {
+    const img = document.createElement('img');
+    img.width = 640;
+    img.height = 360;
+    img.crossOrigin = 'anonymous';
+    img.src = imageUrl;
+    img.onload = () => {
+      createImageBitmap(img).then((ibm) => {
+        processor?.port?.postMessage({
+          cmd: 'update_watermark_image',
+          data: ibm
+        });
+      });
+    };
+  }, []);
+  const onProcessorClick = useCallback(async (processor: any) => {
+    let tempProcessor = createdProcessorList?.find((p) => p.name === processor.name);
+    if (!tempProcessor) {
+      try {
+        tempProcessor = await mediaStream?.createProcessor(processor);
+
+        setCreatedProcessorList([...createdProcessorList, tempProcessor as Processor]);
+      } catch (e) {
+        console.log(e);
+      }
+      if (activeProcessor) {
+        if (processor.name === activeProcessor?.name) {
+          mediaStream?.removeProcessor(activeProcessor);
+          setActiveProcessor(undefined);
+        } else {
+          mediaStream?.removeProcessor(activeProcessor);
+          mediaStream?.addProcessor(tempProcessor as Processor);
+          if (tempProcessor?.name === 'watermark-processor') {
+            updateWatermarkImage(tempProcessor, `${location.origin}/zoom.svg`);
+          }
+          setActiveProcessor(tempProcessor as Processor);
+        }
+      } else {
+        try {
+          await mediaStream?.addProcessor(tempProcessor as Processor);
+          setActiveProcessor(tempProcessor as Processor);
+          if (tempProcessor?.name === 'watermark-processor') {
+            updateWatermarkImage(tempProcessor, `${location.origin}/zoom.svg`);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
     zmClient.on('passively-stop-share', onPassivelyStopShare);
@@ -487,7 +532,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('recording-change', onRecordingChange);
     zmClient.on('individual-recording-change', onRecordingISOChange);
     zmClient.on('dialout-state-change', onDialOutChange);
-    zmClient.on('video-capturing-change', onVideoCaptureChange);
     zmClient.on('share-audio-change', onShareAudioChange);
     zmClient.on('host-ask-unmute-audio', onHostAskToUnmute);
     zmClient.on('caption-status', onCaptionStatusChange);
@@ -502,7 +546,6 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('recording-change', onRecordingChange);
       zmClient.off('individual-recording-change', onRecordingISOChange);
       zmClient.off('dialout-state-change', onDialOutChange);
-      zmClient.off('video-capturing-change', onVideoCaptureChange);
       zmClient.off('share-audio-change', onShareAudioChange);
       zmClient.off('host-ask-unmute-audio', onHostAskToUnmute);
       zmClient.off('caption-status', onCaptionStatusChange);
@@ -518,7 +561,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     onDeviceChange,
     onRecordingChange,
     onDialOutChange,
-    onVideoCaptureChange,
     onShareAudioChange,
     onHostAskToUnmute,
     onCaptionStatusChange,
@@ -595,6 +637,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         onCameraClick={onCameraClick}
         onSwitchCamera={onSwitchCamera}
         onMirrorVideo={onMirrorVideo}
+        onSelectVideoProcessor={onProcessorClick}
         onVideoStatistic={() => {
           setSelectedStatisticTab('video');
           setStatisticVisible(true);
@@ -602,6 +645,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         onBlurBackground={onBlurBackground}
         onSelectVideoPlayback={onSelectVideoPlayback}
         activePlaybackUrl={activePlaybackUrl}
+        activeProcessor={activeProcessor?.name}
         cameraList={cameraList}
         activeCamera={activeCamera}
         isMirrored={isMirrored}
