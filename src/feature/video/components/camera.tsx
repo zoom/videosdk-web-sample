@@ -16,10 +16,12 @@ interface CameraButtonProps {
   onVideoStatistic?: () => void;
   onBlurBackground?: () => void;
   onSelectVideoPlayback?: (url: string) => void;
+  onSelectVideoProcessor?: (processor: any) => void;
   className?: string;
   cameraList?: MediaDevice[];
   activeCamera?: string;
   activePlaybackUrl?: string;
+  activeProcessor?: string;
 }
 const videoPlaybacks = [
   { title: 'ZOOM ZWA', url: 'https://source.zoom.us/brand/mp4/Using%20the%20Zoom%20PWA.mp4' },
@@ -27,6 +29,14 @@ const videoPlaybacks = [
   {
     title: 'ZOOM One',
     url: 'https://source.zoom.us/brand/mp4/Zoom%20One%20-%20Team%20Chat%2C%20Phone%2C%20Email%2C%20and%20more.mp4'
+  }
+];
+const videoProcessor = [
+  {
+    url: `${location.origin}/static/processors/watermark-processor.js`,
+    type: 'video',
+    name: 'watermark-processor',
+    options: {}
   }
 ];
 const CameraButton = (props: CameraButtonProps) => {
@@ -44,10 +54,13 @@ const CameraButton = (props: CameraButtonProps) => {
     onMirrorVideo,
     onVideoStatistic,
     onBlurBackground,
-    onSelectVideoPlayback
+    onSelectVideoPlayback,
+    onSelectVideoProcessor,
+    activeProcessor
   } = props;
   const { mediaStream } = useContext(ZoomMediaContext);
   const onMenuItemClick = (payload: { key: any }) => {
+    const processor = videoProcessor.find((item) => item.name === payload.key);
     if (payload.key === 'mirror') {
       onMirrorVideo?.();
     } else if (payload.key === 'statistic') {
@@ -56,6 +69,8 @@ const CameraButton = (props: CameraButtonProps) => {
       onBlurBackground?.();
     } else if (/^https:\/\//.test(payload.key)) {
       onSelectVideoPlayback?.(payload.key);
+    } else if (processor) {
+      onSelectVideoProcessor?.(processor);
     } else {
       onSwitchCamera(payload.key);
     }
@@ -80,6 +95,18 @@ const CameraButton = (props: CameraButtonProps) => {
           undefined,
           videoPlaybacks.map((item) =>
             getAntdItem(item.title, item.url, item.url === activePlaybackUrl && <CheckOutlined />)
+          ),
+          'group'
+        ),
+
+      !isPreview &&
+        mediaStream?.isSupportVideoProcessor() &&
+        getAntdItem(
+          'Select a Video Processor',
+          'processor',
+          undefined,
+          videoProcessor.map((item) =>
+            getAntdItem(item.name, item.name, item.name === activeProcessor && <CheckOutlined />)
           ),
           'group'
         ),

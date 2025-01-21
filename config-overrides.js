@@ -1,6 +1,10 @@
 const { override, addWebpackPlugin, overrideDevServer } = require('customize-cra');
 const path = require('path');
+const fs = require('fs');
 const CopyPlugin = require('copy-webpack-plugin');
+const processorDir = path.resolve(__dirname, 'src/processor');
+const workerFiles = fs.readdirSync(processorDir).filter((file) => file.endsWith('processor.ts'));
+
 const addDevServerCOOPReponseHeader = (config) => {
   config.headers = {
     ...config.headers,
@@ -10,7 +14,7 @@ const addDevServerCOOPReponseHeader = (config) => {
   config.devMiddleware = {
     ...config.devMiddleware,
     writeToDisk: true,
-  }
+  };
   return config;
 };
 
@@ -25,7 +29,32 @@ module.exports = {
           }
         ]
       })
-    )
+    ),
+    (config) => {
+      const entries = {
+        main: path.resolve(__dirname, 'src/index.tsx')
+      };
+
+      workerFiles.forEach((file) => {
+        const workerName = path.basename(file, path.extname(file));
+        entries[workerName] = path.resolve(processorDir, file);
+      });
+
+      config.entry = entries;
+      config.output = {
+        ...config.output,
+        filename: (pathData) => {
+          if (pathData.chunk.name !== 'main') {
+            return 'static/processors/[name].js';
+          }
+          return 'static/js/[name].[contenthash:8].js';
+        },
+        chunkFilename: 'static/js/[name].[contenthash:8].chunk.js', 
+        path: path.resolve(__dirname, 'build'), 
+        publicPath: '/',
+      };
+      return config;
+    }
   ),
   devServer: overrideDevServer(addDevServerCOOPReponseHeader)
 };
