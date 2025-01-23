@@ -105,10 +105,6 @@ const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) =
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const videoPlayerRef = useRef<VideoPlayer | null>(null);
-  const zmClient = useContext(ZoomContext);
-  // useEffect(() => {
-  //   zmClient.leave();
-  // }, []);
 
   const onCameraClick = useCallback(async () => {
     if (isStartedVideo) {
@@ -117,12 +113,19 @@ const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) =
       setIsInVBMode(false);
       setIsBlur(false);
     } else {
-      if (videoRef.current) {
-        await localVideo?.start(videoRef.current);
-        setIsStartedVideo(true);
+      if (isUseVideoPlayer) {
+        if (videoPlayerRef.current) {
+          await localVideo?.start(videoPlayerRef.current);
+          setIsStartedVideo(true);
+        }
+      } else {
+        if (videoRef.current) {
+          await localVideo?.start(videoRef.current);
+          setIsStartedVideo(true);
+        }
       }
     }
-  }, [isStartedVideo]);
+  }, [isStartedVideo, isUseVideoPlayer]);
   const onMicrophoneClick = useCallback(async () => {
     if (isStartedAudio) {
       if (isMuted) {
@@ -185,7 +188,7 @@ const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) =
     }
   };
   const onBlurBackground = useCallback(async () => {
-    if (isInVBMode) {
+    if (isInVBMode || isUseVideoPlayer) {
       if (isBlur) {
         await localVideo.updateVirtualBackground(undefined);
       } else {
@@ -194,17 +197,10 @@ const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) =
       setIsBlur(!isBlur);
     } else {
       if (!isBlur) {
-        localVideo.stop();
-        if (isUseVideoPlayer) {
-          if (videoPlayerRef.current) {
-            localVideo.start(videoPlayerRef.current, { imageUrl: 'blur' });
-          }
-        } else {
-          if (canvasRef.current) {
-            localVideo.start(canvasRef.current, { imageUrl: 'blur' });
-          }
+        await localVideo.stop();
+        if (canvasRef.current) {
+          localVideo.start(canvasRef.current, { imageUrl: 'blur' });
         }
-
         setIsInVBMode(true);
         setIsBlur(!isBlur);
       }
