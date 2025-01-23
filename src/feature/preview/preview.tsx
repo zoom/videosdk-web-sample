@@ -10,6 +10,7 @@ import { Button, Progress, Select } from 'antd';
 import type { MediaDevice } from '../video/video-types';
 import classNames from 'classnames';
 import ZoomContext from '../../context/zoom-context';
+import type { RouteComponentProps } from 'react-router-dom';
 
 // label: string;
 // deviceId: string;
@@ -19,10 +20,6 @@ let micFeedBackInteval: any = '';
 let localAudio = ZoomVideo.createLocalAudioTrack();
 let localVideo = ZoomVideo.createLocalVideoTrack();
 let allDevices;
-
-interface AppProps {
-  useVideoPlayer?: string;
-}
 
 const mountDevices: () => Promise<{
   mics: MediaDevice[];
@@ -85,8 +82,8 @@ const updateMicFeedbackStyle = () => {
 
 const { Option } = Select;
 
-const PreviewContainer = (props: AppProps) => {
-  const isUseVideoPlayer = props.useVideoPlayer === '1';
+const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+  const isUseVideoPlayer = new URLSearchParams(props.location.search).get('useVideoPlayer') === '1';
   const [isStartedAudio, setIsStartedAudio] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isStartedVideo, setIsStartedVideo] = useState<boolean>(false);
