@@ -2,6 +2,7 @@ const { override, addWebpackPlugin, overrideDevServer } = require('customize-cra
 const path = require('path');
 const fs = require('fs');
 const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const processorDir = path.resolve(__dirname, 'src/processor');
 const workerFiles = fs.readdirSync(processorDir).filter((file) => file.endsWith('processor.ts'));
 
@@ -53,6 +54,13 @@ module.exports = {
         path: path.resolve(__dirname, 'build'), 
         publicPath: '/',
       };
+      const htmlWebpackPlugin = config.plugins.find(
+        (plugin) => plugin instanceof HtmlWebpackPlugin
+      );
+      // only contains main chunk
+      if (htmlWebpackPlugin) {
+        htmlWebpackPlugin.options.chunks = ['main'];
+      }
       return config;
     }
   ),
