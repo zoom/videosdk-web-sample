@@ -1,7 +1,13 @@
-import { useState, useCallback, useEffect, MutableRefObject } from 'react';
-import { useMount, usePrevious, useUnmount } from '../../../hooks';
-import { ZoomClient, MediaStream, Participant } from '../../../index-types';
-import { Modal } from 'antd';
+import { type MutableRefObject, useState, useCallback, useEffect } from 'react';
+import { usePrevious, useUnmount } from '../../../hooks';
+import type { ZoomClient, MediaStream, Participant } from '../../../index-types';
+import { Modal, message as toast } from 'antd';
+import { ActiveMediaFailedCode } from '@zoom/videosdk';
+interface ErrMessagePayload {
+  message: string;
+  code: number;
+  type: string;
+}
 export function useShare(
   zmClient: ZoomClient,
   mediaStream: MediaStream | null,
@@ -53,16 +59,22 @@ export function useShare(
   const onShareContentChange = useCallback((payload: any) => {
     setActiveSharingId(payload.userId);
   }, []);
-  const onActiveMediaFailed = useCallback(() => {
-    Modal.error({
-      title: 'Active media failed',
-      content:
-        'Something went wrong. An unexpected interruption in media capture or insufficient memory occurred. Try refreshing the page to recover.',
-      okText: 'Refresh',
-      onOk: () => {
-        window.location.reload();
-      }
-    });
+
+  const onActiveMediaFailed = useCallback((payload: ErrMessagePayload) => {
+    const { code, message } = payload;
+    const { MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted } = ActiveMediaFailedCode;
+    if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted].includes(code)) {
+      toast.warning(message, 2);
+    } else {
+      Modal.error({
+        title: `Active media failed - Code:${code}`,
+        content: message,
+        okText: 'Refresh',
+        onOk: () => {
+          window.location.reload();
+        }
+      });
+    }
   }, []);
   useEffect(() => {
     zmClient.on('active-share-change', onActiveShareChange);

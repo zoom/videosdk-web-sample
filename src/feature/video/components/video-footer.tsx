@@ -525,6 +525,14 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   }, []);
+  const onVideoScreenshotTaken = useCallback((payload: any) => {
+    const { displayName, userId } = payload;
+    message.info(`${displayName}(User:${userId}) just took a screenshot of your video`);
+  }, []);
+  const onShareViewScreenshotTaken = useCallback((payload: any) => {
+    const { displayName, userId } = payload;
+    message.info(`${displayName}(User:${userId}) just took a screenshot of your sharing`);
+  }, []);
   useEffect(() => {
     zmClient.on('current-audio-change', onHostAudioMuted);
     zmClient.on('passively-stop-share', onPassivelyStopShare);
@@ -539,6 +547,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('caption-host-disable', onCaptionDisable);
     zmClient.on('share-can-see-screen', onCanSeeMyScreen);
     zmClient.on('live-stream-status', onLiveStreamStatusChange);
+    zmClient.on('video-screenshot-taken', onVideoScreenshotTaken);
+    zmClient.on('share-content-screenshot-taken', onShareViewScreenshotTaken);
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
@@ -553,6 +563,8 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('caption-host-disable', onCaptionDisable);
       zmClient.off('share-can-see-screen', onCanSeeMyScreen);
       zmClient.off('live-stream-status', onLiveStreamStatusChange);
+      zmClient.off('video-screenshot-taken', onVideoScreenshotTaken);
+      zmClient.off('share-content-screenshot-taken', onShareViewScreenshotTaken);
     };
   }, [
     zmClient,
@@ -568,7 +580,9 @@ const VideoFooter = (props: VideoFooterProps) => {
     onCanSeeMyScreen,
     onRecordingISOChange,
     onCaptionDisable,
-    onLiveStreamStatusChange
+    onLiveStreamStatusChange,
+    onVideoScreenshotTaken,
+    onShareViewScreenshotTaken
   ]);
   useUnmount(() => {
     if (zmClient.getSessionInfo().isInMeeting) {
