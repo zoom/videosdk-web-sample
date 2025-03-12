@@ -7,6 +7,7 @@ import ZoomContext from '../../../context/zoom-context';
 import MediaContext from '../../../context/media-context';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import { useSpotlightVideo } from '../hooks/useSpotlightVideo';
+import { downloadFile } from '../../../utils/util';
 interface AvatarMoreProps {
   className?: string;
   userId: number;
@@ -44,6 +45,9 @@ const AvatarMore = (props: AvatarMoreProps) => {
         actionItem?.videoResolutionAdjust.toggled && <CheckOutlined />
       )
     );
+  }
+  if (zmClient.getUser(userId)?.bVideoOn) {
+    menu.push(getAntdItem('take screenshot', 'screenshot'));
   }
   if (isUseVideoPlayer) {
     const currentUserId = zmClient.getCurrentUserInfo()?.userId;
@@ -98,6 +102,12 @@ const AvatarMore = (props: AvatarMoreProps) => {
         mediaStream?.spotlightVideo(userId, false);
       } else if (key === 'replaceSpotlight') {
         mediaStream?.spotlightVideo(userId, true);
+      } else if (key === 'screenshot') {
+        mediaStream?.screenshotVideo(userId).then((blob) => {
+          if (blob) {
+            downloadFile(blob as Blob, `screenshot-${userId}-${new Date().getTime()}.png`);
+          }
+        });
       }
       setIsDropdownVisbile(false);
     },

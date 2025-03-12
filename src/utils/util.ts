@@ -177,3 +177,11 @@ export function parseJwt(token: string) {
 
   return JSON.parse(jsonPayload);
 }
+export function downloadFile(blob: Blob, name: string) {
+  const a = document.createElement('a');
+  const url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = name;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
