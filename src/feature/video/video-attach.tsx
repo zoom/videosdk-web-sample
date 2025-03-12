@@ -35,10 +35,10 @@ interface ExtendedParticipant extends Participant {
 type VideoAttachProps = RouteComponentProps;
 
 const VideoContainer: React.FunctionComponent<VideoAttachProps> = (props) => {
-  const preferPageCount = Number(new URLSearchParams(props.location.search).get('videoCount') || 4);
+  const { mediaStream } = useContext(ZoomMediaContext);
+  const preferPageCount = mediaStream?.getMaxRenderableVideos()??1;
   const zmClient = useContext(ZoomContext);
   const { page, pageSize, totalPage, setPage } = usePagination(zmClient, preferPageCount);
-  const { mediaStream } = useContext(ZoomMediaContext);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
 
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
@@ -54,6 +54,7 @@ const VideoContainer: React.FunctionComponent<VideoAttachProps> = (props) => {
   const previousSubscribers = usePrevious(subscribers);
   const aspectRatio = useVideoAspect(zmClient);
   const optionsOfVideoResolution = [
+    { label: '1080P', value: VideoQuality.Video_1080P },
     { label: '720P', value: VideoQuality.Video_720P },
     { label: '360P', value: VideoQuality.Video_360P },
     { label: '180P', value: VideoQuality.Video_180P },
@@ -73,7 +74,7 @@ const VideoContainer: React.FunctionComponent<VideoAttachProps> = (props) => {
       setCurrentUser(tempCurUserInfo);
     }
     updatedParticipants?.forEach((p) => {
-      if (p?.userId === currentUser?.userId) {
+      if (p?.userId === currentUser?.userId && Object.keys(p).length > 1) {
         setCurrentUser((c) => ({
           ...c,
           ...p
