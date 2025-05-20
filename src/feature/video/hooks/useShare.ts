@@ -62,8 +62,8 @@ export function useShare(
 
   const onActiveMediaFailed = useCallback((payload: ErrMessagePayload) => {
     const { code, message } = payload;
-    const { MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted } = ActiveMediaFailedCode;
-    if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted].includes(code)) {
+    const { MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted } = ActiveMediaFailedCode;
+    if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted].includes(code)) {
       toast.warning(message, 2);
     } else {
       Modal.error({

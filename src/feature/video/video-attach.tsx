@@ -1,9 +1,7 @@
 import { useState, useContext, useRef, useEffect, useCallback, useMemo } from 'react';
 // eslint-disable-next-line no-duplicate-imports
-import type React from 'react';
 import classnames from 'classnames';
 import _ from 'lodash';
-import type { RouteComponentProps } from 'react-router-dom';
 import { type VideoPlayer, VideoQuality } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
@@ -32,11 +30,9 @@ interface ExtendedParticipant extends Participant {
   spotlighted?: boolean;
 }
 
-type VideoAttachProps = RouteComponentProps;
-
-const VideoContainer: React.FunctionComponent<VideoAttachProps> = (props) => {
+const VideoContainer = () => {
   const { mediaStream } = useContext(ZoomMediaContext);
-  const preferPageCount = mediaStream?.getMaxRenderableVideos()??1;
+  const preferPageCount = mediaStream?.getMaxRenderableVideos() ?? 1;
   const zmClient = useContext(ZoomContext);
   const { page, pageSize, totalPage, setPage } = usePagination(zmClient, preferPageCount);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);

@@ -5,7 +5,7 @@
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:prettier/recommended",
-    // "alloy",
+    "alloy",
     "alloy/react",
     "alloy/typescript",
     "prettier"

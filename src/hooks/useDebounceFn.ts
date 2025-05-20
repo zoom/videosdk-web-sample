@@ -11,3 +11,13 @@ export function useDebounceFn(fn: Function, wait: number) {
     flush: debounced.flush
   };
 }
+export function useThrottleFn(fn: Function, wait: number) {
+  const fnRef = useRef(fn);
+  fnRef.current = fn;
+  const debounced = useMemo(() => _.throttle((...args) => fnRef.current(...args), wait), [wait]);
+  return {
+    run: debounced,
+    cancel: debounced.cancel,
+    flush: debounced.flush
+  };
+}
