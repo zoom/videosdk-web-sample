@@ -1,5 +1,4 @@
 import { useContext, useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
 import { VideoQuality } from '@zoom/videosdk';
 import classnames from 'classnames';
 import _ from 'lodash';
@@ -20,8 +19,8 @@ import { useAvatarAction } from './hooks/useAvatarAction';
 import { usePrevious } from '../../hooks';
 import './video.scss';
 import { isShallowEqual } from '../../utils/util';
-
-const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) => {
+import { useCleanUp } from './hooks/useCleanUp';
+const VideoContainer = () => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
@@ -152,6 +151,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
     }
   }, [selfCanvasDimension, mediaStream, zmClient, isCurrentUserStartedVideo]);
   const avatarActionState = useAvatarAction(zmClient, activeUser ? [activeUser] : []);
+  useCleanUp(videoRef.current, zmClient, mediaStream);
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
@@ -196,7 +196,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (_props) =>
                 networkQuality={networkQuality[`${activeUser.userId}`]}
               />
             )}
-          {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
+            {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
           </AvatarActionContext.Provider>
         </div>
       </div>

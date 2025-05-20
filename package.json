@@ -1,14 +1,14 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "2.1.10",
+  "version": "2.2.0",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "4.7.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
-    "@zoom/videosdk": "^2.1.10",
-    "antd": "4.24.3",
+    "@zoom/videosdk": "2.2.0",
+     "antd": "^4.24.3",
     "classnames": "^2.2.6",
     "crypto-js": "^4.0.0",
     "immer": "^9.0.6",
@@ -18,7 +18,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-draggable": "^4.4.3",
-    "react-router-dom": "^5.2.0",
+    "react-router": "^7.5.3",
     "react-scripts": "5.0.1",
     "uuid": "^9.0.1",
     "web-vitals": "1.1.1"
@@ -63,18 +63,26 @@
     "@typescript-eslint/parser": "^5.62.0",
     "copy-webpack-plugin": "6.2.1",
     "customize-cra": "1.0.0",
+    "eslint-config-alloy": "^5.1.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+     "nth-check": "^2.1.1",
     "prettier": "^3.3.3",
     "react-app-rewired": "2.2.1",
     "sass": "1.32.8",
     "sass-loader": "10.1.1",
     "typescript": "^5.5.4",
+    "worker-loader": "^3.0.8",
     "write-file-webpack-plugin": "4.5.1"
   },
   "overrides": {
     "react-scripts": {
       "typescript": "^5"
+       },
+    "nth-check": "$nth-check",
+    "postcss": "^8.4.38",
+    "eslint-config-alloy": {
+      "vue-eslint-parser": "^10"
     }
   }
 }

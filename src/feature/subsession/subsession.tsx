@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useContext, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Button, Dropdown, MenuProps } from 'antd';
+import { useState, useCallback, useContext, useEffect } from 'react';
+import { type MenuProps, Button, Dropdown } from 'antd';
 import { SubsessionUserStatus, SubsessionStatus } from '@zoom/videosdk';
+import { useSearchParams } from 'react-router';
 import ZoomContext from '../../context/zoom-context';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { IconFont } from '../../component/icon-font';
@@ -11,7 +11,7 @@ import VideoAttach from '../video/video-attach';
 import SubsessionCreate from './component/subsession-create';
 import SubsessionManage from './component/subsession-manage';
 import DraggableModal from './component/draggable-modal';
-import { Participant } from '../../index-types';
+import type { Participant } from '../../index-types';
 import { SubsessionStatusDescription } from './subsession-constant';
 import { useSubsessionCountdown } from './hooks/useSubsessionCountdown';
 import { useInviteJoinSubsession } from './hooks/useInviteJoinRoom';
@@ -23,7 +23,9 @@ import { usePrevious } from '../../hooks';
 import { useAskForHelp } from './hooks/useAskForHelp';
 import MediaContext from '../../context/media-context';
 import './subsession.scss';
-const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+const SubsessionContainer = () => {
+  const [searchParams] = useSearchParams();
+  const isUseVideoPlayer = searchParams.get('useVideoPlayer') === '1';
   const zmClient = useContext(ZoomContext);
   const subsessionClient = zmClient.getSubsessionClient();
   const { mediaStream } = useContext(MediaContext);
@@ -128,18 +130,9 @@ const SubsessionContainer: React.FunctionComponent<RouteComponentProps> = (props
     currentSubsession.subsessionId &&
     currentSubsession.userStatus === SubsessionUserStatus.Invited;
 
-  const isUseVideoPlayer = new URLSearchParams(props.location.search).get('useVideoPlayer') === '1';
   return (
     <div className="breakout-room-viewport">
-      {mediaStream?.isSupportMultipleVideos() ? (
-        isUseVideoPlayer ? (
-          <VideoAttach {...props} />
-        ) : (
-          <Video {...props} />
-        )
-      ) : (
-        <VideoSingle {...props} />
-      )}
+      {mediaStream?.isSupportMultipleVideos() ? isUseVideoPlayer ? <VideoAttach /> : <Video /> : <VideoSingle />}
       {userStatus === SubsessionUserStatus.InSubsession && (
         <h2 className="room-info">You are in {currentSubsession.subsessionName}.</h2>
       )}

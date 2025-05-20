@@ -1,19 +1,20 @@
 /* eslint-disable no-restricted-globals */
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type React from 'react';
+import { useNavigate } from 'react-router';
 import { Card, Button } from 'antd';
 import { IconFont } from '../../component/icon-font';
 import './home.scss';
 
 const { Meta } = Card;
-interface HomeProps extends RouteComponentProps {
+interface HomeProps {
   status: string;
   onLeaveOrJoinSession: () => void;
 }
 const Home: React.FunctionComponent<HomeProps> = (props) => {
-  const { history, status, onLeaveOrJoinSession } = props;
+  const { status, onLeaveOrJoinSession } = props;
+  const navigate = useNavigate();
   const onCardClick = (type: string) => {
-      history.push(`/${type}${location.search}`);
+    navigate(`/${type}${location.search}`);
   };
   const featureList = [
     {
@@ -61,19 +62,11 @@ const Home: React.FunctionComponent<HomeProps> = (props) => {
           <span>VideoSDK Demo</span>
         </a>
         <div className="navdoc">
-          <a
-            href="https://marketplace.zoom.us/docs/sdk/video/web/reference"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://marketplace.zoom.us/docs/sdk/video/web/reference" target="_blank" rel="noreferrer">
             <span>API Reference</span>
           </a>
 
-          <a
-            href="https://marketplace.zoom.us/docs/sdk/video/web/build/sample-app"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://marketplace.zoom.us/docs/sdk/video/web/build/sample-app" target="_blank" rel="noreferrer">
             <span>Doc</span>
           </a>
         </div>

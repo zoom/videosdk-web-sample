@@ -17,6 +17,7 @@ import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './
 import {
   type DialOutOption,
   type Processor,
+  type ProcessorParams,
   DialoutState,
   RecordingStatus,
   MutedSource,
@@ -73,7 +74,8 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
   const [caption, setCaption] = useState({ text: '', isOver: false });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
-  const [activeProcessor, setActiveProcessor] = useState<Processor | undefined>();
+  const [activeVideoProcessor, setActiveVideoProcessor] = useState<Processor | undefined>();
+  const [activeAudioProcessorList, setActiveAudioProcessorList] = useState<Processor[]>([]);
   const [isMicrophoneForbidden, setIsMicrophoneForbidden] = useState(false);
   const [createdProcessorList, setCreatedProcessorList] = useState<Processor[]>([]);
   const [recordingStatus, setRecordingStatus] = useState<'' | RecordingStatus>(
@@ -84,9 +86,30 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [liveStreamStatus, setLiveStreamStatus] = useState(liveStreamClient?.getLiveStreamStatus());
   // Video Mask
   const [videoMaskVisible, setVideoMaskVisible] = useState(false);
-
+  const [isSupportVideoProcessor, setIsSupportVideoProcessor] = useState(false);
+  const [isSupportAudioProcessor, setIsSupportAudioProcessor] = useState(false);
   const [isSecondaryAudioStarted, setIsSecondaryAudioStarted] = useState(false);
   const [secondaryMicForm] = Form.useForm();
+  const audioProcessorList: Array<ProcessorParams> = [
+    {
+      url: `${location.origin}/static/processors/bypass-audio-processor.js`,
+      type: 'audio',
+      name: 'bypass-audio-processor',
+      options: {}
+    },
+    {
+      url: `${location.origin}/static/processors/white-noise-audio-processor.js`,
+      type: 'audio',
+      name: 'white-noise-audio-processor',
+      options: {}
+    },
+    {
+      url: `${location.origin}/static/processors/pitch-shift-audio-processor.js`,
+      type: 'audio',
+      name: 'pitch-shift-audio-processor',
+      options: {}
+    }
+  ];
   useParticipantsChange(zmClient, () => {
     const currentUser = zmClient.getCurrentUserInfo();
     setIsMuted(!!currentUser?.muted);
@@ -221,6 +244,32 @@ const VideoFooter = (props: VideoFooterProps) => {
               }
             }
           });
+        }
+      } else if (type === 'processor') {
+        const [, processorName] = key.split('|');
+        const processor = audioProcessorList.find((item) => item.name === processorName);
+        if (processor && mediaStream) {
+          try {
+            let tempProcessor =
+              createdProcessorList?.find((p) => p.name === processorName) ||
+              (await mediaStream.createProcessor(processor));
+            setCreatedProcessorList([...createdProcessorList, tempProcessor]);
+
+            let index = activeAudioProcessorList.findIndex((p) => p.name === processorName);
+            if (index > -1) {
+              await mediaStream?.removeProcessor(tempProcessor);
+              setActiveAudioProcessorList(activeAudioProcessorList.filter((p) => p.name !== processorName));
+            } else {
+              await mediaStream?.addProcessor(tempProcessor);
+              setActiveAudioProcessorList([...activeAudioProcessorList, tempProcessor]);
+            }
+            tempProcessor.port.postMessage({ cmd: 'update', data: '6666' });
+            tempProcessor.port.onmessage = ({ data: { cmd: __cmd, data } }) => {
+              console.log('main thread received data:', data);
+            };
+          } catch (e) {
+            console.error(e);
+          }
         }
       }
     }
@@ -490,7 +539,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       });
     };
   }, []);
-  const onProcessorClick = useCallback(async (processor: any) => {
+  const onVideoProcessorClick = useCallback(async (processor: any) => {
     let tempProcessor = createdProcessorList?.find((p) => p.name === processor.name);
     if (!tempProcessor) {
       try {
@@ -500,22 +549,22 @@ const VideoFooter = (props: VideoFooterProps) => {
       } catch (e) {
         console.log(e);
       }
-      if (activeProcessor) {
-        if (processor.name === activeProcessor?.name) {
-          mediaStream?.removeProcessor(activeProcessor);
-          setActiveProcessor(undefined);
+      if (activeVideoProcessor) {
+        if (processor.name === activeVideoProcessor?.name) {
+          mediaStream?.removeProcessor(activeVideoProcessor);
+          setActiveVideoProcessor(undefined);
         } else {
-          mediaStream?.removeProcessor(activeProcessor);
+          mediaStream?.removeProcessor(activeVideoProcessor);
           mediaStream?.addProcessor(tempProcessor as Processor);
           if (tempProcessor?.name === 'watermark-processor') {
             updateWatermarkImage(tempProcessor, `${location.origin}/zoom.svg`);
           }
-          setActiveProcessor(tempProcessor as Processor);
+          setActiveVideoProcessor(tempProcessor as Processor);
         }
       } else {
         try {
           await mediaStream?.addProcessor(tempProcessor as Processor);
-          setActiveProcessor(tempProcessor as Processor);
+          setActiveVideoProcessor(tempProcessor as Processor);
           if (tempProcessor?.name === 'watermark-processor') {
             updateWatermarkImage(tempProcessor, `${location.origin}/zoom.svg`);
           }
@@ -600,6 +649,8 @@ const VideoFooter = (props: VideoFooterProps) => {
       setIsSupportPhone(!!mediaStream.isSupportPhoneFeature());
       setPhoneCountryList(mediaStream.getSupportCountryInfo() || []);
       setSharePrivileg(mediaStream.getSharePrivilege());
+      setIsSupportVideoProcessor(mediaStream.isSupportVideoProcessor());
+      setIsSupportAudioProcessor(mediaStream.isSupportAudioProcessor());
       if (isAndroidOrIOSBrowser()) {
         setCameraList([
           { deviceId: MobileVideoFacingMode.User, label: 'Front-facing' },
@@ -637,6 +688,7 @@ const VideoFooter = (props: VideoFooterProps) => {
           phoneCallStatus={getPhoneCallStatusDescription(phoneCallStatus)}
           onMicrophoneClick={onMicrophoneClick}
           onMicrophoneMenuClick={onMicrophoneMenuClick}
+          audioProcessorList={audioProcessorList}
           microphoneList={micList}
           speakerList={speakerList}
           activeMicrophone={activeMicrophone}
@@ -644,6 +696,8 @@ const VideoFooter = (props: VideoFooterProps) => {
           disabled={isComputerAudioDisabled}
           isMicrophoneForbidden={isMicrophoneForbidden}
           isSecondaryAudioStarted={isSecondaryAudioStarted}
+          isSupportAudioProcessor={isSupportAudioProcessor}
+          activeAudioProcessorList={activeAudioProcessorList}
         />
       )}
       <CameraButton
@@ -651,7 +705,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         onCameraClick={onCameraClick}
         onSwitchCamera={onSwitchCamera}
         onMirrorVideo={onMirrorVideo}
-        onSelectVideoProcessor={onProcessorClick}
+        onSelectVideoProcessor={onVideoProcessorClick}
         onVideoStatistic={() => {
           setSelectedStatisticTab('video');
           setStatisticVisible(true);
@@ -659,11 +713,12 @@ const VideoFooter = (props: VideoFooterProps) => {
         onBlurBackground={onBlurBackground}
         onSelectVideoPlayback={onSelectVideoPlayback}
         activePlaybackUrl={activePlaybackUrl}
-        activeProcessor={activeProcessor?.name}
+        activeProcessor={activeVideoProcessor?.name}
         cameraList={cameraList}
         activeCamera={activeCamera}
         isMirrored={isMirrored}
         isBlur={isBlur}
+        isSupportVideoProcessor={isSupportVideoProcessor}
       />
       {sharing && (
         <ScreenShareButton
@@ -750,4 +805,5 @@ const VideoFooter = (props: VideoFooterProps) => {
     </div>
   );
 };
+
 export default VideoFooter;
