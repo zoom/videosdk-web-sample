@@ -10,6 +10,7 @@ import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import CRCCallOutModal from './crc-call-out-modal';
 import { AudoiAnimationIcon } from '../../../component/audio-animation-icon';
 import { useAudioLevel } from '../hooks/useAudioLevel';
+import type { Processor, ProcessorParams } from '@zoom/videosdk';
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
@@ -31,6 +32,9 @@ interface MicrophoneButtonProps {
   phoneCallStatus?: { text: string; type: string };
   isSecondaryAudioStarted?: boolean;
   isPreview?: boolean;
+  activeAudioProcessorList?: Array<Processor>;
+  isSupportAudioProcessor?: boolean;
+  audioProcessorList?: Array<ProcessorParams>;
 }
 const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const {
@@ -52,7 +56,10 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     onMicrophoneClick,
     onMicrophoneMenuClick,
     onPhoneCallClick,
-    onPhoneCallCancel
+    onPhoneCallCancel,
+    activeAudioProcessorList,
+    isSupportAudioProcessor,
+    audioProcessorList
   } = props;
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [isCrcModalOpen, setIsCrcModalOpen] = useState(false);
@@ -88,13 +95,34 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     );
     menuItems.push(getAntdItem('', 'd2', undefined, undefined, 'divider'));
   }
+
+  if (!isPreview && isSupportAudioProcessor) {
+    menuItems.push(
+      getAntdItem(
+        'Select a Audio Processor',
+        'processor',
+        undefined,
+        audioProcessorList?.map((item) =>
+          getAntdItem(
+            item.name,
+            `processor|${item.name}`,
+            activeAudioProcessorList && activeAudioProcessorList?.findIndex((p) => p.name === item.name) > -1 && (
+              <CheckOutlined />
+            )
+          )
+        ),
+        'group'
+      )
+    );
+    menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
+  }
   if (!isPreview) {
     menuItems.push(
       getAntdItem(isSecondaryAudioStarted ? 'Stop secondary audio' : 'Start secondary audio', 'secondary audio')
     );
   }
 
-  menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
+  menuItems.push(getAntdItem('', 'd4', undefined, undefined, 'divider'));
   if (!isPreview) {
     if (audio !== 'phone') {
       menuItems.push(getAntdItem('Audio Statistic', 'statistic'));
@@ -111,6 +139,8 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
       setIsPhoneModalOpen(true);
     } else if (payload.key === 'crc') {
       setIsCrcModalOpen(true);
+    } else if (payload.key.indexOf('processor|') > -1) {
+      onMicrophoneMenuClick(payload.key);
     }
   };
 
@@ -170,12 +200,36 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
       ) : (
         <Tooltip title={tooltipText}>
           <div>
-            {isSupportPhone ? (
+            {isSupportPhone || isSupportAudioProcessor ? (
               <DropdownButton
                 className="vc-dropdown-button"
                 size="large"
                 menu={getAntdDropdownMenu(
-                  [getAntdItem('Invite by phone', 'phone'), getAntdItem('Invite H323/SIP Room', 'crc')],
+                  [
+                    isSupportPhone
+                      ? [getAntdItem('Invite by phone', 'phone'), getAntdItem('Invite H323/SIP Room', 'crc')]
+                      : [],
+                    isSupportAudioProcessor
+                      ? [
+                          getAntdItem(
+                            'Select a Audio Processor',
+                            'processor',
+                            undefined,
+                            audioProcessorList?.map((item) =>
+                              getAntdItem(
+                                item.name,
+                                `processor|${item.name}`,
+                                activeAudioProcessorList &&
+                                  activeAudioProcessorList?.findIndex((p) => p.name === item.name) > -1 && (
+                                    <CheckOutlined />
+                                  )
+                              )
+                            ),
+                            'group'
+                          )
+                        ]
+                      : []
+                  ].flat(),
                   onPhoneMenuClick
                 )}
                 onClick={onMicrophoneClick}

@@ -22,6 +22,7 @@ interface CameraButtonProps {
   activeCamera?: string;
   activePlaybackUrl?: string;
   activeProcessor?: string;
+  isSupportVideoProcessor?: boolean;
 }
 const videoPlaybacks = [
   { title: 'ZOOM ZWA', url: 'https://source.zoom.us/brand/mp4/Using%20the%20Zoom%20PWA.mp4' },
@@ -56,7 +57,8 @@ const CameraButton = (props: CameraButtonProps) => {
     onBlurBackground,
     onSelectVideoPlayback,
     onSelectVideoProcessor,
-    activeProcessor
+    activeProcessor,
+    isSupportVideoProcessor
   } = props;
   const { mediaStream } = useContext(ZoomMediaContext);
   const onMenuItemClick = (payload: { key: any }) => {
@@ -100,7 +102,7 @@ const CameraButton = (props: CameraButtonProps) => {
         ),
 
       !isPreview &&
-        mediaStream?.isSupportVideoProcessor() &&
+        isSupportVideoProcessor &&
         getAntdItem(
           'Select a Video Processor',
           'processor',
