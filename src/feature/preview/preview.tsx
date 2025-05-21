@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useContext } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import type { TestMicrophoneReturn, TestSpeakerReturn, VideoPlayer } from '@zoom/videosdk';
 // eslint-disable-next-line no-duplicate-imports
 import ZoomVideo from '@zoom/videosdk';
@@ -9,8 +9,7 @@ import CameraButton from '../video/components/camera';
 import { Button, Progress, Select } from 'antd';
 import type { MediaDevice } from '../video/video-types';
 import classNames from 'classnames';
-import ZoomContext from '../../context/zoom-context';
-import type { RouteComponentProps } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 
 // label: string;
 // deviceId: string;
@@ -82,8 +81,9 @@ const updateMicFeedbackStyle = () => {
 
 const { Option } = Select;
 
-const PreviewContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
-  const isUseVideoPlayer = new URLSearchParams(props.location.search).get('useVideoPlayer') === '1';
+const PreviewContainer = () => {
+  const [searchParams] = useSearchParams();
+  const isUseVideoPlayer = searchParams.get('useVideoPlayer') === '1';
   const [isStartedAudio, setIsStartedAudio] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isStartedVideo, setIsStartedVideo] = useState<boolean>(false);

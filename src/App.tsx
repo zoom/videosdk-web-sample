@@ -9,7 +9,7 @@ import {
   useReducer,
   useMemo
 } from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router';
 import ZoomVideo, {
   type VideoPlayerContainer,
   type VideoPlayer,
@@ -277,24 +277,23 @@ function App(props: AppProps) {
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
         <ZoomMediaContext.Provider value={mediaContext}>
-          <Router>
-            <Switch>
+          <BrowserRouter>
+            <Routes>
+              <Route index path="/" element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />} />
               <Route
-                path="/"
-                render={(props) => <Home {...props} status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
-                exact
+                path="/index.html"
+                element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
               />
-              <Route path="/index.html" component={Home} exact />
-              <Route path="/chat" component={Chat} />
-              <Route path="/command" component={Command} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/command" element={<Command />} />
               <Route
                 path="/video"
-                component={isSupportGalleryView ? (galleryViewWithAttach ? VideoAttach : Video) : VideoSingle}
+                element={isSupportGalleryView ? galleryViewWithAttach ? <VideoAttach /> : <Video /> : <VideoSingle />}
               />
-              <Route path="/subsession" component={Subsession} />
-              <Route path="/preview" component={Preview} />
-            </Switch>
-          </Router>
+              <Route path="/subsession" element={<Subsession />} />
+              <Route path="/preview" element={<Preview />} />
+            </Routes>
+          </BrowserRouter>
         </ZoomMediaContext.Provider>
       )}
     </div>

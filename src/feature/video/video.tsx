@@ -1,7 +1,6 @@
-import React, { useState, useContext, useRef, useEffect, useCallback } from 'react';
+import { useState, useContext, useRef } from 'react';
 import classnames from 'classnames';
 import _ from 'lodash';
-import { RouteComponentProps } from 'react-router-dom';
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
@@ -18,9 +17,10 @@ import ReportBtn from './components/report-btn';
 import ShareView from './components/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
 import { SELF_VIDEO_ID } from './video-constants';
+import { useCleanUp } from './hooks/useCleanUp';
 
 import './video.scss';
-const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => {
+const VideoContainer = () => {
   const zmClient = useContext(ZoomContext);
   const {
     mediaStream,
@@ -60,6 +60,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
   }
   const avatarActionState = useAvatarAction(zmClient, visibleParticipants);
   const networkQuality = useNetworkQuality(zmClient);
+  useCleanUp(videoRef.current, zmClient, mediaStream);
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
@@ -111,7 +112,7 @@ const VideoContainer: React.FunctionComponent<RouteComponentProps> = (props) => 
               );
             })}
           </ul>
-          <RemoteCameraControlPanel />
+          {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
         </AvatarActionContext.Provider>
       </div>
       <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />

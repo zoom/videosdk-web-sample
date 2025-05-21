@@ -1,7 +1,8 @@
 import { useReducer, useMemo, useEffect } from 'react';
 import produce from 'immer';
-import { ZoomClient, Participant } from '../../../index-types';
-import { AvatarContext } from '../context/avatar-context';
+import type { ZoomClient, Participant } from '../../../index-types';
+import type { AvatarContext } from '../context/avatar-context';
+import { isAndroidOrIOSBrowser } from '../../../utils/platform';
 
 const avatarActionReducer = produce((draft, action) => {
   switch (action.type) {
@@ -30,7 +31,9 @@ const avatarActionReducer = produce((draft, action) => {
         payload: { user, currentUserId, isUnifiedRender }
       } = action;
       const { userId, audio, bVideoOn, isSpeakerOnly } = user;
-      if (Object.hasOwn(draft, `${userId}`)) {
+      const isLocalVolumeAdjust =
+        audio === 'computer' && !isSpeakerOnly && currentUserId !== userId && !isAndroidOrIOSBrowser();
+      if (Object.prototype.hasOwnProperty.call(draft, `${userId}`)) {
         const element = draft[`${userId}`];
         element.localVolumeAdjust.enabled = audio === 'computer' && !isSpeakerOnly && currentUserId !== userId;
         element.farEndCameraControl.enabled = bVideoOn && currentUserId !== userId;
@@ -39,7 +42,7 @@ const avatarActionReducer = produce((draft, action) => {
         const state = {
           localVolumeAdjust: {
             toggled: false,
-            enabled: audio === 'computer' && !isSpeakerOnly && currentUserId !== userId
+            enabled: isLocalVolumeAdjust
           },
           farEndCameraControl: {
             toggled: false,
