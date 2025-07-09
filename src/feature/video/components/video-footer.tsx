@@ -15,7 +15,6 @@ import './video-footer.scss';
 import { isAndroidOrIOSBrowser } from '../../../utils/platform';
 import { getPhoneCallStatusDescription } from '../video-constants';
 import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './recording';
-import { BroadcastStreamingStatus } from '@zoom/videosdk';
 import {
   type DialOutOption,
   type Processor,
@@ -27,7 +26,8 @@ import {
   SharePrivilege,
   MobileVideoFacingMode,
   LiveStreamStatus,
-  ShareStatus
+  ShareStatus,
+  BroadcastStreamingStatus
 } from '@zoom/videosdk';
 import { LiveTranscriptionButton } from './live-transcription';
 import { LeaveButton } from './leave';
