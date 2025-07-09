@@ -3,6 +3,7 @@ import { usePrevious, useUnmount } from '../../../hooks';
 import type { ZoomClient, MediaStream, Participant } from '../../../index-types';
 import { Modal, message as toast } from 'antd';
 import { ActiveMediaFailedCode } from '@zoom/videosdk';
+import { useSearchParams } from 'react-router';
 interface ErrMessagePayload {
   message: string;
   code: number;
@@ -20,35 +21,36 @@ export function useShare(
     width: 0,
     height: 0
   });
-  const [sharUserList, setShareUserId] = useState<Array<Participant> | undefined>(mediaStream?.getShareUserList());
-  const onActiveShareChange = useCallback(
-    ({ state, userId }: any) => {
-      if (!isStartedShare) {
-        setActiveSharingId(userId);
-        setIsReceiveSharing(state === 'Active');
-      }
-    },
-    [isStartedShare]
-  );
+
+  const [shareUserList, setShareUserList] = useState<Array<Participant> | undefined>(mediaStream?.getShareUserList());
+  const [searchParams] = useSearchParams();
+  const isSimultaneousShareView = searchParams.get('simultaneousShareView') === '1' && isStartedShare;
+  const onActiveShareChange = useCallback(({ state, userId }: any) => {
+    setActiveSharingId(userId);
+    setIsReceiveSharing(state === 'Active');
+  }, []);
   const onSharedContentDimensionChange = useCallback(({ width, height }: any) => {
     setSharedContentDimension({ width, height });
   }, []);
   const onPeerShareChange = useCallback(() => {
     if (mediaStream) {
-      setShareUserId(mediaStream.getShareUserList());
+      setShareUserList(mediaStream.getShareUserList());
     }
   }, [mediaStream]);
   const onCurrentUserUpdate = useCallback(
     (payload: any) => {
       if (Array.isArray(payload) && payload.length > 0) {
         payload.forEach((item) => {
-          if (item.userId === zmClient.getSessionInfo().userId && item.sharerOn !== undefined) {
-            setIsStartedShare(item.sharerOn);
-            if (item.sharerOn) {
-              setIsReceiveSharing(false);
-            }
+          if (item.sharerOn !== undefined) {
+            const currentUserId = zmClient.getSessionInfo().userId;
+            const isCurrentUser = item.userId === currentUserId;
+
             if (mediaStream) {
-              setShareUserId(mediaStream.getShareUserList());
+              const userList = mediaStream.getShareUserList();
+              setShareUserList(userList);
+              if (isCurrentUser) {
+                setIsStartedShare(item.sharerOn);
+              }
             }
           }
         });
@@ -56,6 +58,7 @@ export function useShare(
     },
     [zmClient, mediaStream]
   );
+
   const onShareContentChange = useCallback((payload: any) => {
     setActiveSharingId(payload.userId);
   }, []);
@@ -64,14 +67,19 @@ export function useShare(
     const { code, message } = payload;
     const { MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted } = ActiveMediaFailedCode;
     if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted].includes(code)) {
-      toast.warning(message, 2);
+      toast.warning(message, 8);
     } else {
       Modal.error({
         title: `Active media failed - Code:${code}`,
         content: message,
         okText: 'Refresh',
+        cancelText: 'Cancel',
+        closable: true,
         onOk: () => {
           window.location.reload();
+        },
+        onCancel: () => {
+          return true;
         }
       });
     }
@@ -109,7 +117,7 @@ export function useShare(
         mediaStream?.stopShareView();
       }
     }
-  }, [mediaStream, shareRef, previousIsRecieveSharing, isRecieveSharing, activeSharingId]);
+  }, [mediaStream, shareRef, previousIsRecieveSharing, isRecieveSharing, activeSharingId, shareUserList]);
   useEffect(() => {
     if (mediaStream) {
       const activeSharedUserId = mediaStream.getActiveShareUserId();
@@ -119,10 +127,28 @@ export function useShare(
       }
     }
   }, [mediaStream]);
+  useEffect(() => {
+    if (isStartedShare) {
+      const currentUserId = zmClient.getSessionInfo().userId;
+      const peerShareUser = shareUserList?.filter((user) => user.userId !== currentUserId);
+      if (peerShareUser?.length) {
+        setIsReceiveSharing(isSimultaneousShareView);
+        if (
+          (isSimultaneousShareView && activeSharingId === 0) ||
+          activeSharingId === currentUserId ||
+          !peerShareUser.map((user) => user.userId).includes(activeSharingId)
+        ) {
+          setActiveSharingId(peerShareUser[0].userId);
+        }
+      } else {
+        setIsReceiveSharing(false);
+      }
+    }
+  }, [isStartedShare, isSimultaneousShareView, shareUserList, activeSharingId, zmClient]);
   useUnmount(() => {
     if (isRecieveSharing && zmClient.getSessionInfo().isInMeeting) {
       mediaStream?.stopShareView();
     }
   });
-  return { isRecieveSharing, isStartedShare, sharedContentDimension, sharUserList, activeSharingId };
+  return { isRecieveSharing, isStartedShare, sharedContentDimension, shareUserList, activeSharingId };
 }

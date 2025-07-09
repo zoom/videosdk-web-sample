@@ -1,6 +1,7 @@
 import { useState, useCallback, useContext, useEffect } from 'react';
 import classNames from 'classnames';
 import { message, Modal, Form, Select, Checkbox, Tooltip } from 'antd';
+import { useSearchParams } from 'react-router';
 import { SoundOutlined } from '@ant-design/icons';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
@@ -14,6 +15,7 @@ import './video-footer.scss';
 import { isAndroidOrIOSBrowser } from '../../../utils/platform';
 import { getPhoneCallStatusDescription } from '../video-constants';
 import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './recording';
+import { BroadcastStreamingStatus } from '@zoom/videosdk';
 import {
   type DialOutOption,
   type Processor,
@@ -48,6 +50,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const { mediaStream } = useContext(ZoomMediaContext);
   const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
   const liveStreamClient = zmClient.getLiveStreamClient();
+  const broadcastStreamClient = zmClient.getBroadcastStreamingClient();
   const recordingClient = zmClient.getRecordingClient();
   const [isStartedAudio, setIsStartedAudio] = useState(
     zmClient.getCurrentUserInfo() && zmClient.getCurrentUserInfo().audio !== ''
@@ -59,7 +62,6 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
   const [isStartedLiveTranscription, setIsStartedLiveTranscription] = useState(false);
   const [isDisableCaptions, setIsDisableCaptions] = useState(false);
-  const [isMirrored, setIsMirrored] = useState(false);
   const [isBlur, setIsBlur] = useState(mediaStream?.getVirtualbackgroundStatus().imageSrc === 'blur');
   const [isMuted, setIsMuted] = useState(!!zmClient.getCurrentUserInfo()?.muted);
   const [activeMicrophone, setActiveMicrophone] = useState(mediaStream?.getActiveMicrophone());
@@ -84,12 +86,18 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [recordingIsoStatus, setRecordingIsoStatus] = useState<'' | RecordingStatus>('');
   const [liveStreamVisible, setLiveStreamVisible] = useState(false);
   const [liveStreamStatus, setLiveStreamStatus] = useState(liveStreamClient?.getLiveStreamStatus());
+  const [broadcastStreamStatus, setBroadcastStreamStatus] = useState<'' | BroadcastStreamingStatus>(
+    broadcastStreamClient.getBroadcastStreamingStatus()?.status
+  );
   // Video Mask
   const [videoMaskVisible, setVideoMaskVisible] = useState(false);
   const [isSupportVideoProcessor, setIsSupportVideoProcessor] = useState(false);
   const [isSupportAudioProcessor, setIsSupportAudioProcessor] = useState(false);
   const [isSecondaryAudioStarted, setIsSecondaryAudioStarted] = useState(false);
+  const [isVideoMirrored, setIsVideoMirrored] = useState<boolean>(!!mediaStream?.isVideoMirrored());
+
   const [secondaryMicForm] = Form.useForm();
+  const [searchParams] = useSearchParams();
   const audioProcessorList: Array<ProcessorParams> = [
     {
       url: `${location.origin}/static/processors/bypass-audio-processor.js`,
@@ -288,22 +296,26 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   };
   const onMirrorVideo = async () => {
-    await mediaStream?.mirrorVideo(!isMirrored);
-    setIsMirrored(!isMirrored);
+    await mediaStream?.mirrorVideo(!mediaStream.isVideoMirrored());
+    setIsVideoMirrored(!!mediaStream?.isVideoMirrored());
   };
   const onBlurBackground = async () => {
-    const isSupportVirtualBackground = mediaStream?.isSupportVirtualBackground();
-    if (isSupportVirtualBackground) {
-      if (isBlur) {
-        await mediaStream?.updateVirtualBackgroundImage(undefined);
+    try {
+      const isSupportVirtualBackground = mediaStream?.isSupportVirtualBackground();
+      if (isSupportVirtualBackground) {
+        if (isBlur) {
+          await mediaStream?.updateVirtualBackgroundImage(undefined);
+        } else {
+          await mediaStream?.updateVirtualBackgroundImage('blur');
+        }
       } else {
-        await mediaStream?.updateVirtualBackgroundImage('blur');
+        setVideoMaskVisible(true);
       }
-    } else {
-      setVideoMaskVisible(true);
-    }
 
-    setIsBlur(!isBlur);
+      setIsBlur(!isBlur);
+    } catch (e) {
+      console.error(e);
+    }
   };
   const onPhoneCall = async (code: string, phoneNumber: string, name: string, option: DialOutOption) => {
     await mediaStream?.inviteByPhone(code, phoneNumber, name, option);
@@ -344,9 +356,12 @@ const VideoFooter = (props: VideoFooterProps) => {
   );
   const onScreenShareClick = useCallback(async () => {
     if (mediaStream?.getShareStatus() === ShareStatus.End && selfShareCanvas) {
-      await mediaStream?.startShareScreen(selfShareCanvas, { requestReadReceipt: true });
+      await mediaStream?.startShareScreen(selfShareCanvas, {
+        requestReadReceipt: true,
+        simultaneousShareView: searchParams.get('simultaneousShareView') === '1'
+      });
     }
-  }, [mediaStream, selfShareCanvas]);
+  }, [mediaStream, selfShareCanvas, searchParams]);
 
   const onLiveTranscriptionClick = useCallback(async () => {
     if (isDisableCaptions) {
@@ -511,19 +526,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     [isStartedAudio, activePlaybackUrl, mediaStream]
   );
 
-  const onLiveStreamClick = useCallback(() => {
-    if (liveStreamStatus === LiveStreamStatus.Ended) {
-      setLiveStreamVisible(true);
-    } else if (liveStreamStatus === LiveStreamStatus.InProgress) {
-      liveStreamClient?.stopLiveStream();
-    }
-  }, [liveStreamStatus, liveStreamClient]);
-  const onLiveStreamStatusChange = useCallback((status: any) => {
-    setLiveStreamStatus(status);
-    if (status === LiveStreamStatus.Timeout) {
-      message.error('Start live streaming timeout');
-    }
-  }, []);
   const updateWatermarkImage = useCallback((processor: Processor, imageUrl: string) => {
     const img = document.createElement('img');
     img.width = 640;
@@ -574,6 +576,29 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   }, []);
+  const onLiveStreamClick = useCallback(() => {
+    if (liveStreamStatus === LiveStreamStatus.Ended) {
+      setLiveStreamVisible(true);
+    } else if (liveStreamStatus === LiveStreamStatus.InProgress) {
+      liveStreamClient?.stopLiveStream();
+    }
+  }, [liveStreamStatus, liveStreamClient]);
+  const onBroadcastStreamClick = useCallback(() => {
+    if (broadcastStreamStatus === BroadcastStreamingStatus.InProgress) {
+      broadcastStreamClient.stopBroadcast();
+    } else {
+      broadcastStreamClient.startBroadcast();
+    }
+  }, [broadcastStreamStatus, broadcastStreamClient]);
+  const onLiveStreamStatusChange = useCallback((status: any) => {
+    setLiveStreamStatus(status);
+    if (status === LiveStreamStatus.Timeout) {
+      message.error('Start live streaming timeout');
+    }
+  }, []);
+  const onBroadcastStreamStatusChange = useCallback((payload: any) => {
+    setBroadcastStreamStatus(payload.status);
+  }, []);
   const onVideoScreenshotTaken = useCallback((payload: any) => {
     const { displayName, userId } = payload;
     message.info(`${displayName}(User:${userId}) just took a screenshot of your video`);
@@ -598,6 +623,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('live-stream-status', onLiveStreamStatusChange);
     zmClient.on('video-screenshot-taken', onVideoScreenshotTaken);
     zmClient.on('share-content-screenshot-taken', onShareViewScreenshotTaken);
+    zmClient.on('broadcast-streaming-status', onBroadcastStreamStatusChange);
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
@@ -614,6 +640,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('live-stream-status', onLiveStreamStatusChange);
       zmClient.off('video-screenshot-taken', onVideoScreenshotTaken);
       zmClient.off('share-content-screenshot-taken', onShareViewScreenshotTaken);
+      zmClient.off('broadcast-streaming-status', onBroadcastStreamStatusChange);
     };
   }, [
     zmClient,
@@ -631,7 +658,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     onCaptionDisable,
     onLiveStreamStatusChange,
     onVideoScreenshotTaken,
-    onShareViewScreenshotTaken
+    onShareViewScreenshotTaken,
+    onBroadcastStreamStatusChange
   ]);
   useUnmount(() => {
     if (zmClient.getSessionInfo().isInMeeting) {
@@ -716,7 +744,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         activeProcessor={activeVideoProcessor?.name}
         cameraList={cameraList}
         activeCamera={activeCamera}
-        isMirrored={isMirrored}
+        isMirrored={isVideoMirrored}
         isBlur={isBlur}
         isSupportVideoProcessor={isSupportVideoProcessor}
       />
@@ -755,7 +783,8 @@ const VideoFooter = (props: VideoFooterProps) => {
           <TranscriptionSubtitle text={caption.text} />
         </>
       )}
-      {liveStreamClient?.isLiveStreamEnabled() && zmClient.isHost() && (
+      {/* Live stream */}
+      {/* {liveStreamClient?.isLiveStreamEnabled() && zmClient.isHost() && (
         <>
           <LiveStreamButton
             isLiveStreamOn={liveStreamStatus === LiveStreamStatus.InProgress}
@@ -771,6 +800,16 @@ const VideoFooter = (props: VideoFooterProps) => {
         </>
       )}
       {liveStreamStatus === LiveStreamStatus.InProgress && (
+        <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />
+      )} */}
+      {/** Broadcast streaming */}
+      {broadcastStreamClient.isBroadcastStreamingEnable() && zmClient.isHost() && (
+        <LiveStreamButton
+          isLiveStreamOn={broadcastStreamStatus === BroadcastStreamingStatus.InProgress}
+          onLiveStreamClick={onBroadcastStreamClick}
+        />
+      )}
+      {broadcastStreamStatus === BroadcastStreamingStatus.InProgress && (
         <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />
       )}
       {isSecondaryAudioStarted && (
@@ -800,7 +839,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         />
       )}
       {!mediaStream?.isSupportVirtualBackground() && (
-        <VideoMaskModel visible={videoMaskVisible} setVisible={setVideoMaskVisible} isMirrored={isMirrored} />
+        <VideoMaskModel visible={videoMaskVisible} setVisible={setVideoMaskVisible} isMirrored={isVideoMirrored} />
       )}
     </div>
   );

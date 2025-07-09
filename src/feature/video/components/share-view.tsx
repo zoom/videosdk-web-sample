@@ -35,7 +35,7 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const previousViewType = usePrevious(viewType);
   const previousShareViewSize = usePrevious(shareViewSize);
   const debounceRef = useRef(_.debounce(setContainerSize, 300));
-  const { isRecieveSharing, sharedContentDimension, sharUserList, activeSharingId } = useShare(
+  const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId } = useShare(
     zmClient,
     mediaStream,
     shareViewRef
@@ -137,7 +137,7 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
       >
         {isRecieveSharing && (
           <ShareIndicationBar
-            sharUserList={sharUserList}
+            shareUserList={shareUserList}
             activeSharingId={activeSharingId}
             isControllingUser={isControllingUser}
             viewType={viewType}
