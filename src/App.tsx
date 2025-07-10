@@ -7,7 +7,8 @@ import {
   useState,
   useCallback,
   useReducer,
-  useMemo
+  useMemo,
+  useRef
 } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import ZoomVideo, {
@@ -139,6 +140,7 @@ function App(props: AppProps) {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(false);
   const zmClient = useContext(ZoomContext);
+  const hasInitialized = useRef(false);
   let webEndpoint: any;
   if (webEndpointArg) {
     webEndpoint = webEndpointArg;
@@ -164,6 +166,9 @@ function App(props: AppProps) {
     });
   }
   useEffect(() => {
+    if (hasInitialized.current) {
+      return;
+    }
     const init = async () => {
       await zmClient.init('en-US', `${window.location.origin}/lib`, {
         webEndpoint,
@@ -189,8 +194,9 @@ function App(props: AppProps) {
     };
     init();
     return () => {
-      if (zmClient.getSessionInfo()?.isInMeeting) {
+      if (hasInitialized.current && zmClient.getSessionInfo()?.isInMeeting) {
         ZoomVideo.destroyClient();
+        hasInitialized.current = false;
       }
     };
   }, [

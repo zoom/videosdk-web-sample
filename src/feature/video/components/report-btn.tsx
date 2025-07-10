@@ -1,7 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, message, Modal, List, Typography } from 'antd';
-import { useContext, useMemo } from 'react';
-import ZoomVideo from '@zoom/videosdk';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import ZoomVideo, { BroadcastStreamingStatus } from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import './report-btn.scss';
 const trackingId = Object.fromEntries(new URLSearchParams(location.search))?.customerJoinId;
@@ -10,6 +10,26 @@ const ReportBtn = () => {
   const [messageApi, msgContextHolder] = message.useMessage();
   const [modal, modalContextHolder] = Modal.useModal();
   const zmClient = useContext(ZoomContext);
+  const [channelId, setChannelId] = useState<string>(
+    zmClient.getBroadcastStreamingClient().getBroadcastStreamingStatus()?.channelId
+  );
+  const onChannelIdChange = useCallback(
+    ({ status }: any) => {
+      if (status === BroadcastStreamingStatus.InProgress) {
+        const state = zmClient.getBroadcastStreamingClient().getBroadcastStreamingStatus();
+        setChannelId(state.channelId);
+      } else {
+        setChannelId('');
+      }
+    },
+    [zmClient]
+  );
+  useEffect(() => {
+    zmClient.on('broadcast-streaming-status', onChannelIdChange);
+    return () => {
+      zmClient.off('broadcast-streaming-status', onChannelIdChange);
+    };
+  }, [zmClient, onChannelIdChange]);
 
   const infoList = useMemo(() => {
     const data = [
@@ -32,6 +52,10 @@ const ReportBtn = () => {
       {
         label: 'Telemetry tracking id',
         value: trackingId ? window.atob(trackingId) : ''
+      },
+      {
+        label: 'Broadcast streaming channel id',
+        value: channelId
       }
     ];
     return (
@@ -46,7 +70,7 @@ const ReportBtn = () => {
         )}
       />
     );
-  }, [zmClient]);
+  }, [zmClient, channelId]);
   const onInfoClick = async function () {
     modal.info({
       title: 'Session info',
