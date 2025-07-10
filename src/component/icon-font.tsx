@@ -1,4 +1,3 @@
-import React from 'react';
 import Icon from '@ant-design/icons';
 import { ReactComponent as IconAdvanced } from './svgs/icon-advanced.svg';
 import { ReactComponent as IconChat } from './svgs/icon-chat.svg';
@@ -60,7 +59,8 @@ import { ReactComponent as IconAudioMuted } from './svgs/audio/audio-muted.svg';
 import { ReactComponent as IconAudioUnmuted } from './svgs/audio/audio-unmuted.svg';
 import { ReactComponent as IconAudioDisallow } from './svgs/audio/audio-disallow.svg';
 import { ReactComponent as IconAudioNoDevices } from './svgs/audio/audio-no-devices.svg';
-
+import { ReactComponent as IconStatistic } from './svgs/icon-statistic.svg';
+import { ReactComponent as IconChannel } from './svgs/icon-channel.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -118,7 +118,9 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-audio-muted': IconAudioMuted,
   'icon-audio-unmuted': IconAudioUnmuted,
   'icon-audio-disallow': IconAudioDisallow,
-  'icon-audio-no-devices': IconAudioNoDevices
+  'icon-audio-no-devices': IconAudioNoDevices,
+  'icon-channel': IconChannel,
+  'icon-statistic': IconStatistic
 };
 interface IconFontProps {
   type: string;

@@ -9,18 +9,18 @@ import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import { IconFont } from '../../../component/icon-font';
 import './share-indication.scss';
 interface ShareIndicationBarProps {
-  sharUserList: Array<Participant> | undefined;
+  shareUserList: Array<Participant> | undefined;
   activeSharingId: number;
   isControllingUser?: boolean;
   viewType: string;
   setViewType: (viewtype: string) => void;
 }
 const ShareIndicationBar = (props: ShareIndicationBarProps) => {
-  const { sharUserList, activeSharingId, isControllingUser, viewType, setViewType } = props;
+  const { shareUserList, activeSharingId, isControllingUser, viewType, setViewType } = props;
   const draggableRef = useRef(null);
   const { mediaStream } = useContext(ZoomMediaContext);
   const [mutedShareAudioList, setMutedShareAudioList] = useState<number[]>([]);
-  const activeUser = (sharUserList ?? []).find((user) => user.userId === activeSharingId);
+  const activeUser = (shareUserList ?? []).find((user) => user.userId === activeSharingId);
   const menuItems = [
     getAntdItem(
       'View',
@@ -50,14 +50,14 @@ const ShareIndicationBar = (props: ShareIndicationBarProps) => {
       )
     );
   }
-  if ((sharUserList ?? []).length > 1) {
+  if ((shareUserList ?? []).length > 1) {
     menuItems.push(getAntdItem('', 'd3', undefined, undefined, 'divider'));
     menuItems.push(
       getAntdItem(
         'Shared Screens',
         'share users',
         undefined,
-        (sharUserList ?? []).map((user) =>
+        (shareUserList ?? []).map((user) =>
           getAntdItem(user.displayName, `share|${user.userId}`, activeSharingId === user.userId && <CheckOutlined />)
         ),
         'group'

@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ChatReceiver, ChatRecord } from '../chat-types';
-import { ChatFileDownloadStatus, ChatPrivilege } from '@zoom/videosdk';
+import type { ChatReceiver, ChatRecord } from '../chat-types';
+import { type ChatPrivilege, ChatFileDownloadStatus } from '@zoom/videosdk';
 import produce from 'immer';
 import { v4 as uuidv4 } from 'uuid';
-import { ChatClient, ZoomClient } from '../../../index-types';
+import type { ChatClient, ZoomClient } from '../../../index-types';
 import { useParticipantsChange } from './useParticipantsChange';
 import { isImageFile } from '../chat-utils';
 export function useChat(zmClient: ZoomClient, chatClient: ChatClient) {
