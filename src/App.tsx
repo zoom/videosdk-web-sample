@@ -150,7 +150,7 @@ function App(props: AppProps) {
   const mediaContext = useMemo(() => ({ ...mediaState, mediaStream }), [mediaState, mediaStream]);
   const galleryViewWithoutSAB = Number(enforceGalleryView) === 1 && !window.crossOriginIsolated;
   const vbWithoutSAB = Number(enforceVB) === 1 && !window.crossOriginIsolated;
-  const galleryViewWithAttach = Number(useVideoPlayer) === 1 && (window.crossOriginIsolated || galleryViewWithoutSAB);
+  const galleryViewWithAttach = true;
 
   if (galleryViewWithAttach) {
     console.log({
