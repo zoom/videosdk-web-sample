@@ -3,9 +3,10 @@ import classNames from 'classnames';
 import './transcription-subtitle.scss';
 interface TranscriptionSubtitleProps {
   text?: string;
+  displayName?: string;
 }
 export const TranscriptionSubtitle = (props: TranscriptionSubtitleProps) => {
-  const { text } = props;
+  const { text, displayName } = props;
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<number>();
   useEffect(() => {
@@ -21,6 +22,7 @@ export const TranscriptionSubtitle = (props: TranscriptionSubtitleProps) => {
   }, [text]);
   return (
     <div className={classNames('transcript-subtitle', { 'transcript-subtitle-show': visible })}>
+      <p className="transcript-subtitle-name">{displayName}:</p>
       <p className="transcript-subtitle-message">{text}</p>
     </div>
   );

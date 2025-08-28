@@ -6,7 +6,7 @@ import { type VideoPlayer, VideoQuality } from '@zoom/videosdk';
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
-import ShareView from './components/share-view';
+import ShareView from './components/share-view/share-view';
 import Pagination from './components/pagination';
 import { usePagination } from './hooks/useAttachPagination';
 import VideoFooter from './components/video-footer';
@@ -19,6 +19,8 @@ import { useParticipantsChange } from './hooks/useParticipantsChange';
 import type { Participant } from '../../index-types';
 import { usePrevious } from '../../hooks';
 import { useVideoAspect } from './hooks/useVideoAspectRatio';
+import { useGridLayout } from './hooks/useGridLayout';
+import { useVideoGridStyle } from './hooks/useVideoGridStyle';
 import { Radio } from 'antd';
 // import Draggable from 'react-draggable';
 import Draggable from './components/draggable';
@@ -32,9 +34,9 @@ interface ExtendedParticipant extends Participant {
 
 const VideoContainer = () => {
   const { mediaStream } = useContext(ZoomMediaContext);
-  const preferPageCount = mediaStream?.getMaxRenderableVideos() ?? 1;
+  const preferPageCount = mediaStream?.getMaxRenderableVideos();
   const zmClient = useContext(ZoomContext);
-  const { page, pageSize, totalPage, setPage } = usePagination(zmClient, preferPageCount);
+  const { page, pageSize, totalPage, setPage } = usePagination(zmClient, preferPageCount || 4);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
 
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
@@ -135,22 +137,16 @@ const VideoContainer = () => {
     },
     [videoPlayerListRef, mediaStream]
   );
-  const gridColumns = useMemo(() => {
-    if (isRecieveSharing) return 1;
-    if (spotlightUsers.length) {
-      return Math.sqrt(pageSize) * 2;
-    }
-    return Math.sqrt(pageSize);
-  }, [spotlightUsers, isRecieveSharing, pageSize]);
-  const gridRows = useMemo(() => {
-    if (isRecieveSharing) {
-      return pageSize;
-    }
-    if (spotlightUsers.length) {
-      return Math.sqrt(pageSize) * 2;
-    }
-    return Math.sqrt(pageSize);
-  }, [spotlightUsers, isRecieveSharing, pageSize]);
+  const { gridColumns, gridRows } = useGridLayout({
+    isRecieveSharing,
+    spotlightUsers,
+    pageSize,
+    currentPageParticipants
+  });
+
+  const { getVideoGridStyle } = useVideoGridStyle({
+    currentPageParticipants
+  });
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
@@ -202,14 +198,15 @@ const VideoContainer = () => {
               className="user-list"
               style={{
                 gridTemplateColumns: `repeat(${gridColumns}, minmax(128px, 1fr))`,
-                gridTemplateRows: `repeat(${gridRows},minmax(72px, 1fr))`
+                gridTemplateRows: `repeat(${gridRows}, auto)`
               }}
             >
-              {currentPageParticipants.map((user) => {
+              {currentPageParticipants.map((user, index) => {
                 return (
                   <div
                     className={classnames('video-cell', { 'video-cell-spotlight': (user as any).spotlighted })}
                     key={user.userId}
+                    style={getVideoGridStyle(index)}
                   >
                     {avatarActionState?.avatarActionState[user?.userId]?.videoResolutionAdjust?.toggled && (
                       <div className="change-video-resolution">
@@ -226,7 +223,11 @@ const VideoContainer = () => {
                     )}
                     <div
                       className="aspact-ratio"
-                      style={aspectRatio[`${user.userId}`] ? { aspectRatio: aspectRatio[`${user.userId}`] } : {}}
+                      style={
+                        aspectRatio[`${user.userId}`]
+                          ? { aspectRatio: aspectRatio[`${user.userId}`] }
+                          : { aspectRatio: '16/9' }
+                      }
                     >
                       {user.bVideoOn && (
                         <video-player

@@ -1,22 +1,26 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ZoomClient, MediaStream } from '../../../index-types';
-import { ApprovedState, RemoteControlAppStatus, RemoteControlSessionStatus } from '@zoom/videosdk';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import type { ZoomClient, MediaStream } from '../../../index-types';
+import { ApprovedState, RemoteControlAppStatus, RemoteControlSessionStatus, type VideoPlayer } from '@zoom/videosdk';
 import { message, Modal, Checkbox } from 'antd';
 export function useRemoteControl(
   zmClient: ZoomClient,
   mediaStream: MediaStream | null,
   selfShareView: HTMLCanvasElement | HTMLVideoElement | null,
-  shareView: HTMLCanvasElement | null
+  shareView: HTMLCanvasElement | VideoPlayer | null
 ) {
   const [isControllingUser, setIsControllingUser] = useState(mediaStream?.isControllingUserRemotely());
   const [controllingUser, setControllingUser] = useState<{ userId: number; displayName: string } | null>(null);
   const isDownloadAppRef = useRef(false);
   const launchModalRef = useRef<any>(null);
   const runAsAdminRef = useRef<any>(null);
-  const onInControllingChange = useCallback((payload: any) => {
-    const { isControlling } = payload;
-    setIsControllingUser(isControlling);
-  }, []);
+  const onInControllingChange = useCallback(
+    (payload: any) => {
+      const { isControlling } = payload;
+      const isStartScreenShare = !!zmClient.getCurrentUserInfo()?.sharerOn;
+      setIsControllingUser(isControlling && !isStartScreenShare);
+    },
+    [zmClient]
+  );
   const onControlApproveChange = useCallback(
     (payload: any) => {
       const { state } = payload;

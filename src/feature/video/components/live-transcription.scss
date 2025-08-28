@@ -1,0 +1,34 @@
+.live-transcription-menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .ant-switch {
+    background-color: rgba(200, 200, 200, 0.25);
+  }
+  .ant-switch-checked {
+    background-color: #1890ff;
+  }
+}
+
+.live-transcription-language-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .check-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.live-transcription-caption-language {
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
