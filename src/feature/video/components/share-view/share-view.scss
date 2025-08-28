@@ -1,0 +1,74 @@
+.share-view {
+  display: none;
+  &.share-view-in-sharing {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-right: 1px solid #333;
+  }
+  &.share-view-original {
+    display: block;
+  }
+  .share-view-viewport {
+    max-width: 100%;
+    &.share-view-viewport-original {
+      max-width: initial;
+      cursor: move;
+    }
+    &.share-view-viewport-in-control {
+      cursor: default;
+    }
+    .share-view-canvas {
+      height: 100%;
+      position: relative;
+      video-player {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+    }
+  }
+  .share-view-container {
+    width: 100%;
+    height: 100%;
+    & .share-view-list {
+      height: 100%;
+      width: 100%;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      justify-content: center;
+      align-content: center;
+      gap: 12px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    & .share-view-cell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 16/9;
+      & .share-view-name-tag {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        display: flex;
+        padding: 3px 5px;
+        align-items: center;
+        max-width: 100%;
+        font-size: 14px;
+      }
+    }
+  }
+}

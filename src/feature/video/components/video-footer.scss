@@ -51,10 +51,17 @@
     margin-right: 0;
     margin-left: 3px;
   }
+    &.active {
+    .ant-btn-compact-first-item {
+     color: #00cc64;
+    }
+  }
 }
 .vc-dropdown-menu {
   border: 1px solid #747487;
   background: rgba(0, 0, 0, 0.9) !important;
+   max-height: 80vh;
+  overflow-y: auto;
   .ant-dropdown-menu-item {
     padding: 10px 30px;
     color: #ccc;

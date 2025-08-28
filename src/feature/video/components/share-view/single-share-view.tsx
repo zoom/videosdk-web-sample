@@ -2,29 +2,29 @@ import { useRef, useContext, useState, useCallback, useEffect, forwardRef, useIm
 import classnames from 'classnames';
 import Draggable from 'react-draggable';
 import _ from 'lodash';
-import ZoomContext from '../../../context/zoom-context';
-import ZoomMediaContext from '../../../context/media-context';
-import ShareBar from './share-bar';
-import ShareIndicationBar from './share-indication';
+import ZoomContext from '../../../../context/zoom-context';
+import ZoomMediaContext from '../../../../context/media-context';
+import ShareBar from '../share-bar';
+import ShareIndicationBar from '../share-indication';
 
-import { useShare } from '../hooks/useShare';
-import { useRemoteControl } from '../hooks/useRemoteControl';
-import { useMount, usePrevious, useSizeCallback } from '../../../hooks';
-import { isShallowEqual } from '../../../utils/util';
-
+import { useShare } from '../../hooks/useShare';
+import { useRemoteControl } from '../../hooks/useRemoteControl';
+import { useMount, usePrevious, useSizeCallback } from '../../../../hooks';
+import { isShallowEqual } from '../../../../utils/util';
+import { ShareViewType } from '../../video-constants';
+import { useSearchParams } from 'react-router';
+import type { VideoPlayer } from '@zoom/videosdk';
 import './share-view.scss';
-import { ShareViewType } from '../video-constants';
-interface ShareViewProps {
-  className?: string;
-  onRecieveSharingChange: (isSharing: boolean) => void;
-}
+import type { ShareViewProps } from './share-view-types';
+
 const DragThreshod = 50;
-const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
+const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const { onRecieveSharingChange } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const selfShareViewRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(null);
-  const shareViewRef = useRef<HTMLCanvasElement | null>(null);
+  const shareCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const shareVideoPlayerRef = useRef<VideoPlayer | null>(null);
   const shareViewContainerRef = useRef<HTMLDivElement | null>(null);
   const shareViewViewportRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,16 +35,18 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const previousViewType = usePrevious(viewType);
   const previousShareViewSize = usePrevious(shareViewSize);
   const debounceRef = useRef(_.debounce(setContainerSize, 300));
-  const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId } = useShare(
+  const [searchParams] = useSearchParams();
+  const isVideoPlayer = searchParams.get('useVideoPlayer') === '1';
+  const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId, setActiveSharingId } = useShare(
     zmClient,
     mediaStream,
-    shareViewRef
+    isVideoPlayer ? shareVideoPlayerRef : shareCanvasRef
   );
   const { isControllingUser, controllingUser } = useRemoteControl(
     zmClient,
     mediaStream,
     selfShareViewRef.current,
-    shareViewRef.current
+    isVideoPlayer ? shareVideoPlayerRef.current : shareCanvasRef.current
   );
 
   const onContainerResize = useCallback(({ width, height }: any) => {
@@ -142,6 +144,7 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
             isControllingUser={isControllingUser}
             viewType={viewType}
             setViewType={setViewType}
+            setActiveSharingId={setActiveSharingId}
           />
         )}
         <Draggable
@@ -161,7 +164,13 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
             }}
             ref={shareViewViewportRef}
           >
-            <canvas className="share-view-canvas" ref={shareViewRef} />
+            {isVideoPlayer ? (
+              <video-player-container class="share-view-canvas">
+                <video-player ref={shareVideoPlayerRef} />
+              </video-player-container>
+            ) : (
+              <canvas className="share-view-canvas" ref={shareCanvasRef} />
+            )}
           </div>
         </Draggable>
       </div>
@@ -169,4 +178,4 @@ const ShareView = forwardRef((props: ShareViewProps, ref: any) => {
   );
 });
 
-export default ShareView;
+export default SingleShareView;
