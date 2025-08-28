@@ -1,6 +1,6 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "2.2.5",
+  "version": "2.2.10",
   "private": true,
   "dependencies": {
    "@ant-design/icons": "4.7.0",
