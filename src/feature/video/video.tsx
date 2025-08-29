@@ -14,7 +14,7 @@ import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useAvatarAction } from './hooks/useAvatarAction';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import ReportBtn from './components/report-btn';
-import ShareView from './components/share-view';
+import ShareView from './components/share-view/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
 import { SELF_VIDEO_ID } from './video-constants';
 import { useCleanUp } from './hooks/useCleanUp';

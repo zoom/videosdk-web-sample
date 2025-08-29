@@ -60,8 +60,6 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isSupportPhone, setIsSupportPhone] = useState(false);
   const [phoneCountryList, setPhoneCountryList] = useState<any[]>([]);
   const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
-  const [isStartedLiveTranscription, setIsStartedLiveTranscription] = useState(false);
-  const [isDisableCaptions, setIsDisableCaptions] = useState(false);
   const [isBlur, setIsBlur] = useState(mediaStream?.getVirtualbackgroundStatus().imageSrc === 'blur');
   const [isMuted, setIsMuted] = useState(!!zmClient.getCurrentUserInfo()?.muted);
   const [activeMicrophone, setActiveMicrophone] = useState(mediaStream?.getActiveMicrophone());
@@ -74,7 +72,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [selecetedStatisticTab, setSelectedStatisticTab] = useState('audio');
   const [isComputerAudioDisabled, setIsComputerAudioDisabled] = useState(false);
   const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
-  const [caption, setCaption] = useState({ text: '', isOver: false });
+  const [caption, setCaption] = useState({ text: '', isOver: false, displayName: '' });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
   const [activeVideoProcessor, setActiveVideoProcessor] = useState<Processor | undefined>();
   const [activeAudioProcessorList, setActiveAudioProcessorList] = useState<Processor[]>([]);
@@ -363,31 +361,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     }
   }, [mediaStream, selfShareCanvas, searchParams]);
 
-  const onLiveTranscriptionClick = useCallback(async () => {
-    if (isDisableCaptions) {
-      message.info('Captions has been disable by host.');
-    } else if (isStartedLiveTranscription) {
-      message.info('Live transcription has started.');
-    } else if (!isStartedLiveTranscription) {
-      await liveTranscriptionClient?.startLiveTranscription();
-      setIsStartedLiveTranscription(true);
-    }
-  }, [isStartedLiveTranscription, isDisableCaptions, liveTranscriptionClient]);
-
-  const onDisableCaptions = useCallback(
-    async (disable: boolean) => {
-      if (disable && !isDisableCaptions) {
-        await liveTranscriptionClient?.disableCaptions(disable);
-        setIsStartedLiveTranscription(false);
-        setIsDisableCaptions(true);
-      } else if (!disable && isDisableCaptions) {
-        await liveTranscriptionClient?.disableCaptions(disable);
-        setIsDisableCaptions(false);
-      }
-    },
-    [isDisableCaptions, liveTranscriptionClient]
-  );
-
   const onLeaveClick = useCallback(async () => {
     await zmClient.leave();
   }, [zmClient]);
@@ -486,26 +459,13 @@ const VideoFooter = (props: VideoFooterProps) => {
     [mediaStream]
   );
 
-  const onCaptionStatusChange = useCallback((payload: any) => {
-    const { autoCaption } = payload;
-    if (autoCaption) {
-      message.info('Auto live transcription enabled!');
-    }
-  }, []);
-
   const onCaptionMessage = useCallback((payload: any) => {
-    const { text, done } = payload;
+    const { text, done, displayName } = payload;
     setCaption({
       text,
-      isOver: done
+      isOver: done,
+      displayName
     });
-  }, []);
-
-  const onCaptionDisable = useCallback((payload: any) => {
-    setIsDisableCaptions(payload);
-    if (payload) {
-      setIsStartedLiveTranscription(false);
-    }
   }, []);
 
   const onCanSeeMyScreen = useCallback(() => {
@@ -616,9 +576,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('share-audio-change', onShareAudioChange);
     zmClient.on('host-ask-unmute-audio', onHostAskToUnmute);
-    zmClient.on('caption-status', onCaptionStatusChange);
     zmClient.on('caption-message', onCaptionMessage);
-    zmClient.on('caption-host-disable', onCaptionDisable);
     zmClient.on('share-can-see-screen', onCanSeeMyScreen);
     zmClient.on('live-stream-status', onLiveStreamStatusChange);
     zmClient.on('video-screenshot-taken', onVideoScreenshotTaken);
@@ -633,9 +591,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('share-audio-change', onShareAudioChange);
       zmClient.off('host-ask-unmute-audio', onHostAskToUnmute);
-      zmClient.off('caption-status', onCaptionStatusChange);
       zmClient.off('caption-message', onCaptionMessage);
-      zmClient.off('caption-host-disable', onCaptionDisable);
       zmClient.off('share-can-see-screen', onCanSeeMyScreen);
       zmClient.off('live-stream-status', onLiveStreamStatusChange);
       zmClient.off('video-screenshot-taken', onVideoScreenshotTaken);
@@ -651,11 +607,9 @@ const VideoFooter = (props: VideoFooterProps) => {
     onDialOutChange,
     onShareAudioChange,
     onHostAskToUnmute,
-    onCaptionStatusChange,
     onCaptionMessage,
     onCanSeeMyScreen,
     onRecordingISOChange,
-    onCaptionDisable,
     onLiveStreamStatusChange,
     onVideoScreenshotTaken,
     onShareViewScreenshotTaken,
@@ -773,14 +727,8 @@ const VideoFooter = (props: VideoFooterProps) => {
         })}
       {liveTranscriptionClient?.getLiveTranscriptionStatus().isLiveTranscriptionEnabled && (
         <>
-          <LiveTranscriptionButton
-            isStartedLiveTranscription={isStartedLiveTranscription}
-            isDisableCaptions={isDisableCaptions}
-            isHost={zmClient.isHost()}
-            onDisableCaptions={onDisableCaptions}
-            onLiveTranscriptionClick={onLiveTranscriptionClick}
-          />
-          <TranscriptionSubtitle text={caption.text} />
+          <LiveTranscriptionButton isHost={zmClient.isHost()} />
+          <TranscriptionSubtitle text={caption.text} displayName={caption.displayName} />
         </>
       )}
       {/* Live stream */}

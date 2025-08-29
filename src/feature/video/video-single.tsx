@@ -7,7 +7,7 @@ import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
 import Avatar from './components/avatar';
 import VideoFooter from './components/video-footer';
-import ShareView from './components/share-view';
+import ShareView from './components/share-view/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
 import ReportBtn from './components/report-btn';
 import { useParticipantsChange } from './hooks/useParticipantsChange';

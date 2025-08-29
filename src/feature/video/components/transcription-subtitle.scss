@@ -1,7 +1,8 @@
 .transcript-subtitle{
   position: fixed;
   bottom: 10vh;
-  width: 100vw;
+  width: 60vw;
+  left: 20vw;
   min-height: 50px;
   background: rgba(255,255,255,0.2);
   display: none;
@@ -10,11 +11,20 @@
   &.transcript-subtitle-show{
     display: flex;
   }
+  &-name {
+    color: #CADCAE;
+    font-size: 14px;
+    max-width: 10vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 10px;
+  }
   &-message {
     color: #fff;
     font-size: 16px;
     display: flex;
-    width: 50vw;
+    flex-grow: 1;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
