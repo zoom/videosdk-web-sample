@@ -35,7 +35,7 @@ const avatarActionReducer = produce((draft, action) => {
         audio === 'computer' && !isSpeakerOnly && currentUserId !== userId && !isAndroidOrIOSBrowser();
       if (Object.prototype.hasOwnProperty.call(draft, `${userId}`)) {
         const element = draft[`${userId}`];
-        element.localVolumeAdjust.enabled = audio === 'computer' && !isSpeakerOnly && currentUserId !== userId;
+        element.localVolumeAdjust.enabled = isLocalVolumeAdjust;
         element.farEndCameraControl.enabled = bVideoOn && currentUserId !== userId;
         element.videoResolutionAdjust.enabled = isUnifiedRender && bVideoOn && currentUserId !== userId;
       } else {

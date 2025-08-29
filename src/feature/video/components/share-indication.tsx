@@ -2,11 +2,13 @@ import Draggable from 'react-draggable';
 import { useState, useRef, useContext } from 'react';
 import classNames from 'classnames';
 import { Dropdown, Modal, Button } from 'antd';
+import { useSearchParams } from 'react-router';
 import { CheckOutlined, DownOutlined } from '@ant-design/icons';
 import ZoomMediaContext from '../../../context/media-context';
 import type { Participant } from '../../../index-types';
 import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import { IconFont } from '../../../component/icon-font';
+
 import './share-indication.scss';
 interface ShareIndicationBarProps {
   shareUserList: Array<Participant> | undefined;
@@ -14,12 +16,15 @@ interface ShareIndicationBarProps {
   isControllingUser?: boolean;
   viewType: string;
   setViewType: (viewtype: string) => void;
+  setActiveSharingId: (userId: number) => void;
 }
 const ShareIndicationBar = (props: ShareIndicationBarProps) => {
-  const { shareUserList, activeSharingId, isControllingUser, viewType, setViewType } = props;
+  const { shareUserList, activeSharingId, isControllingUser, viewType, setViewType, setActiveSharingId } = props;
   const draggableRef = useRef(null);
   const { mediaStream } = useContext(ZoomMediaContext);
   const [mutedShareAudioList, setMutedShareAudioList] = useState<number[]>([]);
+  const [searchParams] = useSearchParams();
+  const isVideoPlayer = searchParams.get('useVideoPlayer') === '1';
   const activeUser = (shareUserList ?? []).find((user) => user.userId === activeSharingId);
   const menuItems = [
     getAntdItem(
@@ -64,7 +69,7 @@ const ShareIndicationBar = (props: ShareIndicationBarProps) => {
       )
     );
   }
-  const onMenuClick = (payload: { key: string }) => {
+  const onMenuClick = async (payload: { key: string }) => {
     const { key } = payload;
     if (key.startsWith('view|')) {
       const [, type] = key.split('|');
@@ -72,7 +77,11 @@ const ShareIndicationBar = (props: ShareIndicationBarProps) => {
     } else if (key.startsWith('share|')) {
       const [, shareUserId] = key.split('|');
       if (Number(shareUserId) !== activeSharingId) {
-        mediaStream?.switchShareView(Number(shareUserId));
+        if (isVideoPlayer) {
+          setActiveSharingId(Number(shareUserId));
+        } else {
+          await mediaStream?.switchShareView(Number(shareUserId));
+        }
       }
     } else if (key === 'share audio') {
       if (mediaStream?.isOthersShareAudioMutedLocally(activeSharingId)) {
