@@ -1,13 +1,13 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "2.2.12",
+  "version": "2.3.0",
   "private": true,
   "dependencies": {
-   "@ant-design/icons": "4.7.0",
+    "@ant-design/icons": "4.7.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
-    "@zoom/videosdk": "2.2.12",
+    "@zoom/videosdk": "2.3.0",
     "antd": "^4.24.3",
     "classnames": "^2.2.6",
     "crypto-js": "^4.0.0",
@@ -28,7 +28,7 @@
     "test": "vitest",
     "trace-error": "tsc --traceResolution"
   },
-   "eslintConfig": {
+  "eslintConfig": {
     "extends": [
       "eslint-config-alloy/react"
     ]
@@ -64,7 +64,8 @@
     "eslint-config-alloy": "^5.1.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-     "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "glob": "^11.0.3",
     "jsdom": "^26.1.0",
     "nth-check": "^2.1.1",

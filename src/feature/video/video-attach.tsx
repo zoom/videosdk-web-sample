@@ -1,4 +1,4 @@
-import { useState, useContext, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useContext, useRef, useEffect, useCallback } from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import classnames from 'classnames';
 import _ from 'lodash';
@@ -100,14 +100,17 @@ const VideoContainer = () => {
   const setVideoPlayerRef = (userId: number, element: VideoPlayer | null) => {
     if (element) {
       videoPlayerListRef.current[`${userId}`] = element;
+    } else {
+      delete videoPlayerListRef.current[`${userId}`];
     }
   };
   useEffect(() => {
     const addedUsers = subscribers.filter((user) => !(previousSubscribers || []).includes(user));
     const removedUsers = (previousSubscribers || []).filter((user) => !subscribers.includes(user));
     if (removedUsers.length > 0) {
-      removedUsers.forEach((userId) => {
-        mediaStream?.detachVideo(userId);
+      removedUsers.forEach(async (userId) => {
+        await mediaStream?.detachVideo(userId);
+        delete videoPlayerListRef.current[`${userId}`];
       });
     }
     if (addedUsers.length > 0) {
@@ -127,6 +130,7 @@ const VideoContainer = () => {
       }
     } else {
       mediaStream?.detachVideo(currentUser?.userId);
+      delete videoPlayerListRef.current[`${currentUser?.userId}`];
     }
   }, [currentUser, mediaStream]);
 

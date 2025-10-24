@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useContext, useRef } from 'react';
-import { Modal, Table, Tabs } from 'antd';
+import { Modal, Table, Tabs, Badge } from 'antd';
 import type { AudioQosData, VideoQosData } from '@zoom/videosdk';
 import ZoomContext from '../../../context/zoom-context';
 import MediaContext from '../../../context/media-context';
@@ -16,6 +16,12 @@ interface ExtendedAudioQosData extends AudioQosData {
   timestamp: number;
 }
 interface ExtendedVideoQosData extends VideoQosData {
+  timestamp: number;
+}
+interface SystemResourceUsageData {
+  cpu_usage?: {
+    system_cpu_pressure_level?: number;
+  };
   timestamp: number;
 }
 
@@ -122,6 +128,24 @@ const VideoQosDataShape = {
   bandwidth: 0,
   bitrate: 0
 };
+const getCPUStatusInfo = (pressureLevel?: number) => {
+  if (pressureLevel === undefined) {
+    return { status: 'default', color: '#d9d9d9', text: 'N/A' };
+  }
+
+  switch (pressureLevel) {
+    case 0:
+      return { status: 'success', color: '#52c41a', text: 'Low' };
+    case 1:
+      return { status: 'warning', color: '#faad14', text: 'Medium' };
+    case 2:
+      return { status: 'warning', color: '#fa8c16', text: 'High' };
+    case 3:
+      return { status: 'error', color: '#ff4d4f', text: 'Critical' };
+    default:
+      return { status: 'default', color: '#d9d9d9', text: 'Unknown' };
+  }
+};
 const getDataSouce = (
   streamMertics: typeof AudioMetrics | typeof VideoMetrics,
   encodingData: ExtendedAudioQosData | ExtendedVideoQosData | undefined,
@@ -184,6 +208,7 @@ const AudioVideoStatisticModal = (props: AudioVideoStatisticModalProps) => {
   const [videoDecodingStatistic, setVideoDecodingStatistic] = useState<ExtendedVideoQosData>();
   const [shareEncodingStatistic, setShareEncodingStatistic] = useState<ExtendedVideoQosData>();
   const [shareDecodingStatistic, setShareDecodingStatistic] = useState<ExtendedVideoQosData>();
+  const [systemResourceUsage, setSystemResourceUsage] = useState<SystemResourceUsageData>();
   const timerRef = useRef(0);
   const onTabChange = (key: string) => {
     setTab(key);
@@ -219,6 +244,15 @@ const AudioVideoStatisticModal = (props: AudioVideoStatisticModalProps) => {
       setShareDecodingStatistic({ ...restProps, timestamp: Date.now() });
     }
   }, []);
+  const onWebRTCStatisticChange = useCallback((payload: any) => {
+    console.log('WebRTC statistic:', payload);
+  }, []);
+  const onSystemResourceUsageChange = useCallback((payload: any) => {
+    setSystemResourceUsage({
+      ...payload,
+      timestamp: Date.now()
+    });
+  }, []);
   const audioDataSource = getDataSouce(AudioMetrics, audioEncodingStatistic, audioDecodingStatistic);
   const videoDataSource = getDataSouce(VideoMetrics, videoEncodingStatistic, videoDecodingStatistic);
   const shareDataSource = getDataSouce(VideoMetrics, shareEncodingStatistic, shareDecodingStatistic);
@@ -226,24 +260,39 @@ const AudioVideoStatisticModal = (props: AudioVideoStatisticModalProps) => {
     zmclient.on('audio-statistic-data-change', onAudioStatisticChange);
     zmclient.on('video-statistic-data-change', onVideoStatisticChange);
     zmclient.on('share-statistic-data-change', onShareStatisticChange);
+    zmclient.on('webrtc-stats-report-data-change', onWebRTCStatisticChange);
+    zmclient.on('system-resource-usage-change', onSystemResourceUsageChange);
     return () => {
       zmclient.off('audio-statistic-data-change', onAudioStatisticChange);
       zmclient.off('video-statistic-data-change', onVideoStatisticChange);
       zmclient.off('share-statistic-data-change', onShareStatisticChange);
+      zmclient.off('webrtc-stats-report-data-change', onWebRTCStatisticChange);
+      zmclient.off('system-resource-usage-change', onSystemResourceUsageChange);
     };
-  }, [zmclient, onAudioStatisticChange, onVideoStatisticChange, onShareStatisticChange]);
+  }, [
+    zmclient,
+    onAudioStatisticChange,
+    onVideoStatisticChange,
+    onShareStatisticChange,
+    onWebRTCStatisticChange,
+    onSystemResourceUsageChange
+  ]);
 
   useEffect(() => {
     if (visible && mediaStream && zmclient.getSessionInfo().isInMeeting) {
       mediaStream.subscribeAudioStatisticData();
       mediaStream.subscribeVideoStatisticData();
       mediaStream.subscribeShareStatisticData();
+      mediaStream.subscribeWebRTCStatsReportData();
+      mediaStream.subscribeSystemResourceUsage();
     }
     return () => {
       if (zmclient.getSessionInfo().isInMeeting) {
         mediaStream?.unsubscribeAudioStatisticData();
         mediaStream?.unsubscribeVideoStatisticData();
         mediaStream?.unsubscribeShareStatisticData();
+        mediaStream?.unsubscribeWebRTCStatsReportData();
+        mediaStream?.unsubscribeSystemResourceUsage();
       }
     };
   }, [mediaStream, zmclient, visible]);
@@ -345,6 +394,56 @@ const AudioVideoStatisticModal = (props: AudioVideoStatisticModalProps) => {
           </TabPane>
           <TabPane tab="Share" key="share">
             <Table dataSource={shareDataSource} columns={columns} pagination={false} />
+          </TabPane>
+          <TabPane tab="System" key="system">
+            <div style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600' }}>CPU Usage</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '14px', color: '#666' }}>CPU Pressure Level:</span>
+                  {(() => {
+                    const cpuPressureLevel = systemResourceUsage?.cpu_usage?.system_cpu_pressure_level;
+                    const statusInfo = getCPUStatusInfo(cpuPressureLevel);
+                    return (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Badge status={statusInfo.status as any} color={statusInfo.color} />
+                        <span
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: statusInfo.color
+                          }}
+                        >
+                          {statusInfo.text}
+                        </span>
+                        <span style={{ fontSize: '12px', color: '#999', marginLeft: '8px' }}>
+                          (Level: {cpuPressureLevel !== undefined ? cpuPressureLevel : 'N/A'})
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: '#999',
+                  marginTop: '20px',
+                  padding: '12px',
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: '6px'
+                }}
+              >
+                <strong>CPU Pressure Levels:</strong>
+                <br />
+                • Level 0: Low pressure (optimal)
+                <br />
+                • Level 1: Medium pressure
+                <br />
+                • Level 2: High pressure
+                <br />• Level 3: Critical pressure
+              </div>
+            </div>
           </TabPane>
         </Tabs>
       </div>
