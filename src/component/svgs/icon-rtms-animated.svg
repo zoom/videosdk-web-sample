@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" width="120" height="96" stroke-linecap="round" stroke-linejoin="round" fill="none">
+  <!-- Monitor frame -->
+  <rect x="10" y="15" width="60" height="40" rx="4" ry="4" stroke="#000" stroke-width="3"/>
+  <!-- Stand -->
+  <rect x="35" y="55" width="10" height="6" fill="none" stroke="#000" stroke-width="3"/>
+  <rect x="28" y="61" width="24" height="4" rx="2" fill="none" stroke="#000" stroke-width="3"/>
+
+  <!-- Play triangle -->
+  <polygon points="38,25 38,45 54,35" fill="none" stroke="#000" stroke-width="3"/>
+
+  <!-- Real-time wave animations -->
+  <g stroke-width="3" stroke="url(#waveGradient)">
+    <defs>
+      <linearGradient id="waveGradient" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#00b4ff"/>
+        <stop offset="100%" stop-color="#00ffcc"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Inner wave -->
+    <path d="M75 35 q5 5 0 10" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="0s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Middle wave -->
+    <path d="M80 33 q8 7 0 14" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="0.2s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Outer wave -->
+    <path d="M85 30 q11 10 0 20" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="0.4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

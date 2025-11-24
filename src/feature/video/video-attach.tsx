@@ -1,31 +1,31 @@
 import { useState, useContext, useRef, useEffect, useCallback } from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import classnames from 'classnames';
+import { Radio } from 'antd';
 import _ from 'lodash';
 import { type VideoPlayer, VideoQuality } from '@zoom/videosdk';
+import type { Participant } from '../../index-types';
 import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
 import ShareView from './components/share-view/share-view';
 import Pagination from './components/pagination';
-import { usePagination } from './hooks/useAttachPagination';
 import VideoFooter from './components/video-footer';
 import ReportBtn from './components/report-btn';
 import Avatar from './components/avatar';
+import Draggable from './components/draggable';
+import RemoteCameraControlPanel from './components/remote-camera-control';
+import WhiteboardView from './components/whiteboard-view';
 import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useAvatarAction } from './hooks/useAvatarAction';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
-import type { Participant } from '../../index-types';
 import { usePrevious } from '../../hooks';
 import { useVideoAspect } from './hooks/useVideoAspectRatio';
 import { useGridLayout } from './hooks/useGridLayout';
 import { useVideoGridStyle } from './hooks/useVideoGridStyle';
-import { Radio } from 'antd';
-// import Draggable from 'react-draggable';
-import Draggable from './components/draggable';
+import { usePagination } from './hooks/useAttachPagination';
 import { useSpotlightVideo } from './hooks/useSpotlightVideo';
-import RemoteCameraControlPanel from './components/remote-camera-control';
 import { isAndroidOrIOSBrowser } from '../../utils/platform';
 
 interface ExtendedParticipant extends Participant {
@@ -38,6 +38,7 @@ const VideoContainer = () => {
   const zmClient = useContext(ZoomContext);
   const { page, pageSize, totalPage, setPage } = usePagination(zmClient, preferPageCount || 4);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
+  const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
 
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
@@ -46,6 +47,7 @@ const VideoContainer = () => {
   const [currentPageParticipants, setCurrentPageParticipants] = useState<Participant[]>([]);
   const [currentUser, setCurrentUser] = useState<Participant>(zmClient.getCurrentUserInfo());
   const [subscribers, setSubscribers] = useState<number[]>([]);
+  const [isWhiteboardInProgress, setIsWhiteboardInProgress] = useState(false);
   const activeVideo = useActiveVideo(zmClient);
   const avatarActionState = useAvatarAction(zmClient, participants, true);
   const networkQuality = useNetworkQuality(zmClient);
@@ -142,7 +144,7 @@ const VideoContainer = () => {
     [videoPlayerListRef, mediaStream]
   );
   const { gridColumns, gridRows } = useGridLayout({
-    isRecieveSharing,
+    isRecieveSharingOrWhiteboard: isRecieveSharing || isWhiteboardInProgress,
     spotlightUsers,
     pageSize,
     currentPageParticipants
@@ -154,12 +156,7 @@ const VideoContainer = () => {
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
-      {/* <div
-        className="unified-self-view"
-        style={{
-          width: isAndroidOrIOSBrowser() ? '50vw' : '30vw'
-        }}
-      > */}
+      <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <Draggable
         className="unified-self-view"
         customstyle={{
@@ -192,8 +189,8 @@ const VideoContainer = () => {
       {/* </div> */}
 
       <div
-        className={classnames('video-container', 'video-container-attech', {
-          'video-container-in-sharing': isRecieveSharing
+        className={classnames('video-container', 'video-container-attach', {
+          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
         })}
       >
         <video-player-container class="video-container-wrap">
@@ -256,8 +253,20 @@ const VideoContainer = () => {
           </AvatarActionContext.Provider>
         </video-player-container>
       </div>
-      <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
-      {totalPage > 1 && <Pagination page={page} totalPage={totalPage} setPage={setPage} inSharing={isRecieveSharing} />}
+      <VideoFooter
+        className="video-operations"
+        whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
+        sharing
+        selfShareCanvas={shareViewRef.current?.selfShareRef}
+      />
+      {totalPage > 1 && (
+        <Pagination
+          page={page}
+          totalPage={totalPage}
+          setPage={setPage}
+          inSharing={isRecieveSharing || isWhiteboardInProgress}
+        />
+      )}
       <ReportBtn />
     </div>
   );

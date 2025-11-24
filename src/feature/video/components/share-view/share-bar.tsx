@@ -3,12 +3,12 @@ import { Button, Popconfirm, Dropdown } from 'antd';
 import classNames from 'classnames';
 import { useState, useEffect, useContext, useCallback, useRef, forwardRef } from 'react';
 import { SmallDashOutlined, CheckOutlined } from '@ant-design/icons';
-import { IconFont } from '../../../component/icon-font';
-import ZoomMediaContext from '../../../context/media-context';
-import ZoomContext from '../../../context/zoom-context';
+import { IconFont } from '../../../../component/icon-font';
+import ZoomMediaContext from '../../../../context/media-context';
+import ZoomContext from '../../../../context/zoom-context';
 import { ShareStatus } from '@zoom/videosdk';
-import { SHARE_CANVAS_ID } from '../video-constants';
-import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
+import { SHARE_CANVAS_ID } from '../../video-constants';
+import { getAntdDropdownMenu, getAntdItem } from '../video-footer-utils';
 import './share-bar.scss';
 
 const { Button: DropdownButton } = Dropdown;
