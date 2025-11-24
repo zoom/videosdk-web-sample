@@ -5,17 +5,18 @@ import ZoomContext from '../../context/zoom-context';
 import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
 import Avatar from './components/avatar';
+import ReportBtn from './components/report-btn';
+import RemoteCameraControlPanel from './components/remote-camera-control';
 import VideoFooter from './components/video-footer';
 import Pagination from './components/pagination';
+import ShareView from './components/share-view/share-view';
+import WhiteboardView from './components/whiteboard-view';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
 import { useGalleryLayout } from './hooks/useGalleryLayout';
 import { usePagination } from './hooks/usePagination';
 import { useActiveVideo } from './hooks/useAvtiveVideo';
 import { useAvatarAction } from './hooks/useAvatarAction';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
-import ReportBtn from './components/report-btn';
-import ShareView from './components/share-view/share-view';
-import RemoteCameraControlPanel from './components/remote-camera-control';
 import { SELF_VIDEO_ID } from './video-constants';
 import { useCleanUp } from './hooks/useCleanUp';
 
@@ -28,7 +29,9 @@ const VideoContainer = () => {
   } = useContext(ZoomMediaContext);
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
+  const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
+  const [isWhiteboardInProgress, setIsWhiteboardInProgress] = useState(false);
   const canvasDimension = useCanvasDimension(mediaStream, videoRef);
   const activeVideo = useActiveVideo(zmClient);
   const { page, pageSize, totalPage, totalSize, setPage } = usePagination(zmClient, canvasDimension);
@@ -64,9 +67,10 @@ const VideoContainer = () => {
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
+      <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <div
         className={classnames('video-container', {
-          'video-container-in-sharing': isRecieveSharing
+          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
@@ -115,9 +119,21 @@ const VideoContainer = () => {
           {zmClient.getSessionInfo()?.isInMeeting && <RemoteCameraControlPanel />}
         </AvatarActionContext.Provider>
       </div>
-      <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
+      <VideoFooter
+        className="video-operations"
+        sharing
+        selfShareCanvas={shareViewRef.current?.selfShareRef}
+        whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
+      />
 
-      {totalPage > 1 && <Pagination page={page} totalPage={totalPage} setPage={setPage} inSharing={isRecieveSharing} />}
+      {totalPage > 1 && (
+        <Pagination
+          page={page}
+          totalPage={totalPage}
+          setPage={setPage}
+          inSharing={isRecieveSharing || isWhiteboardInProgress}
+        />
+      )}
       <ReportBtn />
     </div>
   );

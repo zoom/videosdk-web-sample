@@ -1,7 +1,7 @@
 import { useRef, useContext, useCallback, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react';
 import classnames from 'classnames';
 import _ from 'lodash';
-import ShareBar from '../share-bar';
+import ShareBar from './share-bar';
 import ZoomContext from '../../../../context/zoom-context';
 import ZoomMediaContext from '../../../../context/media-context';
 import type { VideoPlayer } from '@zoom/videosdk';

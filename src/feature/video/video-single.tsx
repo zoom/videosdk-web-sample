@@ -7,9 +7,10 @@ import ZoomMediaContext from '../../context/media-context';
 import AvatarActionContext from './context/avatar-context';
 import Avatar from './components/avatar';
 import VideoFooter from './components/video-footer';
-import ShareView from './components/share-view/share-view';
 import RemoteCameraControlPanel from './components/remote-camera-control';
 import ReportBtn from './components/report-btn';
+import ShareView from './components/share-view/share-view';
+import WhiteboardView from './components/whiteboard-view';
 import { useParticipantsChange } from './hooks/useParticipantsChange';
 import { useCanvasDimension } from './hooks/useCanvasDimension';
 import type { Participant } from '../../index-types';
@@ -17,9 +18,9 @@ import { SELF_VIDEO_ID } from './video-constants';
 import { useNetworkQuality } from './hooks/useNetworkQuality';
 import { useAvatarAction } from './hooks/useAvatarAction';
 import { usePrevious } from '../../hooks';
-import './video.scss';
 import { isShallowEqual } from '../../utils/util';
 import { useCleanUp } from './hooks/useCleanUp';
+import './video.scss';
 const VideoContainer = () => {
   const zmClient = useContext(ZoomContext);
   const {
@@ -30,7 +31,9 @@ const VideoContainer = () => {
   const selfVideoCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const selfVideoRef = useRef<HTMLVideoElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
+  const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
   const [isRecieveSharing, setIsRecieveSharing] = useState(false);
+  const [isWhiteboardInProgress, setIsWhiteboardInProgress] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeVideo, setActiveVideo] = useState<number>(mediaStream?.getActiveVideoId() ?? 0);
   const previousActiveUser = useRef<Participant>();
@@ -155,9 +158,10 @@ const VideoContainer = () => {
   return (
     <div className="viewport">
       <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
+      <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <div
         className={classnames('video-container', 'single-video-container', {
-          'video-container-in-sharing': isRecieveSharing
+          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
         })}
       >
         {mediaStream?.isRenderSelfViewWithVideoElement() ? (
@@ -200,7 +204,12 @@ const VideoContainer = () => {
           </AvatarActionContext.Provider>
         </div>
       </div>
-      <VideoFooter className="video-operations" sharing selfShareCanvas={shareViewRef.current?.selfShareRef} />
+      <VideoFooter
+        className="video-operations"
+        sharing
+        selfShareCanvas={shareViewRef.current?.selfShareRef}
+        whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
+      />
       <ReportBtn />
     </div>
   );

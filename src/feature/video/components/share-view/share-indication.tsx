@@ -4,10 +4,10 @@ import classNames from 'classnames';
 import { Dropdown, Modal, Button } from 'antd';
 import { useSearchParams } from 'react-router';
 import { CheckOutlined, DownOutlined } from '@ant-design/icons';
-import ZoomMediaContext from '../../../context/media-context';
-import type { Participant } from '../../../index-types';
-import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
-import { IconFont } from '../../../component/icon-font';
+import ZoomMediaContext from '../../../../context/media-context';
+import type { Participant } from '../../../../index-types';
+import { getAntdDropdownMenu, getAntdItem } from '../video-footer-utils';
+import { IconFont } from '../../../../component/icon-font';
 
 import './share-indication.scss';
 interface ShareIndicationBarProps {

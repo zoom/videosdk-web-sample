@@ -4,8 +4,8 @@ import Draggable from 'react-draggable';
 import _ from 'lodash';
 import ZoomContext from '../../../../context/zoom-context';
 import ZoomMediaContext from '../../../../context/media-context';
-import ShareBar from '../share-bar';
-import ShareIndicationBar from '../share-indication';
+import ShareBar from './share-bar';
+import ShareIndicationBar from './share-indication';
 
 import { useShare } from '../../hooks/useShare';
 import { useRemoteControl } from '../../hooks/useRemoteControl';

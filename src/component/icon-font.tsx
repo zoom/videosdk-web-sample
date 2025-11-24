@@ -61,6 +61,9 @@ import { ReactComponent as IconAudioDisallow } from './svgs/audio/audio-disallow
 import { ReactComponent as IconAudioNoDevices } from './svgs/audio/audio-no-devices.svg';
 import { ReactComponent as IconStatistic } from './svgs/icon-statistic.svg';
 import { ReactComponent as IconChannel } from './svgs/icon-channel.svg';
+import { ReactComponent as IconWhiteboard } from './svgs/icon-whiteboard.svg';
+import { ReactComponent as IconRTMS } from './svgs/icon-rtms.svg';
+import { ReactComponent as IconRTMSAnimated } from './svgs/icon-rtms-animated.svg';
 const iconComponentMap: { [key: string]: any } = {
   'icon-advanced': IconAdvanced,
   'icon-chat': IconChat,
@@ -120,7 +123,10 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-audio-disallow': IconAudioDisallow,
   'icon-audio-no-devices': IconAudioNoDevices,
   'icon-channel': IconChannel,
-  'icon-statistic': IconStatistic
+  'icon-statistic': IconStatistic,
+  'icon-whiteboard': IconWhiteboard,
+  'icon-rtms': IconRTMS,
+  'icon-rtms-animated': IconRTMSAnimated
 };
 interface IconFontProps {
   type: string;

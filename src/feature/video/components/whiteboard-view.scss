@@ -1,0 +1,69 @@
+.whiteboard-view {
+  display: none;
+  position: relative;
+  &.whiteboard-view-in-progress {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #fff;
+  }
+  .whiteboard-indication-bar {
+    height: 32px;
+    position: absolute;
+    top: 0;
+    left: 30%;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    .whiteboard-indication-tip {
+      padding: 0 24px;
+      max-width: 480px;
+     
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: #0e72ed;
+      color: #fff;
+      cursor: ew-resize;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      border-bottom-left-radius: 6px;
+    }
+    .whiteboard-close-btn{
+      font-weight: 700;
+    }
+    .whiteboard-export-btn {
+      background-color: #722ED1;
+    }
+  }
+  .whiteboard-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    .whiteboard-loading-text {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #999;
+    }
+  }
+  // Hide loading when whiteboard-container has children
+  &:has(.whiteboard-container:not(:empty)) .whiteboard-loading {
+    display: none;
+  }
+  .whiteboard-container{
+    position: relative;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+  }
+}
