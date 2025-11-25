@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useScreenOrientation } from './useScreenOrientation';
 
 interface UseGridLayoutProps {
-  isRecieveSharing: boolean;
+  isRecieveSharingOrWhiteboard: boolean;
   spotlightUsers: number[];
   pageSize: number;
   currentPageParticipants: any[];
@@ -14,7 +14,7 @@ interface GridLayout {
 }
 
 export const useGridLayout = ({
-  isRecieveSharing,
+  isRecieveSharingOrWhiteboard,
   spotlightUsers,
   pageSize,
   currentPageParticipants
@@ -22,7 +22,7 @@ export const useGridLayout = ({
   const { isMobilePortrait } = useScreenOrientation();
 
   const gridColumns = useMemo(() => {
-    if (isRecieveSharing) return 1;
+    if (isRecieveSharingOrWhiteboard) return 1;
     if (spotlightUsers.length) {
       const spotlightCount = spotlightUsers.length;
       if (spotlightCount === 1) return 1;
@@ -48,10 +48,10 @@ export const useGridLayout = ({
     if (userCount <= 16) return 4;
     if (userCount <= 25) return 5;
     return Math.ceil(Math.sqrt(userCount));
-  }, [spotlightUsers, isRecieveSharing, currentPageParticipants.length, isMobilePortrait]);
+  }, [spotlightUsers, isRecieveSharingOrWhiteboard, currentPageParticipants.length, isMobilePortrait]);
 
   const gridRows = useMemo(() => {
-    if (isRecieveSharing) {
+    if (isRecieveSharingOrWhiteboard) {
       return pageSize;
     }
     if (spotlightUsers.length) {
@@ -74,7 +74,14 @@ export const useGridLayout = ({
     if (userCount <= 16) return 4;
     if (userCount <= 25) return 5;
     return Math.ceil(userCount / gridColumns);
-  }, [spotlightUsers, isRecieveSharing, pageSize, currentPageParticipants.length, gridColumns, isMobilePortrait]);
+  }, [
+    spotlightUsers,
+    isRecieveSharingOrWhiteboard,
+    pageSize,
+    currentPageParticipants.length,
+    gridColumns,
+    isMobilePortrait
+  ]);
 
   return {
     gridColumns,

@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router';
 import { SoundOutlined } from '@ant-design/icons';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
+import WhiteboardButton from './whiteboard';
 import MicrophoneButton from './microphone';
 import { ScreenShareButton } from './screen-share';
 import AudioVideoStatisticModal from './audio-video-statistic';
@@ -27,7 +28,8 @@ import {
   MobileVideoFacingMode,
   LiveStreamStatus,
   ShareStatus,
-  BroadcastStreamingStatus
+  BroadcastStreamingStatus,
+  RealTimeMediaStreamsStatus
 } from '@zoom/videosdk';
 import { LiveTranscriptionButton } from './live-transcription';
 import { LeaveButton } from './leave';
@@ -37,21 +39,28 @@ import { LiveStreamButton, LiveStreamModal } from './live-stream';
 import { IconFont } from '../../../component/icon-font';
 import { VideoMaskModel } from './video-mask-modal';
 import { useParticipantsChange } from '../hooks/useParticipantsChange';
+import {
+  getRealTimeMediaStreamsButtons,
+  type RTMSButtonProps,
+  RealTimeMediaStreamsButton
+} from './real-time-media-streams';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
+  whiteboardContainer?: HTMLDivElement | null;
   sharing?: boolean;
 }
 
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
-  const { className, selfShareCanvas, sharing } = props;
+  const { className, selfShareCanvas, sharing, whiteboardContainer } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
   const liveStreamClient = zmClient.getLiveStreamClient();
   const broadcastStreamClient = zmClient.getBroadcastStreamingClient();
   const recordingClient = zmClient.getRecordingClient();
+  const rtmsClient = zmClient.getRealTimeMediaStreamsClient();
   const [isStartedAudio, setIsStartedAudio] = useState(
     zmClient.getCurrentUserInfo() && zmClient.getCurrentUserInfo().audio !== ''
   );
@@ -80,6 +89,9 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [createdProcessorList, setCreatedProcessorList] = useState<Processor[]>([]);
   const [recordingStatus, setRecordingStatus] = useState<'' | RecordingStatus>(
     recordingClient?.getCloudRecordingStatus() || ''
+  );
+  const [rtmsStatus, setRtmsStatus] = useState<RealTimeMediaStreamsStatus>(
+    rtmsClient?.getRealTimeMediaStreamsStatus() || RealTimeMediaStreamsStatus.None
   );
   const [recordingIsoStatus, setRecordingIsoStatus] = useState<'' | RecordingStatus>('');
   const [liveStreamVisible, setLiveStreamVisible] = useState(false);
@@ -388,6 +400,9 @@ const VideoFooter = (props: VideoFooterProps) => {
   const onRecordingChange = useCallback(() => {
     setRecordingStatus(recordingClient?.getCloudRecordingStatus() || '');
   }, [recordingClient]);
+  const onRealTimeMediaStreamsStatusChange = useCallback((status: RealTimeMediaStreamsStatus) => {
+    setRtmsStatus(status);
+  }, []);
 
   const onRecordingISOChange = useCallback(
     (payload: any) => {
@@ -426,6 +441,32 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
       default: {
         await recordingClient?.startCloudRecording();
+      }
+    }
+  };
+  const onRealTimeMediaStreamsClick = async (key: string) => {
+    switch (key) {
+      case 'Start': {
+        await rtmsClient?.startRealTimeMediaStreams();
+        break;
+      }
+      case 'Resume': {
+        await rtmsClient?.resumeRealTimeMediaStreams();
+        break;
+      }
+      case 'Stop': {
+        await rtmsClient?.stopRealTimeMediaStreams();
+        break;
+      }
+      case 'Pause': {
+        await rtmsClient?.pauseRealTimeMediaStreams();
+        break;
+      }
+      case 'Status': {
+        break;
+      }
+      default: {
+        await rtmsClient?.startRealTimeMediaStreams();
       }
     }
   };
@@ -572,6 +613,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('passively-stop-share', onPassivelyStopShare);
     zmClient.on('device-change', onDeviceChange);
     zmClient.on('recording-change', onRecordingChange);
+    zmClient.on('real-time-media-streams-status-change', onRealTimeMediaStreamsStatusChange);
     zmClient.on('individual-recording-change', onRecordingISOChange);
     zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('share-audio-change', onShareAudioChange);
@@ -587,6 +629,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('passively-stop-share', onPassivelyStopShare);
       zmClient.off('device-change', onDeviceChange);
       zmClient.off('recording-change', onRecordingChange);
+      zmClient.off('real-time-media-streams-status-change', onRealTimeMediaStreamsStatusChange);
       zmClient.off('individual-recording-change', onRecordingISOChange);
       zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('share-audio-change', onShareAudioChange);
@@ -613,7 +656,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     onLiveStreamStatusChange,
     onVideoScreenshotTaken,
     onShareViewScreenshotTaken,
-    onBroadcastStreamStatusChange
+    onBroadcastStreamStatusChange,
+    onRealTimeMediaStreamsStatusChange
   ]);
   useUnmount(() => {
     if (zmClient.getSessionInfo().isInMeeting) {
@@ -725,6 +769,18 @@ const VideoFooter = (props: VideoFooterProps) => {
             />
           );
         })}
+      {rtmsClient.isSupportRealTimeMediaStreams() &&
+        getRealTimeMediaStreamsButtons(rtmsStatus, zmClient.isHost()).map((button: RTMSButtonProps) => {
+          return (
+            <RealTimeMediaStreamsButton
+              key={button.text}
+              onClick={() => {
+                onRealTimeMediaStreamsClick(button.text);
+              }}
+              {...button}
+            />
+          );
+        })}
       {liveTranscriptionClient?.getLiveTranscriptionStatus().isLiveTranscriptionEnabled && (
         <>
           <LiveTranscriptionButton isHost={zmClient.isHost()} />
@@ -765,6 +821,10 @@ const VideoFooter = (props: VideoFooterProps) => {
           <SoundOutlined style={{ position: 'fixed', top: '45px', left: '10px', color: '#f60', fontSize: '24px' }} />
         </Tooltip>
       )}
+      <WhiteboardButton
+        isHostOrManager={zmClient.isHost() || zmClient.isManager()}
+        whiteboardCantainer={whiteboardContainer}
+      />
       <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
 
       <AudioVideoStatisticModal
