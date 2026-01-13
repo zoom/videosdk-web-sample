@@ -91,6 +91,12 @@ export default defineConfig({
           return 'assets/[name]-[hash].[ext]';
         }
       }
+    },
+    minify: 'terser',
+    terserOptions: {
+      mangle: {
+        keep_classnames: true
+      }
     }
   },
   server: {
