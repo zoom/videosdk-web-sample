@@ -1,0 +1,65 @@
+// Common annotation styles shared between components
+// This file should be imported (not used) to make styles available globally
+
+// Common annotation shape styles
+.anno-shape {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+
+  &.semi-fill {
+    background-color: #a1a1a1;
+  }
+
+  &.fill {
+    background-color: #fff;
+  }
+
+  &.vanishing {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.7);
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.3) 2px,
+      rgba(255, 255, 255, 0.3) 4px
+    );
+    opacity: 0.8;
+    animation: vanishing-fade 2s ease-in-out infinite alternate;
+  }
+}
+
+// Common icon styles
+.anno-rectangle-icon {
+  width: 20px;
+  height: 14px;
+}
+
+.anno-ellipse-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.anno-diamond-icon {
+  transform: rotate(45deg);
+}
+
+// Common palette color style
+.anno-palette-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+// Common animations
+@keyframes vanishing-fade {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}

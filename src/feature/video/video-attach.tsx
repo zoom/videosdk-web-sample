@@ -41,7 +41,7 @@ const VideoContainer = () => {
   const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
 
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
-  const [isRecieveSharing, setIsRecieveSharing] = useState(false);
+  const [isShareViewActive, setIsShareViewActive] = useState(false);
   const [spotlightUsers, setSpotlightUsers] = useState<number[]>([]);
   const [participants, setParticipants] = useState<ExtendedParticipant[]>([]);
   const [currentPageParticipants, setCurrentPageParticipants] = useState<Participant[]>([]);
@@ -144,7 +144,7 @@ const VideoContainer = () => {
     [videoPlayerListRef, mediaStream]
   );
   const { gridColumns, gridRows } = useGridLayout({
-    isRecieveSharingOrWhiteboard: isRecieveSharing || isWhiteboardInProgress,
+    isRecieveSharingOrWhiteboard: isShareViewActive || isWhiteboardInProgress,
     spotlightUsers,
     pageSize,
     currentPageParticipants
@@ -155,7 +155,7 @@ const VideoContainer = () => {
   });
   return (
     <div className="viewport">
-      <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
+      <ShareView ref={shareViewRef} onShareViewActiveChange={setIsShareViewActive} />
       <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <Draggable
         className="unified-self-view"
@@ -190,7 +190,7 @@ const VideoContainer = () => {
 
       <div
         className={classnames('video-container', 'video-container-attach', {
-          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
+          'video-container-in-sharing': isShareViewActive || isWhiteboardInProgress
         })}
       >
         <video-player-container class="video-container-wrap">
@@ -256,7 +256,6 @@ const VideoContainer = () => {
       <VideoFooter
         className="video-operations"
         whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
-        sharing
         selfShareCanvas={shareViewRef.current?.selfShareRef}
       />
       {totalPage > 1 && (
@@ -264,7 +263,7 @@ const VideoContainer = () => {
           page={page}
           totalPage={totalPage}
           setPage={setPage}
-          inSharing={isRecieveSharing || isWhiteboardInProgress}
+          inSharing={isShareViewActive || isWhiteboardInProgress}
         />
       )}
       <ReportBtn />

@@ -32,7 +32,7 @@ const VideoContainer = () => {
   const selfVideoRef = useRef<HTMLVideoElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
   const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
-  const [isRecieveSharing, setIsRecieveSharing] = useState(false);
+  const [isShareViewActive, setIsShareViewActive] = useState(false);
   const [isWhiteboardInProgress, setIsWhiteboardInProgress] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeVideo, setActiveVideo] = useState<number>(mediaStream?.getActiveVideoId() ?? 0);
@@ -157,11 +157,11 @@ const VideoContainer = () => {
   useCleanUp(videoRef.current, zmClient, mediaStream);
   return (
     <div className="viewport">
-      <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
+      <ShareView ref={shareViewRef} onShareViewActiveChange={setIsShareViewActive} />
       <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <div
         className={classnames('video-container', 'single-video-container', {
-          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
+          'video-container-in-sharing': isShareViewActive || isWhiteboardInProgress
         })}
       >
         {mediaStream?.isRenderSelfViewWithVideoElement() ? (
@@ -206,7 +206,6 @@ const VideoContainer = () => {
       </div>
       <VideoFooter
         className="video-operations"
-        sharing
         selfShareCanvas={shareViewRef.current?.selfShareRef}
         whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
       />
