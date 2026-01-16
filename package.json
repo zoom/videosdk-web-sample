@@ -1,13 +1,13 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "2.3.5",
+  "version": "2.3.11",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "4.7.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
-    "@zoom/videosdk": "2.3.5",
+    "@zoom/videosdk": "2.3.11",
     "antd": "^4.24.3",
     "classnames": "^2.2.6",
     "crypto-js": "^4.0.0",
@@ -71,6 +71,7 @@
     "nth-check": "^2.1.1",
     "prettier": "^3.3.3",
     "sass": "^1.89.2",
+    "terser": "^5.43.1",
     "typescript": "^5.5.4",
     "vite": "^7.0.2",
     "vite-plugin-eslint": "^1.8.1",

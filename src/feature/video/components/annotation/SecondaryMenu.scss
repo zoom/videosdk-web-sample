@@ -1,0 +1,177 @@
+@use './annotation-common';
+
+.annotation-secondary-menu {
+  position: absolute;
+  left: 64px; // Position to the right of the main toolbar
+  z-index: 1001;
+  background-color: rgba(40, 40, 40, 0.95);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  color: #fff;
+  min-width: fit-content;
+  backdrop-filter: blur(10px);
+
+  .secondary-menu-section {
+    margin-bottom: 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .section-content {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      &.one-column {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      &.four-columns {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      &.five-columns {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      &.shapes-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+    }
+
+    .secondary-menu-btn {
+      // min-width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &:active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      &.secondary-menu-btn-selected {
+        background: #4096ff !important;
+
+        &:hover {
+          background: #1677ff !important;
+        }
+      }
+
+      .anticon {
+        font-size: 16px;
+      }
+
+      // Custom shape elements
+      .shape-rect,
+      .shape-rect-filled,
+      .shape-rect-solid {
+        width: 16px;
+        height: 12px;
+        border: 2px solid #fff;
+        background: transparent;
+      }
+
+      .shape-rect-filled {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .shape-rect-solid {
+        background: #fff;
+      }
+
+      .shape-circle,
+      .shape-circle-filled,
+      .shape-circle-solid {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: transparent;
+      }
+
+      .shape-circle-filled {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .shape-circle-solid {
+        background: #fff;
+      }
+
+      .shape-diamond,
+      .shape-diamond-filled,
+      .shape-diamond-solid {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #fff;
+        transform: rotate(45deg);
+        background: transparent;
+      }
+
+      .shape-diamond-filled {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .shape-diamond-solid {
+        background: #fff;
+      }
+    }
+
+    .shape-btn {
+      position: relative;
+      overflow: hidden;
+    }
+  }
+
+  .vanishing-timer-section {
+    min-width: 240px;
+
+    .slider-container {
+      padding: 0 8px;
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .ant-slider {
+        .ant-slider-rail {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .ant-slider-track {
+          background-color: #4096ff;
+        }
+
+        .ant-slider-handle {
+          &::after {
+            box-shadow: 0 0 0 2px #4096ff;
+          }
+        }
+      }
+    }
+  }
+}

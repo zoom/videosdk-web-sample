@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import type { ZoomClient, MediaStream, Participant } from '../../../index-types';
 import { useActiveMediaFailed } from './useActiveMediaFailed';
+import { ShareStatus } from '@zoom/videosdk';
 
 export function useMultiShare(zmClient: ZoomClient, mediaStream: MediaStream | null) {
-  const [isStartedShare, setIsStartedShare] = useState(false);
   const [isRecieveSharing, setIsReceiveSharing] = useState(false);
+  const [shareStatus, setShareStatus] = useState(mediaStream?.getShareStatus());
+
   const [shareUserList, setShareUserList] = useState<Array<Participant>>(
     mediaStream?.getShareUserList() as Participant[]
   );
+  const isStartedShare = useMemo(() => shareStatus !== ShareStatus.End, [shareStatus]);
   const [searchParams] = useSearchParams();
   useActiveMediaFailed(zmClient);
   const isSimultaneousShareView = searchParams.get('simultaneousShareView') === '1' && isStartedShare;
@@ -24,7 +27,7 @@ export function useMultiShare(zmClient: ZoomClient, mediaStream: MediaStream | n
               const userList = mediaStream.getShareUserList();
               setShareUserList(userList.filter((user) => user.userId !== currentUserId));
               if (isCurrentUser) {
-                setIsStartedShare(item.sharerOn);
+                setShareStatus(mediaStream.getShareStatus());
               }
             }
           }
@@ -58,7 +61,7 @@ export function useMultiShare(zmClient: ZoomClient, mediaStream: MediaStream | n
     }
   }, [zmClient, shareUserList, isSimultaneousShareView, isStartedShare]);
   return {
-    isStartedShare,
+    shareStatus,
     isRecieveSharing,
     shareUserList: isRecieveSharing ? shareUserList : []
   };

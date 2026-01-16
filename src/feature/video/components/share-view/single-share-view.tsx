@@ -2,24 +2,27 @@ import { useRef, useContext, useState, useCallback, useEffect, forwardRef, useIm
 import classnames from 'classnames';
 import Draggable from 'react-draggable';
 import _ from 'lodash';
+import { useSearchParams } from 'react-router';
+import { ShareStatus, type VideoPlayer } from '@zoom/videosdk';
 import ZoomContext from '../../../../context/zoom-context';
 import ZoomMediaContext from '../../../../context/media-context';
-import ShareBar from './share-bar';
-import ShareIndicationBar from './share-indication';
-
+import { usePrevious } from '../../../../hooks';
+import { isShallowEqual } from '../../../../utils/util';
+import { ShareViewType, SHARE_CANVAS_ID } from '../../video-constants';
 import { useShare } from '../../hooks/useShare';
 import { useRemoteControl } from '../../hooks/useRemoteControl';
-import { useMount, usePrevious, useSizeCallback } from '../../../../hooks';
-import { isShallowEqual } from '../../../../utils/util';
-import { ShareViewType } from '../../video-constants';
-import { useSearchParams } from 'react-router';
-import type { VideoPlayer } from '@zoom/videosdk';
+import { useAnnotation } from '../../hooks/useAnnotation';
+import { useShareViewSize } from '../../hooks/useShareViewSize';
+import ShareBar from './share-bar';
+import ShareIndicationBar from './share-indication';
+import { AnnotationButton, AnnotationToolbox } from '../annotation';
 import './share-view.scss';
 import type { ShareViewProps } from './share-view-types';
 
 const DragThreshod = 50;
+
 const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
-  const { onRecieveSharingChange } = props;
+  const { onShareViewActiveChange } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const selfShareViewRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(null);
@@ -27,40 +30,57 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const shareVideoPlayerRef = useRef<VideoPlayer | null>(null);
   const shareViewContainerRef = useRef<HTMLDivElement | null>(null);
   const shareViewViewportRef = useRef<HTMLDivElement | null>(null);
+  const selfShareViewContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [shareViewSize, setShareViewSize] = useState({ width: 0, height: 0 });
   const [viewType, setViewType] = useState<string>(ShareViewType.FitWindow);
+  const [showAnnotationToolbox, setShowAnnotationToolbox] = useState(false);
   const [originalViewPosition, setOriginalViewPosition] = useState({ x: 0, y: 0 });
-  const previousViewType = usePrevious(viewType);
-  const previousShareViewSize = usePrevious(shareViewSize);
-  const debounceRef = useRef(_.debounce(setContainerSize, 300));
+  const [isLargeSelfShareView, setIsLargeSelfShareView] = useState(false);
   const [searchParams] = useSearchParams();
   const isVideoPlayer = searchParams.get('useVideoPlayer') === '1';
-  const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId, setActiveSharingId } = useShare(
-    zmClient,
-    mediaStream,
-    isVideoPlayer ? shareVideoPlayerRef : shareCanvasRef
-  );
+  const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId, shareStatus, setActiveSharingId } =
+    useShare(zmClient, mediaStream, isVideoPlayer ? shareVideoPlayerRef : shareCanvasRef);
   const { isControllingUser, controllingUser } = useRemoteControl(
     zmClient,
     mediaStream,
     selfShareViewRef.current,
     isVideoPlayer ? shareVideoPlayerRef.current : shareCanvasRef.current
   );
-
-  const onContainerResize = useCallback(({ width, height }: any) => {
-    if (shareViewContainerRef.current) {
-      debounceRef.current({ width, height });
-    }
-  }, []);
-  useMount(() => {
-    if (shareViewContainerRef.current) {
-      const { width, height } = shareViewContainerRef.current.getBoundingClientRect();
-      setContainerSize({ width, height });
-    }
+  const { canAnnotation, canRedo, canUndo, isAnnotationStarted, onToggleAnnotation } = useAnnotation({
+    shareStatus,
+    isRecieveSharing,
+    activeSharingId
   });
-  useSizeCallback(shareViewContainerRef.current, onContainerResize);
+
+  // Use custom hook for share view size calculation
+  const { viewSize: shareViewSize } = useShareViewSize(
+    shareViewContainerRef,
+    isRecieveSharing,
+    sharedContentDimension,
+    viewType
+  );
+
+  // Use custom hook for self share view size calculation
+  const { viewSize: selfShareViewSize } = useShareViewSize(
+    selfShareViewContainerRef,
+    isLargeSelfShareView,
+    sharedContentDimension
+  );
+
+  const previousViewType = usePrevious(viewType);
+  const previousShareViewSize = usePrevious(shareViewSize);
+
+  const handleAnnotationToggle = useCallback(async () => {
+    if (!showAnnotationToolbox) {
+      // Starting annotation
+      await onToggleAnnotation();
+      setShowAnnotationToolbox(true);
+    } else {
+      // Stopping annotation
+      await onToggleAnnotation();
+      setShowAnnotationToolbox(false);
+    }
+  }, [showAnnotationToolbox, onToggleAnnotation]);
   const onShareViewDrag = useCallback(
     (_event: any, { x, y }: any) => {
       const { width, height } = sharedContentDimension;
@@ -85,32 +105,6 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
 
   useEffect(() => {
     if (
-      isRecieveSharing &&
-      shareViewContainerRef.current &&
-      containerSize.width > 0 &&
-      sharedContentDimension.width > 0
-    ) {
-      const { width, height } = sharedContentDimension;
-      const { width: containerWidth, height: containerHeight } = containerSize;
-      if (viewType === ShareViewType.FitWindow) {
-        const ratio = Math.min(containerWidth / width, containerHeight / height, 1);
-        setShareViewSize({
-          width: Math.floor(width * ratio),
-          height: Math.floor(height * ratio)
-        });
-      } else if (viewType === ShareViewType.OriginalSize) {
-        setShareViewSize({
-          width,
-          height
-        });
-      }
-    } else {
-      setShareViewSize({ width: 0, height: 0 });
-    }
-  }, [isRecieveSharing, sharedContentDimension, containerSize, viewType]);
-
-  useEffect(() => {
-    if (
       shareViewSize.width > 0 &&
       (!isShallowEqual(shareViewSize, previousShareViewSize) ||
         (previousViewType !== viewType && viewType === ShareViewType.OriginalSize))
@@ -125,11 +119,26 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
     };
   }, []);
   useEffect(() => {
-    onRecieveSharingChange(isRecieveSharing);
-  }, [isRecieveSharing, onRecieveSharingChange]);
+    if (isAnnotationStarted) {
+      if (shareStatus !== ShareStatus.End) {
+        setIsLargeSelfShareView(true);
+      }
+    } else {
+      setShowAnnotationToolbox(false);
+    }
+  }, [isAnnotationStarted, shareStatus]);
+  useEffect(() => {
+    if (shareStatus === ShareStatus.End) {
+      setIsLargeSelfShareView(false);
+      setShowAnnotationToolbox(false);
+    }
+  }, [shareStatus]);
+  useEffect(() => {
+    onShareViewActiveChange(isRecieveSharing || isLargeSelfShareView);
+  }, [isRecieveSharing, isLargeSelfShareView, onShareViewActiveChange]);
   return (
     <>
-      <ShareBar ref={selfShareViewRef} controllingUser={controllingUser} />
+      <ShareBar controllingUser={controllingUser} shareStatus={shareStatus} />
       <div
         className={classnames('share-view', {
           'share-view-in-sharing': isRecieveSharing,
@@ -174,6 +183,38 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
           </div>
         </Draggable>
       </div>
+      <div
+        className={classnames('self-share-view-container', { 'self-share-view-in-annotation': isLargeSelfShareView })}
+        ref={selfShareViewContainerRef}
+      >
+        <div
+          className="self-share-canvas-wrapper"
+          style={{
+            width: `${selfShareViewSize.width}px`,
+            height: `${selfShareViewSize.height}px`
+          }}
+        >
+          {mediaStream?.isStartShareScreenWithVideoElement() ? (
+            <video id={SHARE_CANVAS_ID} className="self-share-canvas" ref={selfShareViewRef} />
+          ) : (
+            <canvas id={SHARE_CANVAS_ID} className="self-share-canvas" ref={selfShareViewRef} />
+          )}
+        </div>
+      </div>
+      <AnnotationButton
+        showToolbox={showAnnotationToolbox}
+        onToggle={handleAnnotationToggle}
+        canAnnotation={canAnnotation}
+      />
+      {showAnnotationToolbox && (
+        <AnnotationToolbox
+          onClose={handleAnnotationToggle}
+          isPresenter={!isRecieveSharing}
+          isHost={zmClient.isHost()}
+          canRedo={canRedo}
+          canUndo={canUndo}
+        />
+      )}
     </>
   );
 });

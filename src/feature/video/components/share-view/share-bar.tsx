@@ -1,31 +1,32 @@
 import Draggable from 'react-draggable';
 import { Button, Popconfirm, Dropdown } from 'antd';
 import classNames from 'classnames';
-import { useState, useEffect, useContext, useCallback, useRef, forwardRef } from 'react';
+import { useState, useEffect, useContext, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { SmallDashOutlined, CheckOutlined } from '@ant-design/icons';
 import { IconFont } from '../../../../component/icon-font';
 import ZoomMediaContext from '../../../../context/media-context';
 import ZoomContext from '../../../../context/zoom-context';
 import { ShareStatus } from '@zoom/videosdk';
-import { SHARE_CANVAS_ID } from '../../video-constants';
 import { getAntdDropdownMenu, getAntdItem } from '../video-footer-utils';
 import './share-bar.scss';
+import { SHARE_CANVAS_ID } from '../../video-constants';
 
 const { Button: DropdownButton } = Dropdown;
 interface ShareBarProps {
   className?: string;
+  shareStatus?: ShareStatus;
   controllingUser?: { userId: number; displayName: string } | null;
 }
 
 const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
-  const { controllingUser } = props;
+  const { controllingUser, shareStatus } = props;
   const { mediaStream } = useContext(ZoomMediaContext);
   const zmClient = useContext(ZoomContext);
-  const [status, setStatus] = useState<ShareStatus | undefined>(mediaStream?.getShareStatus());
   const [hideShareAudioTooltip, setHideShareAudioTooltip] = useState(false);
   const [shareAudioStatus, setShareAudioStatus] = useState(mediaStream?.getShareAudioStatus());
   const [isVideoShare, setIsVideoShare] = useState(mediaStream?.isOptimizeForSharedVideoEnabled());
   const draggableRef = useRef<HTMLDivElement>(null);
+  const sharePreviewRef = useRef<HTMLVideoElement>(null);
   const onShareAudioChange = useCallback(() => {
     setShareAudioStatus(mediaStream?.getShareAudioStatus());
   }, [mediaStream]);
@@ -44,27 +45,18 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   }, [mediaStream, shareAudioStatus]);
 
   const onSharePauseClick = useCallback(() => {
-    if (status === ShareStatus.Paused) {
+    if (shareStatus === ShareStatus.Paused) {
       mediaStream?.resumeShareScreen();
-    } else if (status === ShareStatus.Sharing) {
+    } else if (shareStatus === ShareStatus.Sharing) {
       mediaStream?.pauseShareScreen();
     }
-  }, [mediaStream, status]);
-  const onShareStatusChange = useCallback(() => {
-    setTimeout(() => {
-      if (status !== mediaStream?.getShareStatus()) {
-        setStatus(mediaStream?.getShareStatus());
-      }
-    });
-  }, [status, mediaStream]);
+  }, [mediaStream, shareStatus]);
   useEffect(() => {
     zmClient.on('share-audio-change', onShareAudioChange);
-    zmClient.on('user-updated', onShareStatusChange);
     return () => {
       zmClient.off('share-audio-change', onShareAudioChange);
-      zmClient.off('user-updated', onShareStatusChange);
     };
-  }, [zmClient, onShareAudioChange, onShareStatusChange]);
+  }, [zmClient, onShareAudioChange]);
   const menuItems = [];
   if (mediaStream?.isSupportOptimizedForSharedVideo()) {
     menuItems.push(getAntdItem('Optimize for video clip', 'video share', isVideoShare && <CheckOutlined />));
@@ -84,19 +76,76 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
     },
     [mediaStream, isVideoShare]
   );
+  useEffect(() => {
+    const sharePreview = sharePreviewRef.current;
+    if (!sharePreview) return;
+
+    // Clear stream when sharing ends
+    if (shareStatus === ShareStatus.End) {
+      if (sharePreview.srcObject) {
+        const stream = sharePreview.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        sharePreview.srcObject = null;
+      }
+      return;
+    }
+
+    // Set up preview stream when sharing is active
+    const setupPreviewStream = () => {
+      const selfShareView = document.querySelector(`#${SHARE_CANVAS_ID}`) as HTMLCanvasElement | HTMLVideoElement;
+
+      if (!selfShareView || sharePreview.srcObject) return;
+
+      try {
+        if (selfShareView instanceof HTMLVideoElement) {
+          // Reuse video element's stream
+          const stream = selfShareView.srcObject as MediaStream;
+          if (stream) {
+            sharePreview.srcObject = stream;
+          }
+        } else if (selfShareView instanceof HTMLCanvasElement) {
+          // Capture canvas stream
+          if ('captureStream' in selfShareView) {
+            const stream = selfShareView.captureStream();
+            sharePreview.srcObject = stream;
+          } else if ('mozCaptureStream' in selfShareView) {
+            // Firefox fallback
+            const stream = (selfShareView as any).mozCaptureStream();
+            sharePreview.srcObject = stream;
+          }
+        }
+      } catch (error) {
+        // Failed to set up share preview stream
+      }
+    };
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    const rafId = requestAnimationFrame(setupPreviewStream);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      // Clean up stream when effect re-runs
+      if (sharePreview.srcObject) {
+        const stream = sharePreview.srcObject as MediaStream;
+        // Only stop tracks from captureStream, not from shared video srcObject
+        if (stream && stream.getTracks()[0]?.label?.includes('canvas')) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+      }
+    };
+  }, [shareStatus]);
+  useImperativeHandle(ref, () => {
+    return sharePreviewRef.current;
+  }, []);
   return (
-    <div className={classNames({ 'share-bar-hide': status === ShareStatus.End })}>
+    <div className={classNames({ 'share-bar-hide': shareStatus === ShareStatus.End })}>
       <Draggable handle=".share-bar-move" nodeRef={draggableRef}>
         <div className="screen-share-control-bar" ref={draggableRef}>
           <Button className="share-bar-move" ghost icon={<IconFont type="icon-move" />} />
           <div className="share-bar-tip">
-            {status === ShareStatus.Sharing ? "You're sharing the screen" : 'Your screen sharing is paused'}
+            {shareStatus === ShareStatus.Sharing ? "You're sharing the screen" : 'Your screen sharing is paused'}
           </div>
-          {mediaStream?.isStartShareScreenWithVideoElement() ? (
-            <video id={SHARE_CANVAS_ID} className="share-bar-canvas" ref={ref} />
-          ) : (
-            <canvas id={SHARE_CANVAS_ID} className="share-bar-canvas" ref={ref} />
-          )}
+          <video className="share-bar-canvas" ref={sharePreviewRef} playsInline autoPlay muted />
           {shareAudioStatus?.isShareAudioEnabled && (
             <Popconfirm
               title="Your microphone is disabled when sharing computer audio. When you pause or stop sharing audio, your microphone will be reactivated."
@@ -115,7 +164,7 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
             </Popconfirm>
           )}
           <Button
-            icon={<IconFont type={status === ShareStatus.Paused ? 'icon-resume' : 'icon-pause'} />}
+            icon={<IconFont type={shareStatus === ShareStatus.Paused ? 'icon-resume' : 'icon-pause'} />}
             className="share-bar-btn"
             ghost
             onClick={onSharePauseClick}

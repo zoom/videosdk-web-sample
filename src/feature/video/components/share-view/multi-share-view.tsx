@@ -5,18 +5,18 @@ import ShareBar from './share-bar';
 import ZoomContext from '../../../../context/zoom-context';
 import ZoomMediaContext from '../../../../context/media-context';
 import type { VideoPlayer } from '@zoom/videosdk';
+import { useMultiShare } from '../../hooks/useMultiShare';
 import { usePrevious } from '../../../../hooks';
 import './share-view.scss';
 import type { ShareViewProps } from './share-view-types';
-import { useMultiShare } from '../../hooks/useMultiShare';
 
 const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
-  const { onRecieveSharingChange } = props;
+  const { onShareViewActiveChange } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const selfShareViewRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(null);
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
-  const { isRecieveSharing, shareUserList } = useMultiShare(zmClient, mediaStream);
+  const { isRecieveSharing, shareStatus, shareUserList } = useMultiShare(zmClient, mediaStream);
   const shareUserIdList = useMemo(() => shareUserList.map((user) => user.userId), [shareUserList]);
   const previousShareUserIdList = usePrevious(shareUserIdList);
   useEffect(() => {
@@ -72,11 +72,11 @@ const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
     return [c, r];
   }, [shareUserList]);
   useEffect(() => {
-    onRecieveSharingChange(isRecieveSharing);
-  }, [isRecieveSharing, onRecieveSharingChange]);
+    onShareViewActiveChange(isRecieveSharing);
+  }, [isRecieveSharing, onShareViewActiveChange]);
   return (
     <>
-      <ShareBar ref={selfShareViewRef} />
+      <ShareBar ref={selfShareViewRef} shareStatus={shareStatus} />
       <div
         className={classnames('share-view', {
           'share-view-in-sharing': isRecieveSharing
