@@ -26,17 +26,14 @@ import {
   AudioChangeAction,
   SharePrivilege,
   MobileVideoFacingMode,
-  LiveStreamStatus,
   ShareStatus,
-  BroadcastStreamingStatus,
   RealTimeMediaStreamsStatus
 } from '@zoom/videosdk';
 import { LiveTranscriptionButton } from './live-transcription';
 import { LeaveButton } from './leave';
 import { TranscriptionSubtitle } from './transcription-subtitle';
 import IsoRecordingModal from './recording-ask-modal';
-import { LiveStreamButton, LiveStreamModal } from './live-stream';
-import { IconFont } from '../../../component/icon-font';
+import { LiveStreamButton } from './live-stream';
 import { VideoMaskModel } from './video-mask-modal';
 import { useParticipantsChange } from '../hooks/useParticipantsChange';
 import {
@@ -48,17 +45,14 @@ interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
   whiteboardContainer?: HTMLDivElement | null;
-  sharing?: boolean;
 }
 
 const isAudioEnable = typeof AudioWorklet === 'function';
 const VideoFooter = (props: VideoFooterProps) => {
-  const { className, selfShareCanvas, sharing, whiteboardContainer } = props;
+  const { className, selfShareCanvas, whiteboardContainer } = props;
   const zmClient = useContext(ZoomContext);
   const { mediaStream } = useContext(ZoomMediaContext);
   const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
-  const liveStreamClient = zmClient.getLiveStreamClient();
-  const broadcastStreamClient = zmClient.getBroadcastStreamingClient();
   const recordingClient = zmClient.getRecordingClient();
   const rtmsClient = zmClient.getRealTimeMediaStreamsClient();
   const [isStartedAudio, setIsStartedAudio] = useState(
@@ -80,7 +74,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [statisticVisible, setStatisticVisible] = useState(false);
   const [selecetedStatisticTab, setSelectedStatisticTab] = useState('audio');
   const [isComputerAudioDisabled, setIsComputerAudioDisabled] = useState(false);
-  const [sharePrivilege, setSharePrivileg] = useState(SharePrivilege.Unlocked);
+  const [sharePrivilege, setSharePrivilege] = useState(SharePrivilege.Unlocked);
   const [caption, setCaption] = useState({ text: '', isOver: false, displayName: '' });
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('');
   const [activeVideoProcessor, setActiveVideoProcessor] = useState<Processor | undefined>();
@@ -94,11 +88,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     rtmsClient?.getRealTimeMediaStreamsStatus() || RealTimeMediaStreamsStatus.None
   );
   const [recordingIsoStatus, setRecordingIsoStatus] = useState<'' | RecordingStatus>('');
-  const [liveStreamVisible, setLiveStreamVisible] = useState(false);
-  const [liveStreamStatus, setLiveStreamStatus] = useState(liveStreamClient?.getLiveStreamStatus());
-  const [broadcastStreamStatus, setBroadcastStreamStatus] = useState<'' | BroadcastStreamingStatus>(
-    broadcastStreamClient.getBroadcastStreamingStatus()?.status
-  );
   // Video Mask
   const [videoMaskVisible, setVideoMaskVisible] = useState(false);
   const [isSupportVideoProcessor, setIsSupportVideoProcessor] = useState(false);
@@ -577,29 +566,7 @@ const VideoFooter = (props: VideoFooterProps) => {
       }
     }
   }, []);
-  const onLiveStreamClick = useCallback(() => {
-    if (liveStreamStatus === LiveStreamStatus.Ended) {
-      setLiveStreamVisible(true);
-    } else if (liveStreamStatus === LiveStreamStatus.InProgress) {
-      liveStreamClient?.stopLiveStream();
-    }
-  }, [liveStreamStatus, liveStreamClient]);
-  const onBroadcastStreamClick = useCallback(() => {
-    if (broadcastStreamStatus === BroadcastStreamingStatus.InProgress) {
-      broadcastStreamClient.stopBroadcast();
-    } else {
-      broadcastStreamClient.startBroadcast();
-    }
-  }, [broadcastStreamStatus, broadcastStreamClient]);
-  const onLiveStreamStatusChange = useCallback((status: any) => {
-    setLiveStreamStatus(status);
-    if (status === LiveStreamStatus.Timeout) {
-      message.error('Start live streaming timeout');
-    }
-  }, []);
-  const onBroadcastStreamStatusChange = useCallback((payload: any) => {
-    setBroadcastStreamStatus(payload.status);
-  }, []);
+
   const onVideoScreenshotTaken = useCallback((payload: any) => {
     const { displayName, userId } = payload;
     message.info(`${displayName}(User:${userId}) just took a screenshot of your video`);
@@ -620,10 +587,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('host-ask-unmute-audio', onHostAskToUnmute);
     zmClient.on('caption-message', onCaptionMessage);
     zmClient.on('share-can-see-screen', onCanSeeMyScreen);
-    zmClient.on('live-stream-status', onLiveStreamStatusChange);
     zmClient.on('video-screenshot-taken', onVideoScreenshotTaken);
     zmClient.on('share-content-screenshot-taken', onShareViewScreenshotTaken);
-    zmClient.on('broadcast-streaming-status', onBroadcastStreamStatusChange);
     return () => {
       zmClient.off('current-audio-change', onHostAudioMuted);
       zmClient.off('passively-stop-share', onPassivelyStopShare);
@@ -636,10 +601,8 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('host-ask-unmute-audio', onHostAskToUnmute);
       zmClient.off('caption-message', onCaptionMessage);
       zmClient.off('share-can-see-screen', onCanSeeMyScreen);
-      zmClient.off('live-stream-status', onLiveStreamStatusChange);
       zmClient.off('video-screenshot-taken', onVideoScreenshotTaken);
       zmClient.off('share-content-screenshot-taken', onShareViewScreenshotTaken);
-      zmClient.off('broadcast-streaming-status', onBroadcastStreamStatusChange);
     };
   }, [
     zmClient,
@@ -653,10 +616,8 @@ const VideoFooter = (props: VideoFooterProps) => {
     onCaptionMessage,
     onCanSeeMyScreen,
     onRecordingISOChange,
-    onLiveStreamStatusChange,
     onVideoScreenshotTaken,
     onShareViewScreenshotTaken,
-    onBroadcastStreamStatusChange,
     onRealTimeMediaStreamsStatusChange
   ]);
   useUnmount(() => {
@@ -674,7 +635,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     if (mediaStream) {
       setIsSupportPhone(!!mediaStream.isSupportPhoneFeature());
       setPhoneCountryList(mediaStream.getSupportCountryInfo() || []);
-      setSharePrivileg(mediaStream.getSharePrivilege());
+      setSharePrivilege(mediaStream.getSharePrivilege());
       setIsSupportVideoProcessor(mediaStream.isSupportVideoProcessor());
       setIsSupportAudioProcessor(mediaStream.isSupportAudioProcessor());
       if (isAndroidOrIOSBrowser()) {
@@ -746,14 +707,14 @@ const VideoFooter = (props: VideoFooterProps) => {
         isBlur={isBlur}
         isSupportVideoProcessor={isSupportVideoProcessor}
       />
-      {sharing && (
+      {!isAndroidOrIOSBrowser() && (
         <ScreenShareButton
           sharePrivilege={sharePrivilege}
           isHostOrManager={zmClient.isHost() || zmClient.isManager()}
           onScreenShareClick={onScreenShareClick}
           onSharePrivilegeClick={async (privilege) => {
             await mediaStream?.setSharePrivilege(privilege);
-            setSharePrivileg(privilege);
+            setSharePrivilege(privilege);
           }}
         />
       )}
@@ -787,35 +748,8 @@ const VideoFooter = (props: VideoFooterProps) => {
           <TranscriptionSubtitle text={caption.text} displayName={caption.displayName} />
         </>
       )}
-      {/* Live stream */}
-      {/* {liveStreamClient?.isLiveStreamEnabled() && zmClient.isHost() && (
-        <>
-          <LiveStreamButton
-            isLiveStreamOn={liveStreamStatus === LiveStreamStatus.InProgress}
-            onLiveStreamClick={onLiveStreamClick}
-          />
-          <LiveStreamModal
-            visible={liveStreamVisible}
-            setVisible={setLiveStreamVisible}
-            onStartLiveStream={(streanUrl: string, streamKey: string, broadcastUrl: string) => {
-              liveStreamClient.startLiveStream(streanUrl, streamKey, broadcastUrl);
-            }}
-          />
-        </>
-      )}
-      {liveStreamStatus === LiveStreamStatus.InProgress && (
-        <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />
-      )} */}
-      {/** Broadcast streaming */}
-      {broadcastStreamClient.isBroadcastStreamingEnable() && zmClient.isHost() && (
-        <LiveStreamButton
-          isLiveStreamOn={broadcastStreamStatus === BroadcastStreamingStatus.InProgress}
-          onLiveStreamClick={onBroadcastStreamClick}
-        />
-      )}
-      {broadcastStreamStatus === BroadcastStreamingStatus.InProgress && (
-        <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />
-      )}
+      {/** Broadcast streaming or Live streaming */}
+      <LiveStreamButton isHost={zmClient.isHost()} />
       {isSecondaryAudioStarted && (
         <Tooltip title="Secondary audio on">
           <SoundOutlined style={{ position: 'fixed', top: '45px', left: '10px', color: '#f60', fontSize: '24px' }} />

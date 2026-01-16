@@ -1,9 +1,9 @@
-import { type MutableRefObject, useState, useCallback, useEffect } from 'react';
+import { type MutableRefObject, useState, useCallback, useEffect, useMemo } from 'react';
 import { usePrevious, useUnmount } from '../../../hooks';
 import type { ZoomClient, MediaStream, Participant } from '../../../index-types';
 import { useSearchParams } from 'react-router';
-import type { VideoPlayer } from '@zoom/videosdk';
 import { useActiveMediaFailed } from './useActiveMediaFailed';
+import { ShareStatus, type VideoPlayer } from '@zoom/videosdk';
 
 export function useShare(
   zmClient: ZoomClient,
@@ -12,14 +12,14 @@ export function useShare(
 ) {
   // State declarations
   const [isRecieveSharing, setIsReceiveSharing] = useState(false);
-  const [isStartedShare, setIsStartedShare] = useState(false);
+  const [shareStatus, setShareStatus] = useState(mediaStream?.getShareStatus() ?? ShareStatus.End);
   const [activeSharingId, setActiveSharingId] = useState(0);
   const [sharedContentDimension, setSharedContentDimension] = useState({
     width: 0,
     height: 0
   });
   const [shareUserList, setShareUserList] = useState<Array<Participant> | undefined>(mediaStream?.getShareUserList());
-
+  const isStartedShare = useMemo(() => shareStatus !== ShareStatus.End, [shareStatus]);
   // Derived state and hooks
   const [searchParams] = useSearchParams();
   const isSimultaneousShareView = searchParams.get('simultaneousShareView') === '1' && isStartedShare;
@@ -57,7 +57,9 @@ export function useShare(
               const userList = mediaStream.getShareUserList();
               setShareUserList(userList);
               if (isCurrentUser) {
-                setIsStartedShare(item.sharerOn);
+                Promise.resolve().then(() => {
+                  setShareStatus(mediaStream.getShareStatus());
+                });
               }
             }
           }
@@ -190,7 +192,7 @@ export function useShare(
 
   return {
     isRecieveSharing,
-    isStartedShare,
+    shareStatus,
     sharedContentDimension,
     shareUserList: isRecieveSharing
       ? shareUserList?.filter((user) => user.userId !== zmClient.getSessionInfo().userId)

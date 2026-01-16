@@ -30,7 +30,7 @@ const VideoContainer = () => {
   const videoRef = useRef<HTMLCanvasElement | null>(null);
   const shareViewRef = useRef<{ selfShareRef: HTMLCanvasElement | HTMLVideoElement | null }>(null);
   const wbViewRef = useRef<{ whiteboardContainerRef: HTMLDivElement | null }>(null);
-  const [isRecieveSharing, setIsRecieveSharing] = useState(false);
+  const [isShareViewActive, setIsShareViewActive] = useState(false);
   const [isWhiteboardInProgress, setIsWhiteboardInProgress] = useState(false);
   const canvasDimension = useCanvasDimension(mediaStream, videoRef);
   const activeVideo = useActiveVideo(zmClient);
@@ -66,11 +66,11 @@ const VideoContainer = () => {
   useCleanUp(videoRef.current, zmClient, mediaStream);
   return (
     <div className="viewport">
-      <ShareView ref={shareViewRef} onRecieveSharingChange={setIsRecieveSharing} />
+      <ShareView ref={shareViewRef} onShareViewActiveChange={setIsShareViewActive} />
       <WhiteboardView ref={wbViewRef} onWhiteboardStatusChange={setIsWhiteboardInProgress} />
       <div
         className={classnames('video-container', {
-          'video-container-in-sharing': isRecieveSharing || isWhiteboardInProgress
+          'video-container-in-sharing': isShareViewActive || isWhiteboardInProgress
         })}
       >
         <canvas className="video-canvas" id="video-canvas" width="800" height="600" ref={videoRef} />
@@ -121,7 +121,6 @@ const VideoContainer = () => {
       </div>
       <VideoFooter
         className="video-operations"
-        sharing
         selfShareCanvas={shareViewRef.current?.selfShareRef}
         whiteboardContainer={wbViewRef.current?.whiteboardContainerRef}
       />
@@ -131,7 +130,7 @@ const VideoContainer = () => {
           page={page}
           totalPage={totalPage}
           setPage={setPage}
-          inSharing={isRecieveSharing || isWhiteboardInProgress}
+          inSharing={isShareViewActive || isWhiteboardInProgress}
         />
       )}
       <ReportBtn />

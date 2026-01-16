@@ -1,0 +1,116 @@
+@use './annotation-common';
+
+.annotation-toolbox {
+  position: fixed;
+  top: 20vh;
+  left: 20px;
+  z-index: 1000;
+
+  .annotation-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 6px;
+    background-color: rgba(40, 40, 40, 0.9);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .annotation-tool-btn,
+    .annotation-close-btn {
+      // width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &:active:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        background: rgba(0, 0, 0, 0.1) !important;
+       
+
+        .anticon,
+        .color-indicator,
+        .anno-shape,
+        .anno-palette-color {
+          opacity: 0.4;
+        }
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.1) !important;
+        }
+      }
+
+      .anticon {
+        font-size: 18px;
+      }
+
+      .color-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+      }
+      & .ant-btn:disabled {
+        opacity: 0.3 !important;
+        cursor: not-allowed !important;
+        background: rgba(0, 0, 0, 0.1) !important;
+        border: none !important;
+
+        .anticon,
+        .color-indicator,
+        .anno-shape,
+        .anno-palette-color {
+          opacity: 0.4 !important;
+        }
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.1) !important;
+        }
+      }
+    }
+
+    .annotation-drag-handle {
+      cursor: move;
+
+      &:hover,
+      &:active {
+        background: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+
+    .annotation-tool-btn-selected {
+      background: #4096ff !important;
+
+      &:hover {
+        background: #1677ff !important;
+      }
+    }
+
+    .annotation-close-btn {
+      margin-top: 4px;
+      background: rgba(255, 77, 77, 0.2);
+
+      &:hover {
+        background: rgba(255, 77, 77, 0.4);
+      }
+
+      &:active {
+        background: rgba(255, 77, 77, 0.6);
+      }
+    }
+  }
+}
