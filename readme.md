@@ -14,6 +14,10 @@ To get started, clone the repo:
 
 ## Setup
 
+> **Use UTF-8 encoding**
+>
+> Add `<meta charset="UTF-8" />` to your web app's entry point (`index.html`) to ensure the browser uses UTF-8. If not set, the browser might choose a different encoding, causing text or data issues.
+
 1. Once cloned, navigate to the `videosdk-web-sample` directory:
 
    `$ cd videosdk-web-sample`
@@ -81,7 +85,3 @@ zmClient.init('en-US', `https://source.zoomgov.com/videosdk/1.11.0/lib`, {
 ## Need help?
 
 If you're looking for help, try [Developer Support](https://devsupport.zoom.us) or our [Developer Forum](https://devforum.zoom.us). Priority support is also available with [Premier Developer Support](https://explore.zoom.us/docs/en-us/developer-support-plans.html) plans.
-
-
-
-
