@@ -1,4 +1,7 @@
 # Zoom Video SDK web sample
+> **⚠️ Action Required:**  
+> We recommend that you upgrade to 2.3.15 or above if you use WebRTC video to prevent issues with future Chrome versions.
+---
 
 Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/en/video-sdk-terms/).
 
