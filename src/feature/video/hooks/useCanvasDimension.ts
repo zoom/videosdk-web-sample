@@ -1,7 +1,9 @@
 import _ from 'lodash';
-import { useState, useCallback, useRef, useEffect, MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+// eslint-disable-next-line no-duplicate-imports
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSizeCallback, useMount } from '../../../hooks';
-import { MediaStream } from '../../../index-types';
+import type { MediaStream } from '../../../index-types';
 export function useCanvasDimension(
   mediaStream: MediaStream | null,
   videoRef: MutableRefObject<HTMLCanvasElement | null>

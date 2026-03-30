@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, useContext } from 'react';
+import { useEffect, useState, useCallback, useContext } from 'react';
 import ZoomContext from '../../../context/zoom-context';
 export function useAudioLevel() {
   const zmClient = useContext(ZoomContext);

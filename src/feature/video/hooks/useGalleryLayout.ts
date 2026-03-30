@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState, MutableRefObject } from 'react';
+import { type MutableRefObject, useEffect, useState } from 'react';
 import { getVideoLayout } from '../video-layout-helper';
 import { useRenderVideo } from './useRenderVideo';
-import { Dimension, Pagination, CellLayout } from '../video-types';
-import { ZoomClient, MediaStream, Participant } from '../../../index-types';
+import type { Dimension, Pagination, CellLayout } from '../video-types';
+import type { ZoomClient, MediaStream, Participant } from '../../../index-types';
 import { useParticipantsChange } from './useParticipantsChange';
 /**
  * Default order of video:

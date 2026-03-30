@@ -43,7 +43,7 @@ const ReportBtn = () => {
       },
       {
         label: 'SharedArrayBuffer',
-        value: `${window.crossOriginIsolated}`
+        value: `${typeof SharedArrayBuffer ==='function'}`
       },
       {
         label: 'Session id(mid)',

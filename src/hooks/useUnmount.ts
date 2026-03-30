@@ -9,7 +9,7 @@ export function useUnmount(fn: Function) {
         fnRef.current();
       }
     },
-    [],
+    []
   );
 }
 
