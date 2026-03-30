@@ -102,11 +102,11 @@ export function useAnnotation(shareParams: {
         });
     }
   }, [previousActiveSharingId, activeSharingId, isAnnotationStarted, mediaStream]);
-  useEffect(() => {
+ useEffect(() => {
     if (mediaStream) {
-      setCanAnnotation(mediaStream?.canDoAnnotation());
+      updateCanAnnotation();
     }
-  }, [isRecieveSharing, mediaStream]);
+  }, [isRecieveSharing, mediaStream, updateCanAnnotation]);
 
   useEffect(() => {
     zmClient.on('annotation-redo-status', onRedoStatusChange);

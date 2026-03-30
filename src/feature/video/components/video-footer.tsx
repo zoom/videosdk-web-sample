@@ -14,13 +14,10 @@ import { useUnmount, useMount } from '../../../hooks';
 import type { MediaDevice } from '../video-types';
 import './video-footer.scss';
 import { isAndroidOrIOSBrowser } from '../../../utils/platform';
-import { getPhoneCallStatusDescription } from '../video-constants';
 import { type RecordButtonProps, getRecordingButtons, RecordingButton } from './recording';
 import {
-  type DialOutOption,
   type Processor,
   type ProcessorParams,
-  DialoutState,
   RecordingStatus,
   MutedSource,
   AudioChangeAction,
@@ -41,6 +38,7 @@ import {
   type RTMSButtonProps,
   RealTimeMediaStreamsButton
 } from './real-time-media-streams';
+import VoiceTranslatorButton from './voice-translator';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
@@ -55,14 +53,13 @@ const VideoFooter = (props: VideoFooterProps) => {
   const liveTranscriptionClient = zmClient.getLiveTranscriptionClient();
   const recordingClient = zmClient.getRecordingClient();
   const rtmsClient = zmClient.getRealTimeMediaStreamsClient();
-  const [isStartedAudio, setIsStartedAudio] = useState(
-    zmClient.getCurrentUserInfo() && zmClient.getCurrentUserInfo().audio !== ''
-  );
+  const [isStartedAudio, setIsStartedAudio] = useState(() => {
+    const currentUser = zmClient.getCurrentUserInfo();
+    return currentUser && currentUser.audio !== '';
+  });
   const [isStartedVideo, setIsStartedVideo] = useState(zmClient.getCurrentUserInfo()?.bVideoOn);
   const [audio, setAudio] = useState(zmClient.getCurrentUserInfo()?.audio);
   const [isSupportPhone, setIsSupportPhone] = useState(false);
-  const [phoneCountryList, setPhoneCountryList] = useState<any[]>([]);
-  const [phoneCallStatus, setPhoneCallStatus] = useState<DialoutState>();
   const [isBlur, setIsBlur] = useState(mediaStream?.getVirtualbackgroundStatus().imageSrc === 'blur');
   const [isMuted, setIsMuted] = useState(!!zmClient.getCurrentUserInfo()?.muted);
   const [activeMicrophone, setActiveMicrophone] = useState(mediaStream?.getActiveMicrophone());
@@ -316,20 +313,6 @@ const VideoFooter = (props: VideoFooterProps) => {
       console.error(e);
     }
   };
-  const onPhoneCall = async (code: string, phoneNumber: string, name: string, option: DialOutOption) => {
-    await mediaStream?.inviteByPhone(code, phoneNumber, name, option);
-  };
-  const onPhoneCallCancel = async (code: string, phoneNumber: string, option: { callMe: boolean }) => {
-    if ([DialoutState.Calling, DialoutState.Ringing, DialoutState.Accepted].includes(phoneCallStatus as any)) {
-      await mediaStream?.cancelInviteByPhone(code, phoneNumber, option);
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(true);
-        }, 3000);
-      });
-    }
-    return Promise.resolve();
-  };
   const onHostAudioMuted = useCallback(
     (payload: any) => {
       const { action, source, type } = payload;
@@ -402,10 +385,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     },
     [zmClient]
   );
-
-  const onDialOutChange = useCallback((payload: any) => {
-    setPhoneCallStatus(payload.code);
-  }, []);
 
   const onRecordingClick = async (key: string) => {
     switch (key) {
@@ -582,7 +561,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     zmClient.on('recording-change', onRecordingChange);
     zmClient.on('real-time-media-streams-status-change', onRealTimeMediaStreamsStatusChange);
     zmClient.on('individual-recording-change', onRecordingISOChange);
-    zmClient.on('dialout-state-change', onDialOutChange);
     zmClient.on('share-audio-change', onShareAudioChange);
     zmClient.on('host-ask-unmute-audio', onHostAskToUnmute);
     zmClient.on('caption-message', onCaptionMessage);
@@ -596,7 +574,6 @@ const VideoFooter = (props: VideoFooterProps) => {
       zmClient.off('recording-change', onRecordingChange);
       zmClient.off('real-time-media-streams-status-change', onRealTimeMediaStreamsStatusChange);
       zmClient.off('individual-recording-change', onRecordingISOChange);
-      zmClient.off('dialout-state-change', onDialOutChange);
       zmClient.off('share-audio-change', onShareAudioChange);
       zmClient.off('host-ask-unmute-audio', onHostAskToUnmute);
       zmClient.off('caption-message', onCaptionMessage);
@@ -610,7 +587,6 @@ const VideoFooter = (props: VideoFooterProps) => {
     onPassivelyStopShare,
     onDeviceChange,
     onRecordingChange,
-    onDialOutChange,
     onShareAudioChange,
     onHostAskToUnmute,
     onCaptionMessage,
@@ -634,7 +610,6 @@ const VideoFooter = (props: VideoFooterProps) => {
   useMount(() => {
     if (mediaStream) {
       setIsSupportPhone(!!mediaStream.isSupportPhoneFeature());
-      setPhoneCountryList(mediaStream.getSupportCountryInfo() || []);
       setSharePrivilege(mediaStream.getSharePrivilege());
       setIsSupportVideoProcessor(mediaStream.isSupportVideoProcessor());
       setIsSupportAudioProcessor(mediaStream.isSupportAudioProcessor());
@@ -669,10 +644,6 @@ const VideoFooter = (props: VideoFooterProps) => {
           isMuted={isMuted}
           isSupportPhone={isSupportPhone}
           audio={audio}
-          phoneCountryList={phoneCountryList}
-          onPhoneCallClick={onPhoneCall}
-          onPhoneCallCancel={onPhoneCallCancel}
-          phoneCallStatus={getPhoneCallStatusDescription(phoneCallStatus)}
           onMicrophoneClick={onMicrophoneClick}
           onMicrophoneMenuClick={onMicrophoneMenuClick}
           audioProcessorList={audioProcessorList}
@@ -759,6 +730,7 @@ const VideoFooter = (props: VideoFooterProps) => {
         isHostOrManager={zmClient.isHost() || zmClient.isManager()}
         whiteboardCantainer={whiteboardContainer}
       />
+      <VoiceTranslatorButton />
       <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
 
       <AudioVideoStatisticModal

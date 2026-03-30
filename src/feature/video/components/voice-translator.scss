@@ -1,0 +1,186 @@
+.voice-translator-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .voice-translator-settings-button {
+    min-width: 40px;
+  }
+}
+
+.voice-translator-settings-modal {
+  .ant-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .ant-modal-title {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .ant-modal-body {
+    padding: 24px;
+  }
+
+  .ant-modal-close {
+    top: 20px;
+    right: 24px;
+  }
+}
+
+.voice-translator-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .setting-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .setting-label-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+
+    .reset-button {
+      padding: 0;
+      height: auto;
+      color: #1890ff;
+      font-size: 14px;
+
+      &:hover {
+        color: #40a9ff;
+      }
+    }
+  }
+
+  .setting-select {
+    .ant-select-selector {
+      height: 48px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #d9d9d9;
+      font-size: 16px;
+
+      .ant-select-selection-item {
+        line-height: 32px;
+      }
+    }
+  }
+
+  .volume-slider {
+    margin: 8px 0;
+
+    .ant-slider-rail {
+      background-color: #e0e0e0;
+      height: 6px;
+    }
+
+    .ant-slider-track {
+      background-color: #1890ff;
+      height: 6px;
+    }
+
+    .ant-slider-handle {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #1890ff;
+      background-color: #fff;
+      margin-top: -7px;
+
+      &:hover,
+      &:focus {
+        border-color: #40a9ff;
+      }
+    }
+  }
+
+  .volume-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+
+    .volume-label-left {
+      color: #666;
+    }
+
+    .volume-label-right {
+      color: #666;
+    }
+  }
+
+  .test-voice-button {
+    padding: 0;
+    height: auto;
+    color: #1890ff;
+    font-size: 14px;
+    margin-top: 4px;
+    text-align: left;
+
+    .anticon {
+      margin-right: 4px;
+      font-size: 18px;
+
+      svg {
+        fill: currentColor;
+
+        path,
+        rect {
+          fill: currentColor;
+          fill-opacity: 1;
+        }
+      }
+    }
+
+    span {
+      margin-right: 4px;
+    }
+
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+
+  .ant-checkbox-wrapper {
+    font-size: 16px;
+    font-weight: 500;
+    color: #000;
+
+    .ant-checkbox {
+      .ant-checkbox-inner {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .caption-hint {
+    font-size: 14px;
+    color: #666;
+    margin-left: 28px;
+    margin-top: 4px;
+  }
+
+  .setting-footer {
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+  }
+}

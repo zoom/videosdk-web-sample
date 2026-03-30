@@ -1,7 +1,7 @@
 import type { NetworkQuality } from '@zoom/videosdk';
 import produce from 'immer';
 import { useState, useCallback, useEffect } from 'react';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 
 export function useNetworkQuality(zmClient: ZoomClient) {
   const [networkQuality, setNetworkQuality] = useState<Record<string, NetworkQuality>>({});
