@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 export function useActiveVideo(zmClient: ZoomClient) {
   const [activeVideo, setActiveVideo] = useState<number>(0);
   const [activeSpeaker, setActiveSpeaker] = useState<number>(0);

@@ -17,35 +17,45 @@ const processorsInput: Record<string, string> = workerFiles.reduce((acc, file) =
 
 // Custom plugin to copy VideoSDK lib files
 const copyVideoSDKLibPlugin = () => {
-  return {
-    name: 'copy-videosdk-lib',
-    buildStart() {
-      // Copy VideoSDK lib files during build
-      const sourceDir = resolve(__dirname, 'node_modules/@zoom/videosdk/dist/lib');
-      const targetDir = resolve(__dirname, 'public/lib');
+  const copyFiles = () => {
+    // Copy VideoSDK lib files
+    const sourceDir = resolve(__dirname, 'node_modules/@zoom/videosdk/dist/lib');
+    const targetDir = resolve(__dirname, 'public/lib');
 
-      if (existsSync(sourceDir)) {
-        if (!existsSync(targetDir)) {
-          mkdirSync(targetDir, { recursive: true });
+    if (existsSync(sourceDir)) {
+      if (!existsSync(targetDir)) {
+        mkdirSync(targetDir, { recursive: true });
+      }
+
+      const files = glob.sync('**/*', { cwd: sourceDir, nodir: true });
+
+      files.forEach((file: string) => {
+        const srcFile = resolve(sourceDir, file);
+        const destFile = resolve(targetDir, file);
+        const destDir = resolve(destFile, '..');
+
+        if (!existsSync(destDir)) {
+          mkdirSync(destDir, { recursive: true });
         }
 
-        const files = glob.sync('**/*', { cwd: sourceDir, nodir: true });
-        files.forEach((file: string) => {
-          const srcFile = resolve(sourceDir, file);
-          const destFile = resolve(targetDir, file);
-          const destDir = resolve(destFile, '..');
+        try {
+          copyFileSync(srcFile, destFile);
+        } catch (error) {
+          // Silently ignore copy errors
+        }
+      });
+    }
+  };
 
-          if (!existsSync(destDir)) {
-            mkdirSync(destDir, { recursive: true });
-          }
-
-          try {
-            copyFileSync(srcFile, destFile);
-          } catch (error) {
-            console.warn(`Failed to copy ${file}:`, error);
-          }
-        });
-      }
+  return {
+    name: 'copy-videosdk-lib',
+    // Use configResolved hook to ensure files are copied before dev server starts
+    configResolved() {
+      copyFiles();
+    },
+    // Also run on buildStart for production builds
+    buildStart() {
+      copyFiles();
     }
   };
 };

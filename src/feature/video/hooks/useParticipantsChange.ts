@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useMount } from '../../../hooks';
-import { ZoomClient, Participant } from '../../../index-types';
+import type { ZoomClient, Participant } from '../../../index-types';
 export function useParticipantsChange(
   zmClient: ZoomClient,
   fn: (participants: Participant[], updatedParticipants?: Participant[]) => void

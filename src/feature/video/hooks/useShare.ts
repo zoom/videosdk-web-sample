@@ -26,6 +26,7 @@ export function useShare(
   const isVideoPlayer = searchParams.get('useVideoPlayer') === '1';
   const previousIsRecieveSharing = usePrevious(isRecieveSharing);
   const previousActiveSharingId = usePrevious(activeSharingId);
+  const previousIsStartedShare = usePrevious(isStartedShare);
 
   useActiveMediaFailed(zmClient);
 
@@ -54,13 +55,13 @@ export function useShare(
             const isCurrentUser = item.userId === currentUserId;
 
             if (mediaStream) {
-              const userList = mediaStream.getShareUserList();
-              setShareUserList(userList);
               if (isCurrentUser) {
                 Promise.resolve().then(() => {
                   setShareStatus(mediaStream.getShareStatus());
                 });
               }
+              const userList = mediaStream.getShareUserList();
+              setShareUserList(userList);
             }
           }
         });
@@ -160,7 +161,7 @@ export function useShare(
 
   // Handle simultaneous share logic
   useEffect(() => {
-    if (isStartedShare) {
+    if (isStartedShare && previousIsStartedShare !== isStartedShare) {
       const currentUserId = zmClient.getSessionInfo().userId;
       const peerShareUser = shareUserList?.filter((user) => user.userId !== currentUserId);
 
@@ -177,7 +178,7 @@ export function useShare(
         setIsReceiveSharing(false);
       }
     }
-  }, [isStartedShare, isSimultaneousShareView, shareUserList, activeSharingId, zmClient]);
+  }, [isStartedShare, previousIsStartedShare, isSimultaneousShareView, shareUserList, activeSharingId, zmClient]);
 
   // Cleanup on unmount
   useUnmount(async () => {

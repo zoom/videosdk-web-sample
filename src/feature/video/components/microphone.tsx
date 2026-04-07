@@ -10,6 +10,7 @@ import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import CRCCallOutModal from './crc-call-out-modal';
 import { useAudioLevel } from '../hooks/useAudioLevel';
 import type { Processor, ProcessorParams } from '@zoom/videosdk';
+import { useSpeakingWhileMuted } from '../hooks/useSpeakingWhileMuted';
 const { Button: DropdownButton } = Dropdown;
 interface MicrophoneButtonProps {
   isStartedAudio: boolean;
@@ -18,11 +19,8 @@ interface MicrophoneButtonProps {
   isMicrophoneForbidden?: boolean;
   disabled?: boolean;
   audio?: string;
-  phoneCountryList?: any[];
   onMicrophoneClick: () => void;
   onMicrophoneMenuClick: (key: string) => void;
-  onPhoneCallClick?: (code: string, phoneNumber: string, name: string, option: any) => void;
-  onPhoneCallCancel?: (code: string, phoneNumber: string, option: any) => Promise<any>;
   className?: string;
   microphoneList?: MediaDevice[];
   speakerList?: MediaDevice[];
@@ -44,18 +42,14 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
     className,
     microphoneList,
     speakerList,
-    phoneCountryList,
     activeMicrophone,
     activeSpeaker,
-    phoneCallStatus,
     disabled,
     isMicrophoneForbidden,
     isSecondaryAudioStarted,
     isPreview,
     onMicrophoneClick,
     onMicrophoneMenuClick,
-    onPhoneCallClick,
-    onPhoneCallCancel,
     activeAudioProcessorList,
     isSupportAudioProcessor,
     audioProcessorList
@@ -64,6 +58,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
   const [isCrcModalOpen, setIsCrcModalOpen] = useState(false);
   // const level = useCurrentAudioLevel();
   const level = useAudioLevel();
+  useSpeakingWhileMuted();
   const tooltipText = isStartedAudio ? (isMuted ? 'unmute' : 'mute') : 'start audio';
   const menuItems = [];
   if (microphoneList?.length && audio !== 'phone') {
@@ -252,14 +247,7 @@ const MicrophoneButton = (props: MicrophoneButtonProps) => {
           </div>
         </Tooltip>
       )}
-      <CallOutModal
-        visible={isPhoneModalOpen}
-        setVisible={(visible: boolean) => setIsPhoneModalOpen(visible)}
-        phoneCallStatus={phoneCallStatus}
-        phoneCountryList={phoneCountryList}
-        onPhoneCallCancel={onPhoneCallCancel}
-        onPhoneCallClick={onPhoneCallClick}
-      />
+      <CallOutModal visible={isPhoneModalOpen} setVisible={(visible: boolean) => setIsPhoneModalOpen(visible)} />
       <CRCCallOutModal visible={isCrcModalOpen} setVisible={(visible: boolean) => setIsCrcModalOpen(visible)} />
     </div>
   );

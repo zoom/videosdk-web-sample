@@ -1,4 +1,4 @@
-import { useState, MutableRefObject } from 'react';
+import { type MutableRefObject, useState } from 'react';
 import { useEventListener } from './useEventListener';
 interface HoverOption {
   onEnter?: () => void;

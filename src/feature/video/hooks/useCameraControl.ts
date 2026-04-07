@@ -3,7 +3,7 @@ import { Modal, message } from 'antd';
 import produce from 'immer';
 import { CameraControlCmd } from '@zoom/videosdk';
 import AvatarActionContext from '../context/avatar-context';
-import { ZoomClient, MediaStream } from '../../../index-types';
+import type { ZoomClient, MediaStream } from '../../../index-types';
 export function useCameraControl(zmClient: ZoomClient, mediaStream: MediaStream | null) {
   const [isInControl, setIsInControl] = useState(false);
   const [controllingUserId, setControllingUserId] = useState(0);
