@@ -1,21 +1,67 @@
 import { Modal, Select, Input, Checkbox, Form } from 'antd';
-import { useContext } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import ZoomContext from '../../../context/zoom-context';
+import ZoomMediaContext from '../../../context/media-context';
 import './call-out-modal.scss';
+import { getPhoneCallStatusDescription } from '../video-constants';
+import { useMount } from '../../../hooks';
+import { AudioChangeAction, DialoutState, type DialOutOption } from '@zoom/videosdk';
 interface CallOutModalProps {
   visible: boolean;
-  phoneCountryList?: any[];
-  phoneCallStatus?: { text: string; type: string };
   setVisible: (visible: boolean) => void;
-  onPhoneCallClick?: (code: string, phoneNumber: string, name: string, option: any) => void;
-  onPhoneCallCancel?: (code: string, phoneNumber: string, option: any) => Promise<any>;
 }
 
 const CallOutModal = (props: CallOutModalProps) => {
-  const { visible, phoneCountryList, phoneCallStatus, onPhoneCallClick, onPhoneCallCancel, setVisible } = props;
+  const { visible, setVisible } = props;
   const [form] = Form.useForm();
   const zmClient = useContext(ZoomContext);
+  const { mediaStream } = useContext(ZoomMediaContext);
+  const [phoneCountryList, setPhoneCountryList] = useState<any[]>(mediaStream?.getSupportCountryInfo() ?? []);
+  const [phoneCallStatus, setPhoneCallStatus] = useState<{ text: string; type: string }>({ text: '', type: '' });
+  const [welcomeAudioList, setWelcomeAudioList] = useState(mediaStream?.getPhoneWelcomeMessageInfoList() ?? []);
+  const onPhoneCallStatusChange = useCallback((payload: any) => {
+    const { code } = payload;
+    setPhoneCallStatus(getPhoneCallStatusDescription(code));
+  }, []);
+  const onCurrentAudioChange = useCallback((payload: any) => {
+    const { action } = payload;
+    if (action === AudioChangeAction.Leave) {
+      setPhoneCallStatus({ text: '', type: '' });
+    }
+  }, []);
+  useEffect(() => {
+    zmClient.on('dialout-state-change', onPhoneCallStatusChange);
+    zmClient.on('current-audio-change', onCurrentAudioChange);
+    return () => {
+      zmClient.off('dialout-state-change', onPhoneCallStatusChange);
+      zmClient.off('current-audio-change', onCurrentAudioChange);
+    };
+  }, [zmClient, onPhoneCallStatusChange, onCurrentAudioChange]);
+  useMount(() => {
+    setPhoneCountryList(mediaStream?.getSupportCountryInfo() ?? []);
+    setWelcomeAudioList(mediaStream?.getPhoneWelcomeMessageInfoList() ?? []);
+  });
+  const onPhoneCallClick = useCallback(
+    async (code: string, phoneNumber: string, name: string, option: DialOutOption) => {
+      await mediaStream?.inviteByPhone(code, phoneNumber, name, option);
+    },
+    [mediaStream]
+  );
+  const onPhoneCallCancel = useCallback(
+    async (code: string, phoneNumber: string, option: { callMe: boolean }) => {
+      if ([DialoutState.Calling, DialoutState.Ringing, DialoutState.Accepted].includes(phoneCallStatus as any)) {
+        await mediaStream?.cancelInviteByPhone(code, phoneNumber, option);
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, 3000);
+        });
+      }
+      return Promise.resolve();
+    },
+    [mediaStream, phoneCallStatus]
+  );
   return (
     <Modal
       open={visible}
@@ -30,17 +76,23 @@ const CallOutModal = (props: CallOutModalProps) => {
             callme,
             name,
             greeting,
-            press
+            press,
+            greetingAudio
           } = data;
           const [, code] = countryCode.split('&&');
           if (callme) {
             onPhoneCallClick?.(code, phoneNumber, zmClient.getCurrentUserInfo().displayName, { callMe: true });
           } else {
-            onPhoneCallClick?.(code, phoneNumber, name, {
+            const options = {
               callMe: false,
               greeting: greeting,
               pressingOne: press
-            });
+            };
+            if (greetingAudio) {
+              const [language, identifier] = greetingAudio.split('/');
+              Object.assign(options, { language, identifier });
+            }
+            onPhoneCallClick?.(code, phoneNumber, name, options);
           }
         } catch (e) {
           console.log(e);
@@ -113,6 +165,29 @@ const CallOutModal = (props: CallOutModalProps) => {
             getFieldValue('callme') ? null : (
               <Form.Item name="press" valuePropName="checked">
                 <Checkbox>Require pressing 1 before being connected</Checkbox>
+              </Form.Item>
+            )
+          }
+        </Form.Item>
+        <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.callme !== currentValues.callme}>
+          {({ getFieldValue }) =>
+            getFieldValue('callme') || welcomeAudioList.length === 0 ? null : (
+              <Form.Item name="greetingAudio" label="Greeting Audio">
+                <Select
+                  placeholder="select a greeting audio"
+                  className="greeting-audio"
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {welcomeAudioList?.map((item) => (
+                    <Select.Option
+                      value={`${item.language}/${item.identifier}`}
+                      key={`${item.language}/${item.identifier}`}
+                    >
+                      {item.languageName}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
             )
           }

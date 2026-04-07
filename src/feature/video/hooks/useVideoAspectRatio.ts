@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ZoomClient } from '../../../index-types';
+import type { ZoomClient } from '../../../index-types';
 export function useVideoAspect(zmClient: ZoomClient) {
   const [aspectRatio, setAspectRatio] = useState<Record<string, number>>({});
   const onVideoAspectRatioChange = useCallback((payload: any) => {

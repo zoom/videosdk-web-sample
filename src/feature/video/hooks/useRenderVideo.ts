@@ -1,8 +1,8 @@
-import { useEffect, MutableRefObject } from 'react';
+import { type MutableRefObject, useEffect } from 'react';
 import { usePrevious, usePersistFn } from '../../../hooks';
 import { isArrayShallowEqual } from '../../../utils/util';
-import { CellLayout } from '../video-types';
-import { MediaStream, Participant } from '../../../index-types';
+import type { CellLayout } from '../video-types';
+import type { MediaStream, Participant } from '../../../index-types';
 import { SELF_VIDEO_ID } from '../video-constants';
 /**
  * gallery view without SharedArrayBuffer mode, self video is present by Video Element

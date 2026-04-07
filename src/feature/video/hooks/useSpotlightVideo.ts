@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { ZoomClient, Participant, MediaStream } from '../../../index-types';
+import type { ZoomClient, Participant, MediaStream } from '../../../index-types';
 import { useMount } from '../../../hooks';
 export function useSpotlightVideo(
   zmClient: ZoomClient,
