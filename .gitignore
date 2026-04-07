@@ -32,3 +32,4 @@ dist
 update-version.js
 export.sh
 /export
+.npmrc
