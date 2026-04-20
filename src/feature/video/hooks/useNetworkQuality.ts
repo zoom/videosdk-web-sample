@@ -1,5 +1,5 @@
 import type { NetworkQuality } from '@zoom/videosdk';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useState, useCallback, useEffect } from 'react';
 import type { ZoomClient } from '../../../index-types';
 

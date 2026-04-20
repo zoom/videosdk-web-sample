@@ -1,5 +1,5 @@
 import { useReducer, useMemo, useEffect } from 'react';
-import produce from 'immer';
+import { produce } from 'immer';
 import type { ZoomClient, Participant } from '../../../index-types';
 import type { AvatarContext } from '../context/avatar-context';
 import { isAndroidOrIOSBrowser } from '../../../utils/platform';
