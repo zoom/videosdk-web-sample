@@ -27,6 +27,7 @@ export function useShare(
   const previousIsRecieveSharing = usePrevious(isRecieveSharing);
   const previousActiveSharingId = usePrevious(activeSharingId);
   const previousIsStartedShare = usePrevious(isStartedShare);
+  const previousShareUserList = usePrevious(shareUserList);
 
   useActiveMediaFailed(zmClient);
 
@@ -161,10 +162,11 @@ export function useShare(
 
   // Handle simultaneous share logic
   useEffect(() => {
-    if (isStartedShare && previousIsStartedShare !== isStartedShare) {
-      const currentUserId = zmClient.getSessionInfo().userId;
-      const peerShareUser = shareUserList?.filter((user) => user.userId !== currentUserId);
+    const currentUserId = zmClient.getSessionInfo().userId;
+    const peerShareUser = shareUserList?.filter((user) => user.userId !== currentUserId);
 
+    // Case 1: current user's own share state just changed (start/stop)
+    if (isStartedShare && previousIsStartedShare !== isStartedShare) {
       if (peerShareUser?.length) {
         setIsReceiveSharing(isSimultaneousShareView);
         if (
@@ -177,8 +179,31 @@ export function useShare(
       } else {
         setIsReceiveSharing(false);
       }
+      return;
     }
-  }, [isStartedShare, previousIsStartedShare, isSimultaneousShareView, shareUserList, activeSharingId, zmClient]);
+
+    // Case 2: current user is already sharing in simultaneous share view,
+    // handle peer share user count transitions (0 → ≥1 or ≥1 → 0)
+    if (isStartedShare && isSimultaneousShareView) {
+      const previousPeerShareUser = previousShareUserList?.filter((user) => user.userId !== currentUserId);
+      if (peerShareUser?.length && !previousPeerShareUser?.length) {
+        // peer starts sharing: begin receiving
+        setIsReceiveSharing(true);
+        setActiveSharingId(peerShareUser[0].userId);
+      } else if (!peerShareUser?.length && previousPeerShareUser?.length) {
+        // last peer stopped sharing: stop receiving
+        setIsReceiveSharing(false);
+      }
+    }
+  }, [
+    isStartedShare,
+    previousIsStartedShare,
+    isSimultaneousShareView,
+    shareUserList,
+    previousShareUserList,
+    activeSharingId,
+    zmClient
+  ]);
 
   // Cleanup on unmount
   useUnmount(async () => {
