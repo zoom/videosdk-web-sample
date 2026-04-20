@@ -74,7 +74,7 @@ For the full list of features and event listeners, as well as additional guides,
 ## Use ZFG(Zoom For Government). You need apply new sdk key for [ZFG](https://marketplace.zoomgov.com/).
 ### option1 change package.json and use zfg specific version
 ```
-"@zoom/videosdk": "1.11.0-zfg",
+"@zoom/videosdk": "1.12.17-zfg",
 zmClient.init('en-US', 'Global');
 ```
 

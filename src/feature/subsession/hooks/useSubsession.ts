@@ -4,7 +4,7 @@ import {
   SubsessionUserStatus,
   SubsessionStatus
 } from '@zoom/videosdk';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useState, useEffect, useCallback } from 'react';
 import { useMount, usePrevious } from '../../../hooks';
 import type { SubsessionClient, Participant, ZoomClient } from '../../../index-types';

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { ChatReceiver, ChatRecord } from '../chat-types';
 import { type ChatPrivilege, ChatFileDownloadStatus } from '@zoom/videosdk';
-import produce from 'immer';
+import { produce } from 'immer';
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatClient, ZoomClient } from '../../../index-types';
 import { useParticipantsChange } from './useParticipantsChange';

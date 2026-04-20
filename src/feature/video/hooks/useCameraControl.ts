@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useContext } from 'react';
 import { Modal, message } from 'antd';
-import produce from 'immer';
+import { produce } from 'immer';
 import { CameraControlCmd } from '@zoom/videosdk';
 import AvatarActionContext from '../context/avatar-context';
 import type { ZoomClient, MediaStream } from '../../../index-types';
