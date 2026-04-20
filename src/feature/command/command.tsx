@@ -1,7 +1,7 @@
 import type React from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import { useCallback, useContext, useEffect, useState, useRef } from 'react';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Input } from 'antd';
 import ZoomContext from '../../context/zoom-context';
 import type { CommandReceiver, CommandRecord } from './cmd-types';
