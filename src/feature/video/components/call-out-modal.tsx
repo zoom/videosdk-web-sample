@@ -50,7 +50,11 @@ const CallOutModal = (props: CallOutModalProps) => {
   );
   const onPhoneCallCancel = useCallback(
     async (code: string, phoneNumber: string, option: { callMe: boolean }) => {
-      if ([DialoutState.Calling, DialoutState.Ringing, DialoutState.Accepted].includes(phoneCallStatus as any)) {
+      if (
+        [DialoutState.Calling, DialoutState.Ringing, DialoutState.Accepted, DialoutState.AnsweredByMachine].includes(
+          phoneCallStatus as any
+        )
+      ) {
         await mediaStream?.cancelInviteByPhone(code, phoneNumber, option);
         await new Promise((resolve) => {
           setTimeout(() => {
@@ -77,16 +81,21 @@ const CallOutModal = (props: CallOutModalProps) => {
             name,
             greeting,
             press,
-            greetingAudio
+            greetingAudio,
+            detectMachine
           } = data;
           const [, code] = countryCode.split('&&');
           if (callme) {
-            onPhoneCallClick?.(code, phoneNumber, zmClient.getCurrentUserInfo().displayName, { callMe: true });
+            onPhoneCallClick?.(code, phoneNumber, zmClient.getCurrentUserInfo().displayName, {
+              callMe: true,
+              detectMachine: detectMachine ? 1 : 0
+            });
           } else {
             const options = {
               callMe: false,
               greeting: greeting,
-              pressingOne: press
+              pressingOne: press,
+              detectMachine: detectMachine ? 1 : 0
             };
             if (greetingAudio) {
               const [language, identifier] = greetingAudio.split('/');
@@ -136,6 +145,9 @@ const CallOutModal = (props: CallOutModalProps) => {
         </Form.Item>
         <Form.Item name="callme" valuePropName="checked">
           <Checkbox>Call me</Checkbox>
+        </Form.Item>
+        <Form.Item name="detectMachine" valuePropName="checked">
+          <Checkbox>Detect Machine</Checkbox>
         </Form.Item>
         <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.callme !== currentValues.callme}>
           {({ getFieldValue }) =>

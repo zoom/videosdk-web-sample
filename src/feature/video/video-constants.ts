@@ -10,7 +10,8 @@ const statusDescription: any = {
   [DialoutState.CancelFailed]: { text: 'Cancel failed', type: 'fail' },
   [DialoutState.NotAvailable]: { text: 'NotAvailable', type: 'fail' },
   [DialoutState.Success]: { text: 'Success', type: 'success' },
-  [DialoutState.Canceled]: { text: 'Canceled', type: 'success' }
+  [DialoutState.Canceled]: { text: 'Canceled', type: 'success' },
+  [DialoutState.AnsweredByMachine]: { text: 'Answered by machine', type: 'success' }
 };
 const crcStatusDescription: any = {
   [CRCReturnCode.Ringing]: { text: 'Ringing', type: 'pending' },
