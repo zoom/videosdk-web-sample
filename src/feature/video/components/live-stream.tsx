@@ -6,7 +6,10 @@ import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
 import { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import ZoomContext from '../../../context/zoom-context';
 import { BroadcastStreamingStatus, LiveStreamStatus } from '@zoom/videosdk';
+import RtmpIngestionModal from './rtmp-ingestion-modal';
+
 const { Button: DropdownButton } = Dropdown;
+
 interface LiveStreamButtonProps {
   isHost: boolean;
 }
@@ -15,6 +18,7 @@ interface LiveStreamModalProps {
   onStartLiveStream: (streamUrl: string, streamKey: string, broadcastUrl: string) => void;
   setVisible: (visible: boolean) => void;
 }
+
 const LiveStreamButton = (props: LiveStreamButtonProps) => {
   const { isHost } = props;
 
@@ -26,6 +30,7 @@ const LiveStreamButton = (props: LiveStreamButtonProps) => {
     broadcastStreamingClient.getBroadcastStreamingStatus()?.status
   );
   const [isLiveStreamModalVisible, setIsLiveStreamModalVisible] = useState(false);
+  const [isRtmpIngestionModalVisible, setIsRtmpIngestionModalVisible] = useState(false);
   const [liveStreamStatus, setLiveStreamStatus] = useState(liveStreamClient.getLiveStreamStatus());
   const [isLiveStreamEnabled, isBroadcastStreamingEnable] = useMemo(() => {
     return [liveStreamClient.isLiveStreamEnabled(), broadcastStreamingClient.isBroadcastStreamingEnable()];
@@ -54,11 +59,16 @@ const LiveStreamButton = (props: LiveStreamButtonProps) => {
     },
     [liveStreamClient]
   );
-  const menuItems = [getAntdItem('Live on 3rd platform', 'live')];
+  const menuItems = [
+    getAntdItem('Live on 3rd platform', 'live'),
+    ...(isHost ? [getAntdItem('RTMP Ingestion', 'rtmp-ingestion')] : [])
+  ];
   const onMenuItemClick = useCallback(
     (payload: { key: string }) => {
       if (payload.key === 'live') {
         onLiveStreamClick();
+      } else if (payload.key === 'rtmp-ingestion') {
+        setIsRtmpIngestionModalVisible(true);
       }
     },
     [onLiveStreamClick]
@@ -95,22 +105,24 @@ const LiveStreamButton = (props: LiveStreamButtonProps) => {
           <IconFont type="icon-live-stream" />
         </DropdownButton>
       ) : (
-        <Button
-          className={classNames('vc-button', {
-            active: liveStreamStatus === LiveStreamStatus.InProgress
-          })}
-          icon={<IconFont type="icon-live-stream" />}
-          ghost={true}
-          shape="circle"
-          size="large"
-          onClick={onLiveStreamClick}
-        />
+        <Dropdown menu={getAntdDropdownMenu(menuItems, onMenuItemClick)} trigger={['click']} placement="topRight">
+          <Button
+            className={classNames('vc-button', {
+              active: liveStreamStatus === LiveStreamStatus.InProgress
+            })}
+            icon={<IconFont type="icon-live-stream" />}
+            ghost={true}
+            shape="circle"
+            size="large"
+          />
+        </Dropdown>
       )}
       <LiveStreamModal
         visible={isLiveStreamModalVisible}
         setVisible={setIsLiveStreamModalVisible}
         onStartLiveStream={onStartLiveStream}
       />
+      <RtmpIngestionModal visible={isRtmpIngestionModalVisible} setVisible={setIsRtmpIngestionModalVisible} />
       {(broadcastStreamingStatus === BroadcastStreamingStatus.InProgress ||
         liveStreamStatus === LiveStreamStatus.InProgress) && (
         <IconFont type="icon-live" style={{ position: 'fixed', top: '45px', left: '10px', color: '#f00' }} />

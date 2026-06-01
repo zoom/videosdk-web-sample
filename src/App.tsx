@@ -27,6 +27,7 @@ import VideoAttach from './feature/video/video-attach';
 import Preview from './feature/preview/preview';
 import ZoomContext from './context/zoom-context';
 import ZoomMediaContext from './context/media-context';
+import MeetingArgsContext from './context/meeting-args-context';
 import LoadingLayer from './component/loading-layer';
 import Chat from './feature/chat/chat';
 import Command from './feature/command/command';
@@ -148,6 +149,10 @@ function App(props: AppProps) {
     webEndpoint = window?.webEndpoint ?? 'zoom.us';
   }
   const mediaContext = useMemo(() => ({ ...mediaState, mediaStream }), [mediaState, mediaStream]);
+  const meetingArgsContext = useMemo(
+    () => ({ signature, webEndpoint: webEndpoint ?? 'zoom.us' }),
+    [signature, webEndpoint]
+  );
   const galleryViewWithoutSAB = Number(enforceGalleryView) === 1 && !window.crossOriginIsolated;
   const vbWithoutSAB = Number(enforceVB) === 1 && !window.crossOriginIsolated;
   const galleryViewWithAttach = true;
@@ -282,25 +287,27 @@ function App(props: AppProps) {
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
       {!loading && (
-        <ZoomMediaContext.Provider value={mediaContext}>
-          <BrowserRouter>
-            <Routes>
-              <Route index path="/" element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />} />
-              <Route
-                path="/index.html"
-                element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
-              />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/command" element={<Command />} />
-              <Route
-                path="/video"
-                element={isSupportGalleryView ? galleryViewWithAttach ? <VideoAttach /> : <Video /> : <VideoSingle />}
-              />
-              <Route path="/subsession" element={<Subsession />} />
-              <Route path="/preview" element={<Preview />} />
-            </Routes>
-          </BrowserRouter>
-        </ZoomMediaContext.Provider>
+        <MeetingArgsContext.Provider value={meetingArgsContext}>
+          <ZoomMediaContext.Provider value={mediaContext}>
+            <BrowserRouter>
+              <Routes>
+                <Route index path="/" element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />} />
+                <Route
+                  path="/index.html"
+                  element={<Home status={status} onLeaveOrJoinSession={onLeaveOrJoinSession} />}
+                />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/command" element={<Command />} />
+                <Route
+                  path="/video"
+                  element={isSupportGalleryView ? galleryViewWithAttach ? <VideoAttach /> : <Video /> : <VideoSingle />}
+                />
+                <Route path="/subsession" element={<Subsession />} />
+                <Route path="/preview" element={<Preview />} />
+              </Routes>
+            </BrowserRouter>
+          </ZoomMediaContext.Provider>
+        </MeetingArgsContext.Provider>
       )}
     </div>
   );

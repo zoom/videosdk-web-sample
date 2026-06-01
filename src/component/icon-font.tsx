@@ -35,6 +35,7 @@ import { ReactComponent as IconChannel } from './svgs/icon-channel.svg';
 import { ReactComponent as IconWhiteboard } from './svgs/icon-whiteboard.svg';
 import { ReactComponent as IconRTMS } from './svgs/icon-rtms.svg';
 import { ReactComponent as IconRTMSAnimated } from './svgs/icon-rtms-animated.svg';
+import { ReactComponent as IconVoiceTranslator } from './svgs/icon-voice-translator.svg';
 const iconComponentMap: { [key: string]: any } = {
   ...AnnotationIconMap,
   ...AudioIconMap,
@@ -68,7 +69,8 @@ const iconComponentMap: { [key: string]: any } = {
   'icon-statistic': IconStatistic,
   'icon-whiteboard': IconWhiteboard,
   'icon-rtms': IconRTMS,
-  'icon-rtms-animated': IconRTMSAnimated
+  'icon-rtms-animated': IconRTMSAnimated,
+  'icon-voice-translator': IconVoiceTranslator
 };
 interface IconFontProps {
   type: string;

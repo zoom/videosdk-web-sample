@@ -1,0 +1,203 @@
+.rtmp-ingestion-modal {
+  .rtmp-steps {
+    margin-bottom: 24px;
+  }
+
+  .rtmp-error-alert {
+    margin-bottom: 16px;
+  }
+
+  // ---- Step 0: Create ----
+  .field-row {
+    margin-bottom: 12px;
+
+    &.field-row-last {
+      margin-bottom: 20px;
+    }
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .session-id-input input {
+    font-family: monospace;
+    font-size: 12px;
+    color: #888;
+  }
+
+  // ---- Copyable field (Step 1 & 2) ----
+  .copyable-field {
+    margin-bottom: 12px;
+
+    input {
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .copy-icon {
+      cursor: pointer;
+      color: inherit;
+
+      &.copied {
+        color: #389e0d;
+      }
+    }
+  }
+
+  // ---- Stream Manager panel ----
+  .stream-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .stream-manager-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+
+  .stream-manager-list {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+
+    .ant-list-item {
+      padding: 8px 12px;
+    }
+  }
+
+  .stream-manager-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    .stream-manager-name {
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stream-manager-id {
+      font-family: monospace;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // ---- Step 2: Status panel ----
+  .stream-status {
+    margin-bottom: 20px;
+  }
+
+  .stream-status-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .status-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .refresh-icon {
+      cursor: pointer;
+      color: #8c8c8c;
+    }
+  }
+
+  .status-rows {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+
+    .status-icon,
+    .status-label {
+      color: #8c8c8c;
+    }
+
+    .status-icon {
+      font-size: 16px;
+    }
+
+    .status-label {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    &.connected {
+      background: rgba(56, 158, 13, 0.12);
+      border-color: rgba(56, 158, 13, 0.4);
+
+      .status-icon,
+      .status-label {
+        color: #389e0d;
+      }
+    }
+  }
+
+  .status-hint {
+    font-size: 11px;
+    display: block;
+    margin-top: 8px;
+
+    &.connecting {
+      color: #faad14;
+    }
+
+    &.live {
+      color: #389e0d;
+    }
+  }
+
+  // ---- Divider ----
+  .stream-divider {
+    margin: 16px 0;
+  }
+
+  // ---- Control buttons ----
+  .control-buttons {
+    width: 100%;
+  }
+
+  .start-stop-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 12px;
+
+    .start-btn,
+    .stop-btn {
+      flex: 1;
+    }
+  }
+
+  .footer-hint {
+    font-size: 11px;
+    display: block;
+    margin-top: 12px;
+  }
+}
