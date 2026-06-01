@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { IconFont } from '../../../component/icon-font';
 import { LockOutlined, UnlockOutlined, UpOutlined, CheckOutlined } from '@ant-design/icons';
 import { SharePrivilege } from '@zoom/videosdk';
-import { getAntdDropdownMenu, getAntdItem } from './video-footer-utils';
+import { getAntdDropdownMenu, getAntdItem, type MenuItem } from './video-footer-utils';
 
 const { Button: DropdownButton } = Dropdown;
 interface ScreenShareButtonProps {
@@ -11,6 +11,8 @@ interface ScreenShareButtonProps {
   isHostOrManager: boolean;
   onSharePrivilegeClick?: (privilege: SharePrivilege) => void;
   onScreenShareClick: () => void;
+  useSelfShareAttachView?: boolean;
+  onSelfShareAttachViewToggle?: () => void;
 }
 
 interface ScreenShareLockButtonProps {
@@ -19,31 +21,50 @@ interface ScreenShareLockButtonProps {
 }
 
 const ScreenShareButton = (props: ScreenShareButtonProps) => {
-  const { sharePrivilege, isHostOrManager, onScreenShareClick, onSharePrivilegeClick } = props;
+  const {
+    sharePrivilege,
+    isHostOrManager,
+    onScreenShareClick,
+    onSharePrivilegeClick,
+    useSelfShareAttachView,
+    onSelfShareAttachViewToggle
+  } = props;
   const menu = [
+    isHostOrManager &&
+      getAntdItem(
+        'Lock share',
+        `${SharePrivilege.Locked}`,
+        sharePrivilege === SharePrivilege.Locked && <CheckOutlined />
+      ),
+    isHostOrManager &&
+      getAntdItem(
+        'One participant can share at a time',
+        `${SharePrivilege.Unlocked}`,
+        sharePrivilege === SharePrivilege.Unlocked && <CheckOutlined />
+      ),
+    isHostOrManager &&
+      getAntdItem(
+        'Multiple participants can share simultaneously',
+        `${SharePrivilege.MultipleShare}`,
+        sharePrivilege === SharePrivilege.MultipleShare && <CheckOutlined />
+      ),
     getAntdItem(
-      'Lock share',
-      `${SharePrivilege.Locked}`,
-      sharePrivilege === SharePrivilege.Locked && <CheckOutlined />
-    ),
-    getAntdItem(
-      'One participant can share at a time',
-      `${SharePrivilege.Unlocked}`,
-      sharePrivilege === SharePrivilege.Unlocked && <CheckOutlined />
-    ),
-    getAntdItem(
-      'Multiple participants can share simultaneously',
-      `${SharePrivilege.MultipleShare}`,
-      sharePrivilege === SharePrivilege.MultipleShare && <CheckOutlined />
+      'Use attachShareView for self view',
+      'self-share-attach-view',
+      useSelfShareAttachView && <CheckOutlined />
     )
-  ];
+  ].filter(Boolean) as MenuItem[];
   const onMenuItemClick = (payload: { key: any }) => {
-    onSharePrivilegeClick?.(Number(payload.key));
+    if (payload.key === 'self-share-attach-view') {
+      onSelfShareAttachViewToggle?.();
+    } else {
+      onSharePrivilegeClick?.(Number(payload.key));
+    }
   };
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
-      {isHostOrManager ? (
+      {menu.length > 0 ? (
         <DropdownButton
           className="vc-dropdown-button"
           size="large"

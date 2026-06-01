@@ -93,7 +93,7 @@ const VideoFooter = (props: VideoFooterProps) => {
   const [isVideoMirrored, setIsVideoMirrored] = useState<boolean>(!!mediaStream?.isVideoMirrored());
 
   const [secondaryMicForm] = Form.useForm();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const audioProcessorList: Array<ProcessorParams> = [
     {
       url: `${location.origin}/static/processors/bypass-audio-processor.js`,
@@ -183,7 +183,6 @@ const VideoFooter = (props: VideoFooterProps) => {
           setIsMicrophoneForbidden(false);
         } else if (audio === 'phone') {
           await mediaStream.hangup();
-          setPhoneCallStatus(undefined);
         }
       } else if (type === 'statistic') {
         setSelectedStatisticTab('audio');
@@ -336,6 +335,7 @@ const VideoFooter = (props: VideoFooterProps) => {
     },
     [zmClient]
   );
+  const useSelfShareAttachView = searchParams.get('selfShareAttachView') === '1';
   const onScreenShareClick = useCallback(async () => {
     if (mediaStream?.getShareStatus() === ShareStatus.End && selfShareCanvas) {
       await mediaStream?.startShareScreen(selfShareCanvas, {
@@ -344,6 +344,15 @@ const VideoFooter = (props: VideoFooterProps) => {
       });
     }
   }, [mediaStream, selfShareCanvas, searchParams]);
+  const onSelfShareAttachViewToggle = useCallback(() => {
+    const newParams = new URLSearchParams(searchParams);
+    if (useSelfShareAttachView) {
+      newParams.delete('selfShareAttachView');
+    } else {
+      newParams.set('selfShareAttachView', '1');
+    }
+    setSearchParams(newParams);
+  }, [searchParams, setSearchParams, useSelfShareAttachView]);
 
   const onLeaveClick = useCallback(async () => {
     await zmClient.leave();
@@ -687,6 +696,8 @@ const VideoFooter = (props: VideoFooterProps) => {
             await mediaStream?.setSharePrivilege(privilege);
             setSharePrivilege(privilege);
           }}
+          useSelfShareAttachView={useSelfShareAttachView}
+          onSelfShareAttachViewToggle={onSelfShareAttachViewToggle}
         />
       )}
       {!zmClient?.getCurrentUserInfo()?.subsessionId &&

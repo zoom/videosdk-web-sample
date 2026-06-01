@@ -36,8 +36,11 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const [showAnnotationToolbox, setShowAnnotationToolbox] = useState(false);
   const [originalViewPosition, setOriginalViewPosition] = useState({ x: 0, y: 0 });
   const [isLargeSelfShareView, setIsLargeSelfShareView] = useState(false);
+  const selfShareAttachedRef = useRef(false);
+  const selfShareVideoPlayerRef = useRef<VideoPlayer | null>(null);
   const [searchParams] = useSearchParams();
   const isVideoPlayer = searchParams.get('useVideoPlayer') === '1';
+  const useSelfShareAttachView = searchParams.get('selfShareAttachView') === '1';
   const { isRecieveSharing, sharedContentDimension, shareUserList, activeSharingId, shareStatus, setActiveSharingId } =
     useShare(zmClient, mediaStream, isVideoPlayer ? shareVideoPlayerRef : shareCanvasRef);
   const { isControllingUser, controllingUser } = useRemoteControl(
@@ -134,6 +137,21 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
     }
   }, [shareStatus]);
   useEffect(() => {
+    if (!useSelfShareAttachView || !mediaStream) return;
+    const currentUserId = zmClient.getSessionInfo().userId;
+    if (shareStatus !== ShareStatus.End && !selfShareAttachedRef.current) {
+      if (!isLargeSelfShareView) {
+        setIsLargeSelfShareView(true);
+      } else if (selfShareVideoPlayerRef.current) {
+        mediaStream.attachShareView(currentUserId, selfShareVideoPlayerRef.current);
+        selfShareAttachedRef.current = true;
+      }
+    } else if (shareStatus === ShareStatus.End && selfShareAttachedRef.current) {
+      mediaStream.detachShareView(currentUserId);
+      selfShareAttachedRef.current = false;
+    }
+  }, [useSelfShareAttachView, shareStatus, isLargeSelfShareView, mediaStream, zmClient]);
+  useEffect(() => {
     onShareViewActiveChange(isRecieveSharing || isLargeSelfShareView);
   }, [isRecieveSharing, isLargeSelfShareView, onShareViewActiveChange]);
   return (
@@ -187,11 +205,22 @@ const SingleShareView = forwardRef((props: ShareViewProps, ref: any) => {
         className={classnames('self-share-view-container', { 'self-share-view-in-annotation': isLargeSelfShareView })}
         ref={selfShareViewContainerRef}
       >
+        {useSelfShareAttachView && isLargeSelfShareView && (
+          <div
+            className="self-share-canvas-wrapper"
+            style={{ width: `${selfShareViewSize.width}px`, height: `${selfShareViewSize.height}px` }}
+          >
+            <video-player-container class="self-share-canvas">
+              <video-player ref={selfShareVideoPlayerRef} />
+            </video-player-container>
+          </div>
+        )}
         <div
           className="self-share-canvas-wrapper"
           style={{
             width: `${selfShareViewSize.width}px`,
-            height: `${selfShareViewSize.height}px`
+            height: `${selfShareViewSize.height}px`,
+            ...(useSelfShareAttachView && isLargeSelfShareView ? { display: 'none' } : {})
           }}
         >
           {mediaStream?.isStartShareScreenWithVideoElement() ? (
