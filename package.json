@@ -19,7 +19,7 @@
     "react-dom": "18.3.1",
     "react-draggable": "^4.4.6",
     "react-router": "^7.6.1",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.1",
     "web-vitals": "^5.2.0"
   },
   "scripts": {
@@ -46,7 +46,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/classnames": "^2.2.11",
     "@types/crypto-js": "^4.2.0",
     "@types/jest": "^29.5.14",
