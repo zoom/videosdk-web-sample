@@ -27,7 +27,9 @@ export function useMultiShare(zmClient: ZoomClient, mediaStream: MediaStream | n
               const userList = mediaStream.getShareUserList();
               setShareUserList(userList.filter((user) => user.userId !== currentUserId));
               if (isCurrentUser) {
-                setShareStatus(mediaStream.getShareStatus());
+                Promise.resolve().then(() => {
+                  setShareStatus(mediaStream.getShareStatus());
+                });
               }
             }
           }

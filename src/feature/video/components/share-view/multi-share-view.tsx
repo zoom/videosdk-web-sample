@@ -1,14 +1,24 @@
-import { useRef, useContext, useCallback, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react';
+import { useRef, useState, useContext, useCallback, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react';
 import classnames from 'classnames';
 import _ from 'lodash';
+import { Dropdown, Button } from 'antd';
+import { CheckOutlined, MoreOutlined } from '@ant-design/icons';
 import ShareBar from './share-bar';
 import ZoomContext from '../../../../context/zoom-context';
 import ZoomMediaContext from '../../../../context/media-context';
-import type { VideoPlayer } from '@zoom/videosdk';
+import { type VideoPlayer, ShareViewQuality } from '@zoom/videosdk';
 import { useMultiShare } from '../../hooks/useMultiShare';
 import { usePrevious } from '../../../../hooks';
+import { getAntdItem, getAntdDropdownMenu } from '../video-footer-utils';
 import './share-view.scss';
 import type { ShareViewProps } from './share-view-types';
+
+const shareViewQualityOptions = [
+  { label: 'Original', value: ShareViewQuality.Original },
+  { label: 'High', value: ShareViewQuality.High },
+  { label: 'Medium', value: ShareViewQuality.Medium },
+  { label: 'Low', value: ShareViewQuality.Low }
+];
 
 const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const { onShareViewActiveChange } = props;
@@ -17,6 +27,7 @@ const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
   const selfShareViewRef = useRef<(HTMLCanvasElement & HTMLVideoElement) | null>(null);
   const videoPlayerListRef = useRef<Record<string, VideoPlayer>>({});
   const { isRecieveSharing, shareStatus, shareUserList } = useMultiShare(zmClient, mediaStream);
+  const [shareViewQualityMap, setShareViewQualityMap] = useState<Record<string, ShareViewQuality>>({});
   const shareUserIdList = useMemo(() => shareUserList.map((user) => user.userId), [shareUserList]);
   const previousShareUserIdList = usePrevious(shareUserIdList);
   useEffect(() => {
@@ -48,6 +59,13 @@ const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
       videoPlayerListRef.current[`${userId}`] = element;
     }
   }, []);
+  const onShareViewQualityChange = useCallback(
+    async (userId: number, quality: ShareViewQuality) => {
+      await mediaStream?.updateShareViewQuality(userId, quality);
+      setShareViewQualityMap((prev) => ({ ...prev, [`${userId}`]: quality }));
+    },
+    [mediaStream]
+  );
   useImperativeHandle(ref, () => {
     return {
       selfShareRef: selfShareViewRef.current
@@ -91,6 +109,10 @@ const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
             }}
           >
             {shareUserList.map((user) => {
+              const currentQuality = shareViewQualityMap[`${user.userId}`] ?? ShareViewQuality.Original;
+              const qualityMenu = shareViewQualityOptions.map((option) =>
+                getAntdItem(option.label, `${option.value}`, currentQuality === option.value && <CheckOutlined />)
+              );
               return (
                 <div key={user.userId} className="share-view-cell">
                   <video-player
@@ -99,6 +121,15 @@ const MultiShareView = forwardRef((props: ShareViewProps, ref: any) => {
                       setVideoPlayerRef(user.userId, element);
                     }}
                   />
+                  <Dropdown
+                    menu={getAntdDropdownMenu(qualityMenu, ({ key }) =>
+                      onShareViewQualityChange(user.userId, Number(key) as ShareViewQuality)
+                    )}
+                    placement="bottomRight"
+                    trigger={['click']}
+                  >
+                    <Button icon={<MoreOutlined />} className="share-view-quality-button" type="primary" size="small" />
+                  </Dropdown>
                   <span className="share-view-name-tag">{`${user.displayName}'s screen`}</span>
                 </div>
               );

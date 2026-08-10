@@ -56,7 +56,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      aspect-ratio: 16/9;
+       aspect-ratio: 16/9;
+      & .share-view-quality-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 1;
+      }
       & .share-view-name-tag {
         position: absolute;
         left: 0;
