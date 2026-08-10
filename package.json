@@ -1,13 +1,13 @@
 {
   "name": "react-video-sdk-demo",
-  "version": "2.4.7",
+  "version": "2.5.0",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.8.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@zoom/videosdk": "2.4.7",
+    "@zoom/videosdk": "2.5.0",
     "antd": "^4.24.16",
     "classnames": "^2.5.1",
     "crypto-js": "^4.2.0",
@@ -19,7 +19,7 @@
     "react-dom": "18.3.1",
     "react-draggable": "^4.4.6",
     "react-router": "^7.6.1",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.1",
     "web-vitals": "^5.2.0"
   },
   "scripts": {
@@ -46,7 +46,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/classnames": "^2.2.11",
     "@types/crypto-js": "^4.2.0",
     "@types/jest": "^29.5.14",

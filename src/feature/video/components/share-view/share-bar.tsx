@@ -25,8 +25,12 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   const [hideShareAudioTooltip, setHideShareAudioTooltip] = useState(false);
   const [shareAudioStatus, setShareAudioStatus] = useState(mediaStream?.getShareAudioStatus());
   const [isVideoShare, setIsVideoShare] = useState(mediaStream?.isOptimizeForSharedVideoEnabled());
+  // When the SDK shares with a <video> element we can mirror its stream into the preview.
+  // On browsers without that capability (e.g. Firefox) it shares with a <canvas>, which has
+  // no srcObject, so the preview element must be a <canvas> too and the stream setup is skipped.
+  const isShareWithVideoElement = !!mediaStream?.isStartShareScreenWithVideoElement();
   const draggableRef = useRef<HTMLDivElement>(null);
-  const sharePreviewRef = useRef<HTMLVideoElement>(null);
+  const sharePreviewRef = useRef<(HTMLVideoElement & HTMLCanvasElement) | null>(null);
   const onShareAudioChange = useCallback(() => {
     setShareAudioStatus(mediaStream?.getShareAudioStatus());
   }, [mediaStream]);
@@ -79,6 +83,10 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
   useEffect(() => {
     const sharePreview = sharePreviewRef.current;
     if (!sharePreview) return;
+
+    // A <canvas> preview element (isStartShareScreenWithVideoElement() === false, e.g. Firefox)
+    // has no srcObject, so the captured stream cannot be assigned to it.
+    if (!(sharePreview instanceof HTMLVideoElement)) return;
 
     // Clear stream when sharing ends
     if (shareStatus === ShareStatus.End) {
@@ -145,7 +153,11 @@ const ShareBar = forwardRef((props: ShareBarProps, ref: any) => {
           <div className="share-bar-tip">
             {shareStatus === ShareStatus.Sharing ? "You're sharing the screen" : 'Your screen sharing is paused'}
           </div>
-          <video className="share-bar-canvas" ref={sharePreviewRef} playsInline autoPlay muted />
+          {isShareWithVideoElement ? (
+            <video className="share-bar-canvas" ref={sharePreviewRef} playsInline autoPlay muted />
+          ) : (
+            <canvas className="share-bar-canvas" ref={sharePreviewRef} />
+          )}
           {shareAudioStatus?.isShareAudioEnabled && (
             <Popconfirm
               title="Your microphone is disabled when sharing computer audio. When you pause or stop sharing audio, your microphone will be reactivated."
