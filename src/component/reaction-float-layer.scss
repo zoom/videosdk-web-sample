@@ -1,0 +1,42 @@
+.reaction-float-layer {
+  width: 140px;
+  pointer-events: none;
+  overflow: hidden;
+
+  &.overlay {
+    position: absolute;
+    right: 12px;
+    bottom: 148px;
+    height: 36%;
+  }
+
+  &.fixed {
+    position: fixed;
+    right: 24px;
+    bottom: 14vh;
+    height: 70vh;
+    z-index: 30;
+  }
+}
+
+.reaction-float-item {
+  position: absolute;
+  bottom: 0;
+  font-size: 36px;
+  line-height: 1;
+  animation: reaction-rise 2.8s ease-out forwards;
+}
+
+@keyframes reaction-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-58vh);
+    opacity: 0;
+  }
+}

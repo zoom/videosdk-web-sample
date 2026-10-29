@@ -15,6 +15,7 @@ import StreamingContext from './context/streaming-context';
 import classNames from 'classnames';
 import { IconFont } from '../component/icon-font';
 import AudioVideoStatisticModal from './audio-video-statistic';
+import StreamingOverlay from './components/streaming-overlay';
 import 'antd/dist/antd.min.css';
 import './streaming.scss';
 interface AppProps {
@@ -44,15 +45,21 @@ function StreamingApp(props: AppProps) {
   const [statisticVisible, setStatisticVisible] = useState(false);
   const [channelForm] = Form.useForm();
   useEffect(() => {
-    if (liveVideoRef.current) {
-      if (cid && signature && !invokeRef.current) {
-        invokeRef.current = true;
-        streaming.attachStreaming(cid, signature, VideoQuality.Video_720P, liveVideoRef.current);
-        liveVideoRef.current.setAttribute('controls', 'true');
-      }
+    const video = liveVideoRef.current;
+    if (!video || !cid || !signature) {
+      return;
     }
+    const timer = window.setTimeout(() => {
+      if (!liveVideoRef.current || invokeRef.current) {
+        return;
+      }
+      invokeRef.current = true;
+      streaming.attachStreaming(cid, signature, VideoQuality.Video_720P, liveVideoRef.current);
+      liveVideoRef.current.setAttribute('controls', 'true');
+    }, 0);
     return () => {
-      if (liveVideoRef.current) {
+      window.clearTimeout(timer);
+      if (invokeRef.current && liveVideoRef.current) {
         invokeRef.current = false;
         streaming.detachStreaming(cid, liveVideoRef.current);
       }
@@ -142,6 +149,7 @@ function StreamingApp(props: AppProps) {
         <live-video-container>
           <live-video ref={liveVideoRef} />
         </live-video-container>
+        <StreamingOverlay />
       </div>
       <div className="tool-bar">
         {/* <Button

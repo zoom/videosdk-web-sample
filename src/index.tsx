@@ -50,6 +50,8 @@ if (meetingArgs?.telemetry_tracking_id) {
 } else {
   meetingArgs.telemetry_tracking_id = '';
 }
+// hold: 0 = waiting room off, 1 = waiting room on, 2 = off but host can turn it on
+meetingArgs.hold = [0, 1, 2].includes(Number(meetingArgs.hold)) ? Number(meetingArgs.hold) : 0;
 
 if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
   meetingArgs.signature = generateVideoToken(
@@ -61,7 +63,8 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     Number(meetingArgs.role ?? 1),
     meetingArgs.cloud_recording_option,
     meetingArgs.cloud_recording_election,
-    meetingArgs.telemetry_tracking_id
+    meetingArgs.telemetry_tracking_id,
+    meetingArgs.hold
   );
   console.log('=====================================');
   console.log('meetingArgs', meetingArgs);
@@ -76,6 +79,7 @@ if (!meetingArgs.signature && meetingArgs.sdkSecret && meetingArgs.topic) {
     cloud_recording_option: meetingArgs.cloud_recording_option || '',
     cloud_recording_election: meetingArgs.cloud_recording_election || '',
     telemetry_tracking_id: meetingArgs.telemetry_tracking_id || '',
+    hold: meetingArgs.hold,
     enforceGalleryView: 0,
     enforceVB: 0,
     web: '1'
