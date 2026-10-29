@@ -1,0 +1,66 @@
+src/feature/video/components/video-footer.tsx
+  s_fc5a15accfbd46::t_5d3d56efc9e3fa 1,3,5
+  s_fc5a15accfbd46::t_d22a8d5e0a4024 42-43
+  s_fc5a15accfbd46::t_1600f38b8042c6 650-724,726-801,804-834,836,838-844
+src/streaming-viewer/StreamingApp.tsx
+  s_fc5a15accfbd46::t_1c10a88fb89ded 48-50,52-59,61-62
+  s_fc5a15accfbd46::t_9957c42231fea9 152
+  s_fc5a15accfbd46::t_356edec7980ebc 18
+src/feature/video/components/reactions-button.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-20
+src/component/reaction-float-layer.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-42
+src/streaming-viewer/components/streaming-overlay.tsx
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-335
+src/feature/waiting-room/waiting-room.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-35
+src/feature/video/components/video-footer.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 7-38
+src/streaming-viewer/components/streaming-overlay.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-199
+src/feature/waiting-room/waiting-room.tsx
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-23
+src/feature/video/components/reactions-button.tsx
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-142
+src/feature/video/components/waiting-room-button.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-11
+src/App.tsx
+  s_fc5a15accfbd46::t_6e845ea2965702 35
+  s_fc5a15accfbd46::t_4d206d26bfdd15 236-237,241
+  s_fc5a15accfbd46::t_72e42285d0102d 251
+  s_fc5a15accfbd46::t_38c920003b58a4 273-280,286,288,290,293,297,301,303
+  s_fc5a15accfbd46::t_f124ac7a339d29 308-309
+  s_fc5a15accfbd46::t_a1bfafea6c3c5d 141
+  s_fc5a15accfbd46::t_2d92fc1baafed5 196
+src/index.tsx
+  s_fc5a15accfbd46::t_c355be7be4173b 66-67
+  s_fc5a15accfbd46::t_c382e13dcb5df1 53-54
+  s_fc5a15accfbd46::t_dacc7e4c2defd5 82
+src/utils/util.ts
+  s_fc5a15accfbd46::t_e8f0c0416fa456 29-30
+  s_fc5a15accfbd46::t_b3c66620f29bd2 13-14
+src/utils/reaction-emoji.ts
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-49
+src/feature/video/components/waiting-room-button.tsx
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-131
+src/streaming-viewer/streaming.scss
+  s_fc5a15accfbd46::t_d58d3e9eb11649 54
+src/component/reaction-float-layer.tsx
+  s_fc5a15accfbd46::t_d58d3e9eb11649 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e2aef29696724f8ce44e88e514608941ecdbe175",
+  "prompts": {},
+  "sessions": {
+    "s_fc5a15accfbd46": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f93a6a5a-ec8b-4ef9-a63c-610f5894a574",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "vic.yang <vic.yang@zoom.us>"
+    }
+  }
+}
