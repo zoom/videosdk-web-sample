@@ -1,0 +1,27 @@
+src/feature/video/components/waiting-room-button.tsx
+  s_fc5a15accfbd46::t_7cd51f7f39d655 62-74
+  s_fc5a15accfbd46::t_e22551b065c886 131-138
+src/feature/video/hooks/useActiveMediaFailed.ts
+  s_fc5a15accfbd46::t_8fe2520ac13ea9 15-25
+src/streaming-viewer/index.tsx
+  s_fc5a15accfbd46::t_069d44e3504337 30-31
+  s_fc5a15accfbd46::t_1133dfffc41af6 5,10-16
+src/App.tsx
+  s_fc5a15accfbd46::t_237351c063c98d 264-268
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "175fd64ba08f969b9f39e98f779324e190a6131b",
+  "prompts": {},
+  "sessions": {
+    "s_fc5a15accfbd46": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f93a6a5a-ec8b-4ef9-a63c-610f5894a574",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "vic.yang <vic.yang@zoom.us>"
+    }
+  }
+}
