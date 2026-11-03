@@ -261,6 +261,11 @@ function App(props: AppProps) {
             title: 'Meeting ended',
             content: 'This meeting has been ended by host'
           });
+        } else if (payload.reason === 'kicked by host') {
+          Modal.warning({
+            title: 'Removed from meeting',
+            content: 'You have been removed from the meeting by the host'
+          });
         }
       }
     },

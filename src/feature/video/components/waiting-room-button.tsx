@@ -59,6 +59,19 @@ const WaitingRoomButton = (props: WaitingRoomButtonProps) => {
     [zmClient, refreshWaitingRoomState]
   );
 
+  const onRemove = useCallback(
+    async (userId: number) => {
+      try {
+        await zmClient.removeUser(userId);
+        message.success('Participant removed');
+        refreshWaitingRoomState();
+      } catch (e: any) {
+        message.error(e?.reason || 'Failed to remove participant');
+      }
+    },
+    [zmClient, refreshWaitingRoomState]
+  );
+
   const onAdmitAll = useCallback(async () => {
     try {
       await zmClient.admitAll();
@@ -115,7 +128,14 @@ const WaitingRoomButton = (props: WaitingRoomButtonProps) => {
                 actions={[
                   <Button key="admit" type="link" onClick={() => onAdmit(user.userId)}>
                     Admit
-                  </Button>
+                  </Button>,
+                  ...(zmClient.isHost()
+                    ? [
+                        <Button key="remove" type="link" danger onClick={() => onRemove(user.userId)}>
+                          Remove
+                        </Button>
+                      ]
+                    : [])
                 ]}
               >
                 <List.Item.Meta title={user.displayName} />
