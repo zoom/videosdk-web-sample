@@ -1,8 +1,8 @@
-import { useState, useCallback, useContext, useEffect } from 'react';
+import { useState, useCallback, useContext, useEffect, useLayoutEffect, useRef } from 'react';
 import classNames from 'classnames';
-import { message, Modal, Form, Select, Checkbox, Tooltip } from 'antd';
+import { message, Modal, Form, Select, Checkbox, Tooltip, Button } from 'antd';
 import { useSearchParams } from 'react-router';
-import { SoundOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, SoundOutlined } from '@ant-design/icons';
 import ZoomContext from '../../../context/zoom-context';
 import CameraButton from './camera';
 import WhiteboardButton from './whiteboard';
@@ -39,6 +39,8 @@ import {
   RealTimeMediaStreamsButton
 } from './real-time-media-streams';
 import VoiceTranslatorButton from './voice-translator';
+import WaitingRoomButton from './waiting-room-button';
+import ReactionsButton from './reactions-button';
 interface VideoFooterProps {
   className?: string;
   selfShareCanvas?: HTMLCanvasElement | HTMLVideoElement | null;
@@ -645,104 +647,201 @@ const VideoFooter = (props: VideoFooterProps) => {
     };
   }, [mediaStream, zmClient, statisticVisible]);
   const recordingButtons: RecordButtonProps[] = getRecordingButtons(recordingStatus, zmClient.isHost());
+  const footerRef = useRef<HTMLDivElement>(null);
+  const primaryRef = useRef<HTMLDivElement>(null);
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const leaveRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const collapsedRef = useRef(false);
+  const overflowWidthRef = useRef(0);
+  const overflowCountRef = useRef(0);
+  useLayoutEffect(() => {
+    const footer = footerRef.current;
+    const overflow = overflowRef.current;
+    if (!footer || !overflow) {
+      return;
+    }
+    const measure = () => {
+      const primary = primaryRef.current;
+      const leave = leaveRef.current;
+      if (!primary || !leave) {
+        return;
+      }
+      const count = overflow.querySelectorAll('.vc-button, .vc-dropdown-button').length;
+      const gap = Math.min(30, footer.clientWidth * 0.01);
+      if (!collapsedRef.current && overflow.offsetWidth > 0) {
+        overflowWidthRef.current = overflow.offsetWidth;
+        overflowCountRef.current = count;
+      }
+      const overflowWidth = collapsedRef.current
+        ? overflowCountRef.current === count && overflowWidthRef.current > 0
+          ? overflowWidthRef.current
+          : count * (96 + gap)
+        : overflow.offsetWidth;
+      const needed = primary.offsetWidth + overflowWidth + leave.offsetWidth;
+      const next = count > 0 && needed > footer.clientWidth + 1;
+      collapsedRef.current = next;
+      setCollapsed((prev) => (prev === next ? prev : next));
+    };
+    measure();
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(footer);
+    const mutationObserver = new MutationObserver(measure);
+    mutationObserver.observe(overflow, { childList: true, subtree: true });
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [recordingStatus, rtmsStatus]);
+  useEffect(() => {
+    if (!collapsed) {
+      setMoreOpen(false);
+    }
+  }, [collapsed]);
+  useEffect(() => {
+    if (!moreOpen) {
+      return;
+    }
+    const onPointerDown = (event: MouseEvent) => {
+      const { target } = event;
+      if (!(target instanceof Element)) {
+        return;
+      }
+      if (
+        target.closest(
+          '.footer-more-panel, .footer-more-button, .ant-dropdown, .ant-select-dropdown, .ant-modal-root, .ant-popover, .ant-tooltip'
+        )
+      ) {
+        return;
+      }
+      setMoreOpen(false);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+    };
+  }, [moreOpen]);
   return (
-    <div className={classNames('video-footer', className)}>
-      {isAudioEnable && (
-        <MicrophoneButton
-          isStartedAudio={isStartedAudio}
-          isMuted={isMuted}
-          isSupportPhone={isSupportPhone}
-          audio={audio}
-          onMicrophoneClick={onMicrophoneClick}
-          onMicrophoneMenuClick={onMicrophoneMenuClick}
-          audioProcessorList={audioProcessorList}
-          microphoneList={micList}
-          speakerList={speakerList}
-          activeMicrophone={activeMicrophone}
-          activeSpeaker={activeSpeaker}
-          disabled={isComputerAudioDisabled}
-          isMicrophoneForbidden={isMicrophoneForbidden}
-          isSecondaryAudioStarted={isSecondaryAudioStarted}
-          isSupportAudioProcessor={isSupportAudioProcessor}
-          activeAudioProcessorList={activeAudioProcessorList}
-        />
-      )}
-      <CameraButton
-        isStartedVideo={isStartedVideo}
-        onCameraClick={onCameraClick}
-        onSwitchCamera={onSwitchCamera}
-        onMirrorVideo={onMirrorVideo}
-        onSelectVideoProcessor={onVideoProcessorClick}
-        onVideoStatistic={() => {
-          setSelectedStatisticTab('video');
-          setStatisticVisible(true);
-        }}
-        onBlurBackground={onBlurBackground}
-        onSelectVideoPlayback={onSelectVideoPlayback}
-        activePlaybackUrl={activePlaybackUrl}
-        activeProcessor={activeVideoProcessor?.name}
-        cameraList={cameraList}
-        activeCamera={activeCamera}
-        isMirrored={isVideoMirrored}
-        isBlur={isBlur}
-        isSupportVideoProcessor={isSupportVideoProcessor}
-      />
-      {!isAndroidOrIOSBrowser() && (
-        <ScreenShareButton
-          sharePrivilege={sharePrivilege}
-          isHostOrManager={zmClient.isHost() || zmClient.isManager()}
-          onScreenShareClick={onScreenShareClick}
-          onSharePrivilegeClick={async (privilege) => {
-            await mediaStream?.setSharePrivilege(privilege);
-            setSharePrivilege(privilege);
+    <div className={classNames('video-footer', className, { 'footer-collapsed': collapsed })} ref={footerRef}>
+      <div className="footer-primary" ref={primaryRef}>
+        {isAudioEnable && (
+          <MicrophoneButton
+            isStartedAudio={isStartedAudio}
+            isMuted={isMuted}
+            isSupportPhone={isSupportPhone}
+            audio={audio}
+            onMicrophoneClick={onMicrophoneClick}
+            onMicrophoneMenuClick={onMicrophoneMenuClick}
+            audioProcessorList={audioProcessorList}
+            microphoneList={micList}
+            speakerList={speakerList}
+            activeMicrophone={activeMicrophone}
+            activeSpeaker={activeSpeaker}
+            disabled={isComputerAudioDisabled}
+            isMicrophoneForbidden={isMicrophoneForbidden}
+            isSecondaryAudioStarted={isSecondaryAudioStarted}
+            isSupportAudioProcessor={isSupportAudioProcessor}
+            activeAudioProcessorList={activeAudioProcessorList}
+          />
+        )}
+        <CameraButton
+          isStartedVideo={isStartedVideo}
+          onCameraClick={onCameraClick}
+          onSwitchCamera={onSwitchCamera}
+          onMirrorVideo={onMirrorVideo}
+          onSelectVideoProcessor={onVideoProcessorClick}
+          onVideoStatistic={() => {
+            setSelectedStatisticTab('video');
+            setStatisticVisible(true);
           }}
-          useSelfShareAttachView={useSelfShareAttachView}
-          onSelfShareAttachViewToggle={onSelfShareAttachViewToggle}
+          onBlurBackground={onBlurBackground}
+          onSelectVideoPlayback={onSelectVideoPlayback}
+          activePlaybackUrl={activePlaybackUrl}
+          activeProcessor={activeVideoProcessor?.name}
+          cameraList={cameraList}
+          activeCamera={activeCamera}
+          isMirrored={isVideoMirrored}
+          isBlur={isBlur}
+          isSupportVideoProcessor={isSupportVideoProcessor}
+        />
+        {!isAndroidOrIOSBrowser() && (
+          <ScreenShareButton
+            sharePrivilege={sharePrivilege}
+            isHostOrManager={zmClient.isHost() || zmClient.isManager()}
+            onScreenShareClick={onScreenShareClick}
+            onSharePrivilegeClick={async (privilege) => {
+              await mediaStream?.setSharePrivilege(privilege);
+              setSharePrivilege(privilege);
+            }}
+            useSelfShareAttachView={useSelfShareAttachView}
+            onSelfShareAttachViewToggle={onSelfShareAttachViewToggle}
+          />
+        )}
+        {liveTranscriptionClient?.getLiveTranscriptionStatus().isLiveTranscriptionEnabled && (
+          <>
+            <LiveTranscriptionButton isHost={zmClient.isHost()} />
+            <TranscriptionSubtitle text={caption.text} displayName={caption.displayName} />
+          </>
+        )}
+        {isSecondaryAudioStarted && (
+          <Tooltip title="Secondary audio on">
+            <SoundOutlined style={{ position: 'fixed', top: '45px', left: '10px', color: '#f60', fontSize: '24px' }} />
+          </Tooltip>
+        )}
+      </div>
+      {collapsed && (
+        <Button
+          className={classNames('vc-button', 'footer-more-button', { active: moreOpen })}
+          icon={<EllipsisOutlined />}
+          ghost={true}
+          shape="circle"
+          size="large"
+          title="More"
+          onClick={() => setMoreOpen((open) => !open)}
         />
       )}
-      {!zmClient?.getCurrentUserInfo()?.subsessionId &&
-        recordingButtons.map((button: RecordButtonProps) => {
-          return (
-            <RecordingButton
-              key={button.text}
-              onClick={() => {
-                onRecordingClick(button.text);
-              }}
-              {...button}
-            />
-          );
-        })}
-      {rtmsClient.isSupportRealTimeMediaStreams() &&
-        getRealTimeMediaStreamsButtons(rtmsStatus, zmClient.isHost()).map((button: RTMSButtonProps) => {
-          return (
-            <RealTimeMediaStreamsButton
-              key={button.text}
-              onClick={() => {
-                onRealTimeMediaStreamsClick(button.text);
-              }}
-              {...button}
-            />
-          );
-        })}
-      {liveTranscriptionClient?.getLiveTranscriptionStatus().isLiveTranscriptionEnabled && (
-        <>
-          <LiveTranscriptionButton isHost={zmClient.isHost()} />
-          <TranscriptionSubtitle text={caption.text} displayName={caption.displayName} />
-        </>
-      )}
-      {/** Broadcast streaming or Live streaming */}
-      <LiveStreamButton isHost={zmClient.isHost()} />
-      {isSecondaryAudioStarted && (
-        <Tooltip title="Secondary audio on">
-          <SoundOutlined style={{ position: 'fixed', top: '45px', left: '10px', color: '#f60', fontSize: '24px' }} />
-        </Tooltip>
-      )}
-      <WhiteboardButton
-        isHostOrManager={zmClient.isHost() || zmClient.isManager()}
-        whiteboardCantainer={whiteboardContainer}
-      />
-      <VoiceTranslatorButton />
-      <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
+      <div
+        className={classNames('footer-more-panel', { inline: !collapsed, open: collapsed && moreOpen })}
+        ref={overflowRef}
+      >
+        {!zmClient?.getCurrentUserInfo()?.subsessionId &&
+          recordingButtons.map((button: RecordButtonProps) => {
+            return (
+              <RecordingButton
+                key={button.text}
+                onClick={() => {
+                  onRecordingClick(button.text);
+                }}
+                {...button}
+              />
+            );
+          })}
+        {rtmsClient.isSupportRealTimeMediaStreams() &&
+          getRealTimeMediaStreamsButtons(rtmsStatus, zmClient.isHost()).map((button: RTMSButtonProps) => {
+            return (
+              <RealTimeMediaStreamsButton
+                key={button.text}
+                onClick={() => {
+                  onRealTimeMediaStreamsClick(button.text);
+                }}
+                {...button}
+              />
+            );
+          })}
+        {/** Broadcast streaming or Live streaming */}
+        <LiveStreamButton isHost={zmClient.isHost()} />
+        <WhiteboardButton
+          isHostOrManager={zmClient.isHost() || zmClient.isManager()}
+          whiteboardCantainer={whiteboardContainer}
+        />
+        <VoiceTranslatorButton />
+        <WaitingRoomButton />
+        <ReactionsButton />
+      </div>
+      <div className="footer-leave" ref={leaveRef}>
+        <LeaveButton onLeaveClick={onLeaveClick} isHost={zmClient.isHost()} onEndClick={onEndClick} />
+      </div>
 
       <AudioVideoStatisticModal
         visible={statisticVisible}

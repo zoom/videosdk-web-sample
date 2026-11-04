@@ -32,6 +32,7 @@ import LoadingLayer from './component/loading-layer';
 import Chat from './feature/chat/chat';
 import Command from './feature/command/command';
 import Subsession from './feature/subsession/subsession';
+import WaitingRoom from './feature/waiting-room/waiting-room';
 import type { MediaStream } from './index-types';
 import './App.css';
 type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: any }>;
@@ -137,6 +138,7 @@ function App(props: AppProps) {
   const [loadingText, setLoadingText] = useState('');
   const [isFailover, setIsFailover] = useState<boolean>(false);
   const [status, setStatus] = useState<string>('closed');
+  const [isOnHold, setIsOnHold] = useState(false);
   const [mediaState, dispatch] = useReducer(mediaReducer, mediaShape);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isSupportGalleryView, setIsSupportGalleryView] = useState<boolean>(false);
@@ -191,6 +193,7 @@ function App(props: AppProps) {
         const stream = zmClient.getMediaStream();
         setMediaStream(stream);
         setIsSupportGalleryView(stream.isSupportMultipleVideos());
+        setIsOnHold(zmClient.isUserOnHold());
         setIsLoading(false);
       } catch (e: any) {
         setIsLoading(false);
@@ -230,9 +233,12 @@ function App(props: AppProps) {
           setLoadingText(`Joining ${subsessionName}...`);
         } else if (reason === ReconnectReason.BackToMainSession) {
           setLoadingText('Returning to Main Session...');
+        } else if (reason === 'on hold') {
+          setLoadingText('Joining the session...');
         }
       } else if (payload.state === ConnectionState.Connected) {
         setStatus('connected');
+        setIsOnHold(zmClient.isUserOnHold());
         if (isFailover) {
           setIsLoading(false);
         }
@@ -242,6 +248,7 @@ function App(props: AppProps) {
         console.log('getSessionInfo', zmClient.getSessionInfo());
       } else if (payload.state === ConnectionState.Closed || payload.state === ConnectionState.Fail) {
         setStatus('closed');
+        setIsOnHold(false);
         dispatch({ type: 'reset-media' });
         if (payload.state === ConnectionState.Fail) {
           Modal.error({
@@ -254,6 +261,11 @@ function App(props: AppProps) {
             title: 'Meeting ended',
             content: 'This meeting has been ended by host'
           });
+        } else if (payload.reason === 'kicked by host') {
+          Modal.warning({
+            title: 'Removed from meeting',
+            content: 'You have been removed from the meeting by the host'
+          });
         }
       }
     },
@@ -263,30 +275,43 @@ function App(props: AppProps) {
     const { action, type, result } = payload;
     dispatch({ type: `${type}-${action}`, payload: result === 'success' });
   }, []);
+  const onHoldChange = useCallback((payload: { isOnHold: boolean }) => {
+    setIsOnHold(!!payload.isOnHold);
+    if (!payload.isOnHold) {
+      setIsLoading(true);
+      setIsFailover(true);
+      setLoadingText('Joining the session...');
+    }
+  }, []);
 
   const onLeaveOrJoinSession = useCallback(async () => {
     if (status === 'closed') {
       setIsLoading(true);
       await zmClient.join(topic, signature, name, password);
+      setIsOnHold(zmClient.isUserOnHold());
       setIsLoading(false);
-    } else if (status === 'connected') {
+    } else if (status === 'connected' || isOnHold) {
       await zmClient.leave();
+      setIsOnHold(false);
       message.warn('You have left the session.');
     }
-  }, [zmClient, status, topic, signature, name, password]);
+  }, [zmClient, status, isOnHold, topic, signature, name, password]);
   useEffect(() => {
     zmClient.on('connection-change', onConnectionChange);
     zmClient.on('media-sdk-change', onMediaSDKChange);
+    zmClient.on('on-hold-change', onHoldChange);
     return () => {
       zmClient.off('connection-change', onConnectionChange);
       zmClient.off('media-sdk-change', onMediaSDKChange);
+      zmClient.off('on-hold-change', onHoldChange);
     };
-  }, [zmClient, onConnectionChange, onMediaSDKChange]);
+  }, [zmClient, onConnectionChange, onMediaSDKChange, onHoldChange]);
   console.log({ isSupportGalleryView, galleryViewWithAttach });
   return (
     <div className="App">
       {loading && <LoadingLayer content={loadingText} />}
-      {!loading && (
+      {!loading && isOnHold && <WaitingRoom onLeave={onLeaveOrJoinSession} />}
+      {!loading && !isOnHold && (
         <MeetingArgsContext.Provider value={meetingArgsContext}>
           <ZoomMediaContext.Provider value={mediaContext}>
             <BrowserRouter>

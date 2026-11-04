@@ -12,8 +12,17 @@ interface ErrMessagePayload {
 export function useActiveMediaFailed(zmClient: ZoomClient) {
   const onActiveMediaFailed = useCallback((payload: ErrMessagePayload) => {
     const { code, message } = payload;
-    const { MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted } = ActiveMediaFailedCode;
-    if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted].includes(code)) {
+    const {
+      MicrophoneMuted,
+      AudioStreamMuted,
+      AudioPlaybackInterrupted,
+      VideoStreamMuted,
+      AudioPeerConnectionReconnect,
+      VideoPeerConnectionReconnect
+    } = ActiveMediaFailedCode;
+    if ([AudioPeerConnectionReconnect, VideoPeerConnectionReconnect].includes(code)) {
+      toast.info(message, 5);
+    } else if ([MicrophoneMuted, AudioStreamMuted, AudioPlaybackInterrupted, VideoStreamMuted].includes(code)) {
       toast.warning(message, 8);
     } else {
       Modal.error({

@@ -1,0 +1,199 @@
+.streaming-overlay {
+  --live-controls-offset: 88px;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.danmaku-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+}
+
+.danmaku-item {
+  position: absolute;
+  left: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 70vw;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 15px;
+  line-height: 22px;
+  white-space: nowrap;
+  animation: danmaku-scroll 6s linear forwards;
+
+  &.self {
+    background: rgba(14, 114, 237, 0.62);
+  }
+}
+
+.danmaku-sender {
+  color: #ffd666;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.danmaku-message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.streaming-caption {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--live-controls-offset) + 56px);
+  transform: translateX(-50%);
+  max-width: 72%;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.68);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.streaming-dock {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: var(--live-controls-offset);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.streaming-chat-input.ant-input-affix-wrapper {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.25);
+
+  input {
+    background: transparent;
+    color: #fff;
+  }
+
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+.streaming-chat-disabled {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+}
+
+.streaming-dock-btn.ant-btn {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  border-color: rgba(255, 255, 255, 0.35);
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+.streaming-language-select {
+  width: 180px;
+
+  &.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    background: rgba(0, 0, 0, 0.72);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+
+  .ant-select-selection-item,
+  .ant-select-selection-search-input,
+  .ant-select-selection-placeholder {
+    color: #fff;
+  }
+
+  .ant-select-arrow,
+  .ant-select-clear {
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.streaming-language-dropdown.ant-select-dropdown {
+  background: rgba(20, 20, 20, 0.96);
+  border: 1px solid #747487;
+
+  .ant-select-item {
+    color: #ddd;
+  }
+
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.streaming-reaction-popover {
+  .ant-popover-inner {
+    background: rgba(20, 20, 20, 0.96);
+    border: 1px solid #747487;
+  }
+
+  .ant-popover-inner-content {
+    color: #fff;
+  }
+
+  .ant-popover-arrow-content {
+    --antd-arrow-background-color: rgba(20, 20, 20, 0.96);
+    background: rgba(20, 20, 20, 0.96);
+  }
+
+  .ant-popover-arrow-content::before {
+    background: rgba(20, 20, 20, 0.96);
+  }
+}
+
+.streaming-reaction-row {
+  display: flex;
+  gap: 4px;
+}
+
+.streaming-reaction-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+@keyframes danmaku-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - 100vw));
+  }
+}

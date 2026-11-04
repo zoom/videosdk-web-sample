@@ -1,0 +1,35 @@
+.waiting-room {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 98;
+  color: #fff;
+
+  .waiting-room-icon {
+    font-size: 64px;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+
+  .waiting-room-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+
+  .waiting-room-desc {
+    font-size: 16px;
+    color: #ccc;
+    margin-bottom: 32px;
+  }
+}

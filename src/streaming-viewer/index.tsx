@@ -2,11 +2,18 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ZoomStreaming from '@zoom/videosdk/broadcast-streaming';
 import { devConfig } from '../config/dev';
-import { generateVideoToken } from '../utils/util';
+import { b64DecodeUnicode, generateVideoToken } from '../utils/util';
 import StreamingContext from './context/streaming-context';
 import StreamingApp from './StreamingApp';
 const args: Record<string, any> = Object.fromEntries(new URLSearchParams(location.search));
 const localConfig = devConfig;
+if (args.web && args.web !== '0' && Object.hasOwn(args, 'name')) {
+  try {
+    args.name = b64DecodeUnicode(args.name);
+  } catch (e) {
+    delete args.name;
+  }
+}
 if (!('signature' in args)) {
   Object.assign(args, {
     signature: generateVideoToken(
@@ -20,7 +27,8 @@ if (!('signature' in args)) {
   });
 }
 const streaming = ZoomStreaming.createClient({
-  dependentAssets: `${window.location.origin}/lib`
+  dependentAssets: `${window.location.origin}/lib`,
+  userName: args.name
 });
 const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
